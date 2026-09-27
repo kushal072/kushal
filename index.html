@@ -406,6 +406,7 @@ async function initCloud(){
  const tag=document.createElement("script");tag.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
  tag.onload=async()=>{
   sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
+  startCloudLiveSync();
   const code=new URLSearchParams(location.search).get("code");
   if(code){
    const ex=await sb.auth.exchangeCodeForSession(code);
@@ -414,16 +415,60 @@ async function initCloud(){
    history.replaceState({},document.title,clean);
   }
   const res=await sb.auth.getSession();session=res.data.session||null;
-  if(session) await loadCloud();
+  if(session){ await loadCloud(); startCloudLiveSync(); }
   updateAuthButton();
   sb.auth.onAuthStateChange(async(_event,s)=>{
     session=s||null;
-    if(session) await loadCloud(); else {profile=null;loadLocal();renderAll()}
+    if(session){ await loadCloud(); startCloudLiveSync(); }
+    else { await stopCloudLiveSync(); profile=null;loadLocal();renderAll(); }
     updateAuthButton();
   });
  };
  tag.onerror=()=>toast("Cloud library could not load; staying offline.");
  document.head.appendChild(tag);
+}
+let cloudSyncTimer=null;
+let cloudChannel=null;
+let cloudRealtimeSubscribed=false;
+let cloudSyncBusy=false;
+async function syncCloudNow(){
+  if(!sb||!session||cloudSyncBusy)return;
+  cloudSyncBusy=true;
+  try{
+    const r=await sb.from("trades").select("*").order("trade_date",{ascending:false}).order("created_at",{ascending:false});
+    if(r.error)throw r.error;
+    const im=await sb.from("trade_images").select("trade_id,storage_path");
+    if(im.error)throw im.error;
+    const map={};(im.data||[]).forEach(x=>(map[x.trade_id]??=[]).push(x.storage_path));
+    const trades=r.data||[]; trades.forEach(t=>t.images=map[t.id]||[]);
+    const previous=JSON.stringify(state.trades.map(t=>({id:t.id,trade_date:t.trade_date,result_r:t.result_r,result_usd:t.result_usd,created_at:t.created_at,images:t.images||[]})));
+    const next=JSON.stringify(trades.map(t=>({id:t.id,trade_date:t.trade_date,result_r:t.result_r,result_usd:t.result_usd,created_at:t.created_at,images:t.images||[]})));
+    state.trades=trades;
+    saveLocal();
+    if(previous!==next)renderAll();
+  }catch(e){ console.warn("Background cloud sync failed",e); }
+  finally{cloudSyncBusy=false;}
+}
+function startCloudLiveSync(){
+  if(!sb)return;
+  if(cloudSyncTimer)clearInterval(cloudSyncTimer);
+  cloudSyncTimer=setInterval(()=>{ if(session&&!cloudRealtimeSubscribed) syncCloudNow(); },8000);
+  if(cloudChannel)sb.removeChannel(cloudChannel);
+  if(session){
+    cloudRealtimeSubscribed=false;
+    cloudChannel=sb.channel("bluebird-live-trades")
+      .on("postgres_changes",{event:"*",schema:"public",table:"trades",filter:`user_id=eq.${session.user.id}`},()=>syncCloudNow())
+      .on("postgres_changes",{event:"*",schema:"public",table:"trade_images",filter:`user_id=eq.${session.user.id}`},()=>syncCloudNow())
+      .on("postgres_changes",{event:"*",schema:"public",table:"profiles",filter:`id=eq.${session.user.id}`},()=>loadCloud())
+      .subscribe(status=>{
+        cloudRealtimeSubscribed=status==="SUBSCRIBED";
+      });
+  }
+}
+async function stopCloudLiveSync(){
+  if(cloudSyncTimer){clearInterval(cloudSyncTimer);cloudSyncTimer=null;}
+  cloudRealtimeSubscribed=false;
+  if(cloudChannel&&sb){try{await sb.removeChannel(cloudChannel);}catch(_e){} cloudChannel=null;}
 }
 async function loadCloud(){
  try{
@@ -453,10 +498,11 @@ async function signIn(create){
 }
 async function google(){
  if(!sb){toast("Add the Supabase public key in config.js first.");return}
- const r=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin}});
+ const redirectTo=window.location.origin+window.location.pathname+(window.location.hash||"#home");
+ const r=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo}});
  if(r.error)toast(r.error.message);
 }
-async function signOut(){if(sb)await sb.auth.signOut();session=null;profile=null;closeAccountMenu();loadLocal();updateAuthButton();renderAll()}
+async function signOut(){if(sb)await sb.auth.signOut();await stopCloudLiveSync();session=null;profile=null;closeAccountMenu();loadLocal();updateAuthButton();renderAll()}
 function getUserDisplayName(){
   const profileName=String(profile?.display_name||"").trim();
   if(profileName)return profileName;
@@ -1178,8 +1224,12 @@ async function adminGrant(){
   $("adminEmail").value="";
   adminRefresh();
 }
-function nav(page){
+function nav(page,updateUrl=true){
   if(page==="admin" && !isAdmin()){toast("Admin access required.");page="home";}
+  if(updateUrl){
+    const nextHash="#"+page;
+    if(location.hash!==nextHash)history.pushState({page},"",nextHash);
+  }
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
   const target=document.getElementById("page-"+page);
   if(target) target.classList.add("active");
@@ -1198,6 +1248,8 @@ function nav(page){
 $("run").onclick=randomWeek;
 ["winRate","maxTrades","rr","oneR","showMoney"].forEach(id=>$(id).addEventListener(id==="showMoney"?"change":"input",renderSimulator));
 document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));
+window.addEventListener("hashchange",()=>{const page=(location.hash||"#home").slice(1)||"home";nav(page,false)});
+window.addEventListener("popstate",()=>{const page=(location.hash||"#home").slice(1)||"home";nav(page,false)});
 $("tradeForm").addEventListener("submit",saveTrade);$("exportBtn").onclick=exportCSV;
 $("cancelEditBtn").onclick=cancelEdit;
 $("editManageImages").onclick=()=>{if(editTradeId){const trade=state.trades.find(x=>x.id===editTradeId);if(trade&&trade.images?.length)openImageViewer(trade.images,0,editTradeId);else openAddImagePicker(editTradeId)}};
@@ -1239,7 +1291,9 @@ $("nameSetupModal").addEventListener("keydown",e=>{if(e.key==="Enter")saveNameSe
 $("prevMonth").onclick=()=>{state.month.setMonth(state.month.getMonth()-1);renderCalendar()};$("nextMonth").onclick=()=>{state.month.setMonth(state.month.getMonth()+1);renderCalendar()};
 
 document.addEventListener("click",e=>{if(!session)return;if(e.target.closest("#authBtn")||e.target.closest("#accountMenu"))return;closeAccountMenu()});
-loadLocal();loadWeek();renderSimulator();nav("home");
+loadLocal();loadWeek();renderSimulator();
+const initialPage=(location.hash||"#home").slice(1)||"home";
+nav(initialPage,false);
 setInterval(()=>{if(profile)renderAccess()},1000);
 const journalDate = document.querySelector('#tradeForm input[name="date"]');
 if (journalDate && !journalDate.value) {
