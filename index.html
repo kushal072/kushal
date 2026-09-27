@@ -31,6 +31,22 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.calh{text-align:center;color:#87a0b3;font-size:10px;font-weight:900;padding:6px}.month-total{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:12px;padding-top:11px;border-top:1px solid #12344e}.month-total .mt-box{border:1px solid #123f5d;background:#06131f;border-radius:7px;padding:10px 12px}.month-total .mt-label{display:block;font-size:9px;font-weight:900;color:#8aa2b4;margin-bottom:5px}.month-total .mt-value{font-size:19px;font-weight:950;color:#edf6ff}.month-total .mt-r{color:#17e99f}.month-total .mt-cash{color:#2aaaff}.calendar-card{padding:16px}.calendar-month-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-month-title{font-size:18px;font-weight:950;letter-spacing:.2px}.cald{min-height:112px;border:1px solid #113249;background:#06111a;border-radius:6px;padding:9px}.cald .num{font-size:10px;font-weight:900;color:#8aa2b4}.cald .cash{font-size:18px;font-weight:950;margin-top:15px;line-height:1.05;white-space:nowrap}.cald .rrsmall{font-size:10px;font-weight:800;margin-top:5px;color:#8ba1b2;line-height:1.25}.cald.pos{border-color:#0b6145;background:#06241b}.cald.neg{border-color:#651821;background:#22090e}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{border:1px solid #11334d;background:#06111a;padding:11px;border-radius:6px}.metric span{display:block;font-size:8px;color:#718799}.metric strong{display:block;font-size:15px;margin-top:4px}
 .analytics-filter-card{background:linear-gradient(180deg,#081725,#040b12);border-color:#1a4260;box-shadow:0 16px 42px #0009;padding:16px}.analytics-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}.analytics-title{margin:5px 0 3px;font-size:26px;font-weight:950;letter-spacing:-.8px;line-height:1.05}.analytics-range-label{font-size:10px;color:#91a7b8;font-weight:700;letter-spacing:.1px}.analytics-filter-row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.analytics-filter-field{min-width:180px}.analytics-filter-field label,.analytics-custom-range .field label{font-size:8px!important;letter-spacing:.9px!important;color:#8ca5b8!important;font-weight:950!important}.analytics-filter-field .select,.analytics-custom-range .input{height:39px;border-color:#18435e;background:#050c13;font-size:12px;font-weight:850}.analytics-custom-range{display:flex;align-items:flex-end;gap:7px}.analytics-custom-range .field{min-width:145px}.analytics-apply{height:39px;padding:0 13px}.analytics-summary-card{padding:11px;background:#040b12;border-color:#122e44;box-shadow:0 14px 36px #0008}.analytics-metrics{grid-template-columns:repeat(5,1fr)}.analytics-metrics .metric{min-height:79px;padding:12px 13px;background:linear-gradient(180deg,#07141f,#041018);border-color:#163b56;border-radius:7px}.analytics-metrics .metric span{font-size:8px;letter-spacing:.75px;font-weight:950;color:#8097aa}.analytics-metrics .metric strong{font-size:19px;letter-spacing:-.2px;font-weight:950;line-height:1.05}.analytics-metrics .metric:nth-child(3) strong,.analytics-metrics .metric:nth-child(4) strong{font-size:21px}.analytics-chart-card{padding:16px;background:linear-gradient(180deg,#07141e,#030a10);border-color:#173d58;box-shadow:0 16px 42px #0009}.analytics-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.analytics-chart-head h3{font-size:10px!important;letter-spacing:1.1px!important;color:#d7ecfb!important;font-weight:950!important}.analytics-chart-meta{font-size:9px;color:#73899b;margin-top:5px;font-weight:650}.analytics-chart-result{font-size:24px;font-weight:950;letter-spacing:-.5px}.analytics-chart{height:340px;margin-top:14px;border:1px solid #102f46;border-radius:8px;background:radial-gradient(circle at 50% 0,#0a1b28 0,#040b12 55%,#02070b 100%);position:relative;overflow:hidden}.analytics-chart svg{display:block;width:100%;height:100%}.analytics-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#718799;font-size:11px;text-align:center;padding:20px;font-weight:700}.analytics-summary-card .metric:nth-child(3){box-shadow:inset 0 0 0 1px #0f4b3a}.analytics-summary-card .metric:nth-child(4){box-shadow:inset 0 0 0 1px #16486a}
+
+<style>
+/* Analytics v35: smoother equity curve, adaptive date axis and hover tooltip */
+.analytics-chart-shell{position:relative}
+.analytics-chart{overflow:visible!important}
+.analytics-x-labels{position:absolute;left:0;right:0;bottom:-19px;height:16px;pointer-events:none}
+.analytics-x-label{position:absolute;transform:translateX(-50%);font-size:9px;font-weight:850;color:#6f8797;white-space:nowrap}
+.analytics-tooltip{position:absolute;display:none;min-width:170px;max-width:230px;background:#07131d;border:1px solid #1c6b98;border-radius:7px;box-shadow:0 16px 38px #000b;padding:9px 10px;z-index:12;pointer-events:none}
+.analytics-tooltip .tt-date{font-size:10px;font-weight:950;color:#eef9ff;margin-bottom:6px}
+.analytics-tooltip .tt-line{font-size:9px;color:#9ab1c1;line-height:1.55}
+.analytics-tooltip .tt-r{color:#18eaa0;font-weight:950}
+.analytics-tooltip .tt-r.neg{color:#ff5360}
+.analytics-hit{cursor:crosshair}
+.analytics-chart-wrap{padding-bottom:24px}
+@media(max-width:700px){.analytics-x-label{font-size:8px}.analytics-tooltip{min-width:150px;max-width:200px;padding:8px 9px}}
+</style>
 .locked{position:relative;overflow:hidden;min-height:155px}.veil{position:absolute;inset:0;background:#02070de8;display:flex;align-items:center;justify-content:center;text-align:center;z-index:2}.veil p{font-size:9px;color:#9fb1bf;max-width:300px;line-height:1.5}
 .modal{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.show{display:flex}.modalbox{width:min(430px,100%);background:#071521;border:1px solid #175277;border-radius:8px;padding:16px;box-shadow:0 25px 70px #000}
 .status{position:fixed;right:18px;bottom:18px;max-width:min(460px,calc(100vw - 36px));background:#061521;border:1px solid #17608b;color:#e7f7ff;padding:14px 17px;border-radius:10px;font-size:12px;line-height:1.45;display:none;z-index:60;box-shadow:0 12px 35px #0008}
@@ -317,7 +333,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
   </div>
 </div>
 <div class="card analytics-summary-card" style="margin-top:10px"><div id="analytics" class="metrics analytics-metrics"></div></div>
-<div class="card analytics-chart-card" style="margin-top:10px"><div class="analytics-chart-head"><div><div class="smallbrand" style="font-size:8px;letter-spacing:2px">EQUITY CURVE</div><h3 style="font-size:11px;color:#d9efff;margin:3px 0 0">Cumulative journal performance</h3><div id="analyticsChartMeta" class="analytics-chart-meta">Cumulative R for the selected period</div></div><div id="analyticsChartResult" class="analytics-chart-result pos">+0R</div></div><div id="journalCurve" class="chart analytics-chart"></div></div>
+<div class="card analytics-chart-card" style="margin-top:10px"><div class="analytics-chart-head"><div><div class="smallbrand" style="font-size:8px;letter-spacing:2px">EQUITY CURVE</div><h3 style="font-size:11px;color:#d9efff;margin:3px 0 0">Cumulative journal performance</h3><div id="analyticsChartMeta" class="analytics-chart-meta">Cumulative R for the selected period</div></div><div id="analyticsChartResult" class="analytics-chart-result pos">+0R</div></div><div class="analytics-chart-wrap"><div id="journalCurve" class="chart analytics-chart"></div></div></div>
 <div class="grid2" style="margin-top:10px"><div class="card locked"><div class="veil"><div><h3>Monte Carlo — Pro</h3><p>Run thousands of possible future paths from your actual results.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div><div class="card locked"><div class="veil"><div><h3>AI Trading Review — Pro</h3><p>Analyze your own journal for recurring strengths, weaknesses and patterns.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div></div>
 </section>
 
@@ -1148,6 +1164,34 @@ function filterAnalyticsRows(rows,range){
  if(!range.from&&!range.to)return rows;
  return rows.filter(t=>{const d=String(t.trade_date||'').slice(0,10);return d&&(range.from?d>=range.from:true)&&(range.to?d<=range.to:true)});
 }
+function analyticsFmtDate(key, style='short'){
+  const m=String(key||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return key||'';
+  const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+  if(style==='month') return d.toLocaleDateString(undefined,{month:'short',year:'numeric'});
+  if(style==='long') return d.toLocaleDateString(undefined,{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  return d.toLocaleDateString(undefined,{day:'2-digit',month:'short'});
+}
+function analyticsDateDiff(fromKey,toKey){
+  if(!fromKey||!toKey) return 0;
+  const a=new Date(fromKey+'T00:00:00'),b=new Date(toKey+'T00:00:00');
+  return Math.max(0,Math.round((b-a)/86400000));
+}
+function analyticsLabelMode(range, sorted){
+  const days=range.from&&range.to?analyticsDateDiff(range.from,range.to)+1:analyticsDateDiff(sorted[0]?.date||'',sorted[sorted.length-1]?.date||'')+1;
+  if(days<=14) return {step:1,style:'short'};
+  if(days<=45) return {step:Math.ceil(days/8),style:'short'};
+  if(days<=140) return {step:7,style:'short'};
+  return {step:30,style:'month'};
+}
+function smoothPath(points){
+  if(points.length<2) return points.length?`M ${points[0][0]} ${points[0][1]}`:'';
+  let d=`M ${points[0][0]} ${points[0][1]}`;
+  for(let i=0;i<points.length-1;i++){
+    const p1=points[i],p2=points[i+1],dx=(p2[0]-p1[0])*.42;
+    d+=` C ${(p1[0]+dx).toFixed(2)} ${p1[1].toFixed(2)}, ${(p2[0]-dx).toFixed(2)} ${p2[1].toFixed(2)}, ${p2[0]} ${p2[1]}`;
+  }
+  return d;
+}
 function renderAnalytics(){
  const allRows=visibleTrades();const range=analyticsGetRange();const rows=filterAnalyticsRows(allRows,range);
  const wins=rows.filter(t=>Number(t.result_r)>0),losses=rows.filter(t=>Number(t.result_r)<0),R=rows.reduce((a,t)=>a+Number(t.result_r||0),0);
@@ -1157,21 +1201,54 @@ function renderAnalytics(){
  $('analytics').innerHTML=`<div class="metric"><span>TRADES</span><strong>${rows.length}</strong></div><div class="metric"><span>WIN RATE</span><strong>${rows.length?wr.toFixed(1)+'%':'—'}</strong></div><div class="metric"><span>TOTAL R</span><strong class="${R>=0?'pos':'neg'}">${R>=0?'+':''}${fmt(R)}R</strong></div><div class="metric"><span>TOTAL $</span><strong class="${usd>=0?'pos':'neg'}">${hasUsd?money(usd):'—'}</strong></div><div class="metric"><span>EXPECTANCY</span><strong>${rows.length?(avg>=0?'+':'')+fmt(avg)+'R':'—'}</strong></div><div class="metric"><span>AVG WIN</span><strong class="pos">${wins.length?fmt(avgW)+'R':'—'}</strong></div><div class="metric"><span>AVG LOSS</span><strong class="neg">${losses.length?fmt(avgL)+'R':'—'}</strong></div><div class="metric"><span>LONGEST L STREAK</span><strong>${longest(rows,false)}</strong></div><div class="metric"><span>LONGEST W STREAK</span><strong>${longest(rows,true)}</strong></div>`;
  if($('analyticsRangeLabel'))$('analyticsRangeLabel').textContent=`${range.label} · ${rows.length} of ${allRows.length} visible trades`;
  if($('analyticsChartResult')){$('analyticsChartResult').className='analytics-chart-result '+(R>=0?'pos':'neg');$('analyticsChartResult').textContent=(R>=0?'+':'')+fmt(R)+'R';}
- if($('analyticsChartMeta'))$('analyticsChartMeta').textContent=`Cumulative R for ${range.label.toLowerCase()}`;
- const sorted=[...rows].filter(t=>t.trade_date).sort((a,b)=>String(a.trade_date).localeCompare(String(b.trade_date))||String(a.created_at||'').localeCompare(String(b.created_at||'')));
- if(!sorted.length){$('journalCurve').innerHTML='<div class="analytics-empty">No trades in this period.</div>';return}
- const e=[0];let cur=0;sorted.forEach(t=>{cur+=Number(t.result_r||0);e.push(cur)});
- const W=1000,H=330,padL=54,padR=20,padT=18,padB=30,min=Math.min(0,...e),max=Math.max(0,...e),rangeY=(max-min)||1;
- const x=i=>padL+(W-padL-padR)*(i/(e.length-1||1)),y=v=>padT+(H-padT-padB)*(1-(v-min)/rangeY);const points=e.map((v,i)=>[x(i),y(v)]),line=points.map(p=>p.join(',')).join(' ');
- const gridVals=[0,.25,.5,.75,1].map(r=>min+(max-min)*r);const grid=gridVals.map(v=>{const yy=y(v);return `<line x1="${padL}" x2="${W-padR}" y1="${yy}" y2="${yy}" stroke="#103047" stroke-width="1" stroke-dasharray="4 8"/><text x="${padL-8}" y="${yy+4}" fill="#658094" font-size="11" text-anchor="end">${fmt(v)}R</text>`}).join('');
- const zeroY=y(0),last=points[points.length-1],area=`${padL},${y(0)} ${line} ${last[0]},${H-padB} ${padL},${H-padB}`;
- const circles=points.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===points.length-1?5:3}" fill="${e[i]>=0?'#18eaa0':'#ff5360'}"/>`).join('');
- const chartColor=cur>=0?'#18eaa0':'#ff5360';const gradId='eqgrad'+Date.now();
- const svgGrid=grid.replaceAll('stroke="#103047"','stroke="#153347"');
- const area2=`${padL},${y(0)} ${line} ${last[0]},${H-padB} ${padL},${H-padB}`;
- const pointLabels=points.map((p,i)=>i===0||i===points.length-1?`<circle cx="${p[0]}" cy="${p[1]}" r="${i===points.length-1?5.5:4}" fill="#02070b" stroke="${chartColor}" stroke-width="2.5"/>`:``).join('');
- $('journalCurve').innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Journal equity curve"><defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${chartColor}" stop-opacity=".26"/><stop offset="100%" stop-color="${chartColor}" stop-opacity="0"/></linearGradient></defs>${svgGrid}<line x1="${padL}" x2="${W-padR}" y1="${zeroY}" y2="${zeroY}" stroke="#2c7396" stroke-width="1.3" stroke-dasharray="6 8"/><polygon points="${area2}" fill="url(#${gradId})"/><polyline points="${line}" fill="none" stroke="${chartColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>${circles}${pointLabels}<rect x="${Math.max(padL,last[0]-70)}" y="${Math.max(12,last[1]-38)}" rx="5" ry="5" width="64" height="22" fill="#07141f" stroke="${chartColor}" stroke-opacity=".45"/><text x="${Math.min(W-padR-6,last[0]-6)}" y="${Math.max(27,last[1]-23)}" fill="${chartColor}" font-size="12" font-weight="950" text-anchor="end">${cur>=0?'+':''}${fmt(cur)}R</text><text x="${padL}" y="${H-9}" fill="#6f8797" font-size="9" font-weight="800">${range.from||'START'}</text><text x="${W-padR}" y="${H-9}" fill="#6f8797" font-size="9" font-weight="800" text-anchor="end">${range.to||'TODAY'}</text></svg>`;
+ if($('analyticsChartMeta'))$('analyticsChartMeta').textContent=`Daily cumulative R · hover a point for the date and R`;
+
+ // Aggregate to one point per trading date so spikes/deeps correspond to actual dates.
+ const byDate=new Map();
+ [...rows].filter(t=>t.trade_date).forEach(t=>{
+   const date=String(t.trade_date).slice(0,10);
+   const bucket=byDate.get(date)||{date,dailyR:0,trades:0,usd:0,hasUsd:false};
+   bucket.dailyR+=Number(t.result_r||0); bucket.trades++;
+   if(t.result_usd!==null&&t.result_usd!==undefined&&t.result_usd!==''){bucket.usd+=Number(t.result_usd||0);bucket.hasUsd=true;}
+   byDate.set(date,bucket);
+ });
+ const daily=[...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date));
+ if(!daily.length){$('journalCurve').innerHTML='<div class="analytics-empty">No trades in this period.</div>';return}
+ let cur=0;daily.forEach(d=>{cur+=d.dailyR;d.cumulativeR=cur});
+ const pointsData=[{date:'START',dailyR:0,cumulativeR:0,trades:0},...daily];
+ const vals=pointsData.map(d=>d.cumulativeR);
+ const W=1000,H=330,padL=62,padR=26,padT=18,padB=34,min=Math.min(0,...vals),max=Math.max(0,...vals),rangeY=(max-min)||1;
+ const x=i=>padL+(W-padL-padR)*(i/(vals.length-1||1));
+ const y=v=>padT+(H-padT-padB)*(1-(v-min)/rangeY);
+ const pts=pointsData.map((d,i)=>[x(i),y(d.cumulativeR)]);
+ const curve=smoothPath(pts);
+ const first=pts[0],last=pts[pts.length-1];
+ const areaPath=curve.replace(/^M\s+[-0-9.]+\s+[-0-9.]+/, `M ${first[0]} ${y(0)} L ${first[0]} ${first[1]}`).replace(/ C/g,' C') + ` L ${last[0]} ${H-padB} L ${first[0]} ${H-padB} Z`;
+ const gridVals=[0,.25,.5,.75,1].map(r=>min+(max-min)*r);
+ const grid=gridVals.map(v=>{const yy=y(v);return `<line x1="${padL}" x2="${W-padR}" y1="${yy}" y2="${yy}" stroke="#17364a" stroke-width="1" stroke-dasharray="4 8"/><text x="${padL-9}" y="${yy+4}" fill="#688094" font-size="10" font-weight="800" text-anchor="end">${fmt(v)}R</text>`}).join('');
+ const zeroY=y(0);
+ const chartColor=R>=0?'#18eaa0':'#ff5360';
+ const gradId='eqgrad'+Date.now();
+ const strokePath=curve;
+ const area=areaPath;
+ const labelMode=analyticsLabelMode(range,daily.length?daily:pointsData);
+ const maxLabels=9;
+ let tickIdx=[];
+ const eligible=pointsData.map((d,i)=>({d,i})).filter(o=>o.i>0);
+ if(eligible.length<=maxLabels){tickIdx=eligible.map(o=>o.i);} else {
+   const stride=Math.max(1,Math.ceil(eligible.length/maxLabels));
+   for(let i=1;i<pointsData.length;i+=stride) tickIdx.push(i);
+   if(tickIdx[tickIdx.length-1]!==pointsData.length-1) tickIdx.push(pointsData.length-1);
+ }
+ const xLabels=tickIdx.map(i=>{const d=pointsData[i]; const txt=d.date==='START'?'START':analyticsFmtDate(d.date,labelMode.style); return `<span class="analytics-x-label" style="left:${(pts[i][0]/W*100).toFixed(2)}%">${txt}</span>`}).join('');
+ const dots=pointsData.map((d,i)=>{if(i===0)return '';const p=pts[i];const c=d.dailyR>=0?'#18eaa0':'#ff5360';return `<circle class="analytics-hit" data-idx="${i}" cx="${p[0]}" cy="${p[1]}" r="${i===pointsData.length-1?5.5:4}" fill="#041019" stroke="${c}" stroke-width="2.2"/>`;}).join('');
+ $('journalCurve').innerHTML=`<div class="analytics-tooltip" id="analyticsTooltip"></div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Journal equity curve"><defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${chartColor}" stop-opacity=".28"/><stop offset="100%" stop-color="${chartColor}" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${padL}" x2="${W-padR}" y1="${zeroY}" y2="${zeroY}" stroke="#3b7898" stroke-width="1.4" stroke-dasharray="7 7"/><path d="${area}" fill="url(#${gradId})"/><path d="${strokePath}" fill="none" stroke="${chartColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}<circle cx="${last[0]}" cy="${last[1]}" r="6.5" fill="#02070b" stroke="${chartColor}" stroke-width="2.8"/><text x="${Math.min(W-padR-8,last[0]-8)}" y="${Math.max(26,last[1]-16)}" fill="${chartColor}" font-size="12" font-weight="950" text-anchor="end">${cur>=0?'+':''}${fmt(cur)}R</text></svg><div class="analytics-x-labels">${xLabels}</div>`;
+ const chartEl=$('journalCurve'), tooltip=$('analyticsTooltip');
+ const showTip=(evt)=>{const idx=Number(evt.currentTarget.dataset.idx),d=pointsData[idx],r=d.dailyR>=0?'+':'';const cr=d.cumulativeR>=0?'+':'';const rect=chartEl.getBoundingClientRect();const px=evt.clientX-rect.left,py=evt.clientY-rect.top;tooltip.innerHTML=`<div class="tt-date">${analyticsFmtDate(d.date,'long')}</div><div class="tt-line">Daily R: <span class="tt-r ${d.dailyR<0?'neg':''}">${r}${fmt(d.dailyR)}R</span></div><div class="tt-line">Cumulative R: <span class="tt-r ${d.cumulativeR<0?'neg':''}">${cr}${fmt(d.cumulativeR)}R</span></div><div class="tt-line">Trades: ${d.trades}</div>`;tooltip.style.display='block';tooltip.style.left=Math.min(Math.max(8,px+12),chartEl.clientWidth-tooltip.offsetWidth-8)+'px';tooltip.style.top=Math.max(8,py-92)+'px';};
+ const hideTip=()=>{tooltip.style.display='none'};
+ chartEl.querySelectorAll('.analytics-hit').forEach(el=>{el.addEventListener('mouseenter',showTip);el.addEventListener('mousemove',showTip);el.addEventListener('mouseleave',hideTip);});
 }
+
 function longest(rows,win){let best=0,cur=0;for(const t of [...rows].sort((a,b)=>a.trade_date.localeCompare(b.trade_date)||a.created_at.localeCompare(b.created_at))){if((t.result_r>0)===win){cur++;best=Math.max(best,cur)}else cur=0}return best}
 function journalLockMessage(){
   if(trialExpired())return "Your 7-day journal trial has ended. Subscribe to restore journal access and your stored history.";
