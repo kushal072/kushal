@@ -296,7 +296,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div class="field"><label>SCREENSHOTS</label><input class="input" name="images" type="file" accept="image/*" multiple><div id="imagePreview" class="image-preview-wrap"></div></div>
    </div>
    <div class="field" style="margin-top:8px"><label>NOTES</label><textarea name="notes"></textarea></div>
-   <div class="actions" style="justify-content:flex-start;margin-top:9px"><button class="btn primary" id="saveTradeBtn" type="submit">Save trade</button><button class="btn hidden" id="cancelEditBtn" type="button">Cancel edit</button><span style="align-self:center;font-size:9px;color:#6f8496">R and $ are saved separately.</span><button class="btn" type="button" id="exportBtn">Export visible CSV</button></div>
+   <div class="actions" style="justify-content:flex-start;margin-top:9px"><button class="btn primary" id="saveTradeBtn" type="submit">Save trade</button><button class="btn hidden" id="cancelEditBtn" type="button">Cancel edit</button><span style="align-self:center;font-size:9px;color:#6f8496">R and $ are saved separately.</span><button class="btn" type="button" id="exportBtn">Export journal ZIP</button></div>
    <div id="editBanner" class="edit-banner"><span id="editBannerText">Editing saved trade</span><button class="btn" type="button" id="editManageImages">Manage screenshots</button></div>
   </form>
  </div>
@@ -1321,7 +1321,78 @@ function renderSimulator(){
  const all=state.days.flat(),w=all.filter(x=>x==="W").length,l=all.length-w,R=totalR(s.rr);$("totalR").textContent=(R>=0?"+":"")+fmt(R)+"R";$("totalR").className="big "+(R>=0?"pos":"neg");$("totalMoney").textContent=$("showMoney").checked?money(R*s.risk):"";$("wins").textContent=w+" × +"+fmt(s.rr)+"R";$("losses").textContent=l+" × -1R";$("actualWR").textContent=all.length?(w/all.length*100).toFixed(1)+"%":"—";$("be").textContent=(100/(s.rr+1)).toFixed(1)+"%";$("note").textContent="One win at 1:"+fmt(s.rr)+" pays for "+fmt(s.rr)+" losses";
  const e=[0];let c=0;state.days.forEach(a=>a.forEach(x=>{c+=x==="W"?s.rr:-1;e.push(c)}));const W=920,H=245,min=Math.min(0,...e),max=Math.max(2,...e),range=max-min||1,pts=e.map((v,i)=>[15+(W-30)*(i/(e.length-1||1)),H-15-(H-30)*((v-min)/range)]);$("chart").innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="15" x2="${W-15}" y1="${H-15}" y2="${H-15}" stroke="#123851"/><line x1="15" x2="${W-15}" y1="${H/2}" y2="${H/2}" stroke="#10324a" stroke-dasharray="4 7"/><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#18eaa0" stroke-width="3"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${e[i]>=0?"#18eaa0":"#ff5360"}"/>`).join("")}</svg>`;
 }
-function exportCSV(){const rows=visibleTrades();if(!rows.length){toast("No visible trades.");return}const ks=["trade_date","instrument","direction","result_r","result_usd","setup","session","tag","notes"];const csv=[ks.join(","),...rows.map(t=>ks.map(k=>`"${String(t[k]??"").replaceAll('"','""')}"`).join(","))].join("\\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="bluebird-journal.csv";a.click()}
+async function loadJsZip(){
+  if(window.JSZip)return window.JSZip;
+  return await new Promise((resolve,reject)=>{
+    const existing=document.querySelector('script[data-bluebird-jszip]');
+    if(existing){existing.addEventListener('load',()=>resolve(window.JSZip));existing.addEventListener('error',reject);return;}
+    const tag=document.createElement('script');
+    tag.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+    tag.async=true;tag.dataset.bluebirdJszip='1';
+    tag.onload=()=>window.JSZip?resolve(window.JSZip):reject(new Error('JSZip unavailable'));
+    tag.onerror=()=>reject(new Error('Could not load export library'));
+    document.head.appendChild(tag);
+  });
+}
+function csvCell(v){return `"${String(v??'').replaceAll('"','""')}"`;}
+function safeFilePart(v){return String(v||'trade').replace(/[^a-z0-9._-]+/gi,'_').replace(/^_+|_+$/g,'')||'trade';}
+function uniqueSortedExportRows(rows){
+  return [...rows].sort((a,b)=>{
+    const da=String(a.trade_date||'9999-12-31').slice(0,10), db=String(b.trade_date||'9999-12-31').slice(0,10);
+    if(da!==db)return da.localeCompare(db);
+    const ca=String(a.created_at||''), cb=String(b.created_at||'');
+    if(ca!==cb)return ca.localeCompare(cb);
+    return String(a.id||'').localeCompare(String(b.id||''));
+  });
+}
+async function resolveExportBlob(path){
+  const p=String(path||'');
+  if(!p)return null;
+  try{
+    if(p.startsWith('data:')) return await (await fetch(p)).blob();
+    let src=p;
+    if(sb&&session&&!/^https?:\/\//i.test(p)) src=await signedImage(p);
+    if(!src)return null;
+    const r=await fetch(src);if(!r.ok)throw new Error('image fetch failed');
+    return await r.blob();
+  }catch(e){console.warn('Export image failed',p,e);return null;}
+}
+function blobToDataUrl(blob){
+  return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=reject;fr.readAsDataURL(blob);});
+}
+function escHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+async function exportCSV(){
+  const rows=uniqueSortedExportRows(visibleTrades());
+  if(!rows.length){toast('No visible trades.');return}
+  toast('Preparing Bluebird journal export…');
+  try{
+    const JSZip=await loadJsZip(),zip=new JSZip(),imageDir=zip.folder('images');
+    const exportedRows=[],reportRows=[];let imageCount=0;
+    const baseCols=[['Date','trade_date'],['Instrument','instrument'],['Direction','direction'],['Result R','result_r'],['Result $','result_usd']];
+    const optionalCols=[['Setup','setup'],['Session','session'],['Tag','tag'],['Notes','notes']].filter(([_,key])=>rows.some(t=>String(t[key]??'').trim()!==''));
+    const includeImages=rows.some(t=>Array.isArray(t.images)&&t.images.length);
+    const cols=[...baseCols,...optionalCols];if(includeImages)cols.push(['Image Files','image_files']);
+    for(let ri=0;ri<rows.length;ri++){
+      const t=rows[ri],images=Array.isArray(t.images)?t.images:[],imagePaths=[],reportImages=[];
+      for(let ii=0;ii<images.length;ii++){
+        const blob=await resolveExportBlob(images[ii]);if(!blob)continue;
+        const ext=safeFilePart((blob.type&&blob.type.split('/')[1])||String(images[ii]).split('.').pop()||'jpg').toLowerCase();
+        const date=String(t.trade_date||'undated').slice(0,10).replace(/[^0-9-]/g,'')||'undated';
+        const instrument=safeFilePart(t.instrument||'trade');
+        const fileName=`${date}_${String(ri+1).padStart(3,'0')}_${instrument}_image-${String(ii+1).padStart(2,'0')}.${ext}`;
+        imageDir.file(fileName,blob);const rel=`images/${fileName}`;imagePaths.push(rel);reportImages.push({path:rel,dataUrl:await blobToDataUrl(blob)});imageCount++;
+      }
+      const rec={};for(const [,key] of baseCols.concat(optionalCols))rec[key]=t[key]??'';rec.image_files=imagePaths.join(' | ');
+      exportedRows.push(cols.map(([_,key])=>rec[key]??''));reportRows.push({t,images:reportImages});
+    }
+    const csv=[cols.map(([label])=>csvCell(label)).join(','),...exportedRows.map(r=>r.map(csvCell).join(','))].join('\n');
+    zip.file('bluebird-journal.csv',csv);
+    const reportHtml=`<!doctype html><html><head><meta charset="utf-8"><title>Bluebird Journal Export</title><style>body{font-family:Arial,sans-serif;background:#08131d;color:#eaf6ff;margin:0;padding:28px}.wrap{max-width:1100px;margin:auto}.title{font-size:28px;font-weight:800;margin-bottom:6px}.sub{color:#92a9ba;margin-bottom:22px}.trade{background:#0d1d29;border:1px solid #234057;border-radius:12px;padding:16px;margin:0 0 16px}.meta{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cell{background:#0a1722;border-radius:8px;padding:9px}.k{font-size:11px;color:#7690a3;text-transform:uppercase}.v{font-size:15px;font-weight:700;margin-top:3px}.notes{margin-top:12px;color:#bfd3df;white-space:pre-wrap}.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:14px}.shot{background:#07111a;border-radius:8px;padding:8px}.shot img{display:block;width:100%;height:auto;border-radius:5px}.cap{font-size:11px;color:#8da5b6;margin-top:6px}.empty{color:#6f8696}@media(max-width:700px){.meta{grid-template-columns:1fr 1fr}}</style></head><body><div class="wrap"><div class="title">Bluebird Journal Export</div><div class="sub">${escHtml(new Date().toLocaleString())} · ${rows.length} trades · ${imageCount} images</div>${reportRows.map((item,idx)=>{const t=item.t;const rr=t.result_r===null||t.result_r===undefined||t.result_r===''?'—':(Number(t.result_r)>=0?'+':'')+fmt(Number(t.result_r))+'R';const amount=t.result_usd===null||t.result_usd===undefined||t.result_usd===''?'—':(Number(t.result_usd)>=0?'+$':'-$')+Math.abs(Number(t.result_usd)).toLocaleString();const optional=optionalCols.length?`<div class="meta" style="margin-top:8px">${optionalCols.map(([label,key])=>`<div class="cell"><div class="k">${escHtml(label)}</div><div class="v">${escHtml(t[key]||'—')}</div></div>`).join('')}</div>`:'';const imgs=item.images.length?`<div class="imgs">${item.images.map(im=>`<div class="shot"><img src="${im.dataUrl}" alt=""><div class="cap">${escHtml(im.path)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:12px">No images attached.</div>';return `<section class="trade"><div class="meta"><div class="cell"><div class="k">Date</div><div class="v">${escHtml(t.trade_date||'—')}</div></div><div class="cell"><div class="k">Instrument</div><div class="v">${escHtml(t.instrument||'—')}</div></div><div class="cell"><div class="k">Direction</div><div class="v">${escHtml(t.direction||'—')}</div></div><div class="cell"><div class="k">Result R</div><div class="v">${escHtml(rr)}</div></div><div class="cell"><div class="k">Result $</div><div class="v">${escHtml(amount)}</div></div></div>${optional}${t.notes?`<div class="notes">${escHtml(t.notes)}</div>`:''}${imgs}</section>`;}).join('')}</div></body></html>`;
+    zip.file('bluebird-journal-report.html',reportHtml);
+    const blob=await zip.generateAsync({type:'blob'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`bluebird-journal-${localDateKey(new Date()).replace(/-/g,'')}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    toast(`Export ready · ${rows.length} trades · ${imageCount} images.`);
+  }catch(e){console.error('Export failed',e);toast('Export failed: '+(e.message||e));}
+}
 function isAdmin(){return !!session && !!profile && profile.is_admin===true}
 function setDefaultAdminUntil(){
   const el=$("adminUntil");
