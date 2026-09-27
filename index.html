@@ -324,7 +324,14 @@ async function initCloud(){
  if(!CFG.SUPABASE_URL||!CFG.SUPABASE_KEY){toast("Offline mode: add your Supabase public key to config.js when you are ready.");return}
  const tag=document.createElement("script");tag.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
  tag.onload=async()=>{
-  sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
+  const code=new URLSearchParams(location.search).get("code");
+  if(code){
+   const ex=await sb.auth.exchangeCodeForSession(code);
+   if(ex.error) console.error("OAuth code exchange failed",ex.error);
+   const clean=location.origin+location.pathname+location.hash;
+   history.replaceState({},document.title,clean);
+  }
   const res=await sb.auth.getSession();session=res.data.session||null;
   if(session) await loadCloud();
   updateAuthButton();
@@ -365,7 +372,7 @@ async function signIn(create){
 }
 async function google(){
  if(!sb){toast("Add the Supabase public key in config.js first.");return}
- const r=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href.split("#")[0]}});
+ const r=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin}});
  if(r.error)toast(r.error.message);
 }
 async function signOut(){if(sb)await sb.auth.signOut();session=null;profile=null;closeAccountMenu();loadLocal();updateAuthButton();renderAll()}
