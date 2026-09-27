@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bluebird Trading</title><meta name="theme-color" content="#06131f">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--bg:#02060b;--panel:#07131f;--line:#12344e;--blue:#0795ff;--green:#17e99f;--red:#ff5260;--text:#edf6ff;--muted:#7e93a5}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#02060b;color:var(--text);font-family:Inter,Arial,sans-serif}
+body{background:radial-gradient(circle at 50% -15%,#0b3159 0,#07141f 30%,#02060b 73%)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{max-width:1180px;margin:auto;padding:24px 18px 38px}
+.top{position:relative;z-index:90;display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px solid #10304a;padding-bottom:15px}
+.brand{display:flex;gap:12px;align-items:center}.logo{width:52px;height:52px;object-fit:cover;border-radius:9px;border:1px solid #1b7fc9;background:#000}.smallbrand{font-size:9px;letter-spacing:3px;color:#2aaaff;font-weight:900}.title{font-size:38px;font-weight:900;letter-spacing:-1.5px}.title span{color:var(--blue)}.desc{max-width:500px;font-size:11px;color:#9eb1c1;line-height:1.5;margin-top:8px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.btn{border:1px solid #164b70;background:#061522;color:#dfefff;border-radius:5px;padding:8px 11px;font-size:10px;font-weight:900}.btn:hover{border-color:#159eff;background:#09253d}.primary{background:#087fdf;border-color:#1599ff;color:#fff}
+.wr{display:flex;align-items:center;border:1px solid #164b70;background:#061522;border-radius:5px;height:34px;padding:0 8px}.wr input{width:45px;border:0;background:transparent;color:#2aaaff;outline:0;text-align:center;font-size:11px;font-weight:900}.wr span{font-size:9px;color:#7890a3;font-weight:900}
+.hidden{display:none!important}
+.page{display:none}.page.active{display:block}
+.card{border:1px solid #10334e;background:linear-gradient(#071521,#040b12);border-radius:8px;padding:13px;box-shadow:0 12px 34px #0008}
+.controls{display:grid;grid-template-columns:1.35fr .85fr .9fr .9fr .9fr 1fr 1fr;gap:9px;align-items:end;margin-top:12px}
+.field label{display:block;color:#8399ab;font-size:8px;font-weight:900;margin-bottom:5px}
+.input,.select,textarea{width:100%;background:#030a11;color:#eef7ff;border:1px solid #133853;border-radius:4px;padding:8px;outline:0}
+.input,.select{height:35px;font-size:12px;font-weight:800}.checks{display:flex;gap:15px;margin-top:10px;color:#91a6b7;font-size:10px}.checks label{display:flex;align-items:center;gap:5px}.checks input{accent-color:#078fff}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:13px}.day{position:relative;min-height:187px;border:1px solid #123550;border-radius:7px;background:linear-gradient(#071623,#040b12);padding:10px}.dayh{display:flex;justify-content:space-between;font-size:12px;font-weight:900}.dots{color:#159bff}.dr{font-size:32px;font-weight:950;line-height:1;margin-top:19px}.pos{color:var(--green)}.neg{color:var(--red)}.cash{font-size:10px;color:#8fa6b8;margin-top:3px}.chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:10px}.chip{font-size:8px;font-weight:900;padding:3px 5px;border-radius:3px;background:#063929;border:1px solid #08714b;color:#32eba7}.chip.l{background:#310a0e;border-color:#661821;color:#ff6873}
+.daybtns{position:absolute;left:10px;right:10px;bottom:29px;display:flex;gap:5px}.daybtns button{flex:1;border-radius:4px;padding:7px 3px;font-size:9px;font-weight:900}.win{background:#063727;border:1px solid #08734a;color:#2dedaa}.loss{background:#31090d;border:1px solid #671820;color:#ff6571}
+.foot{position:absolute;left:10px;right:10px;bottom:8px;display:flex;justify-content:space-between;color:#718799;font-size:8px}.foot button{border:0;background:transparent;color:#718799;padding:0}
+.lower{display:grid;grid-template-columns:290px 1fr;gap:10px;margin-top:13px}.big{font-size:65px;line-height:.96;font-weight:950;letter-spacing:-4px;margin-top:10px}.money{font-size:17px;font-weight:900;color:#bcd0df;margin-top:4px}.tag{display:inline-block;margin-top:9px;background:#063a27;color:#2ceda2;padding:5px 8px;border-radius:3px;font-size:8px;font-weight:900}.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;border-top:1px solid #0e2a3d;margin-top:14px;padding-top:12px}.stats span{display:block;color:#718799;font-size:8px}.stats b{display:block;font-size:11px;margin-top:3px}.note{margin-top:12px;padding:10px 11px;border:1px solid #1a5d86;background:#071d2c;color:#c5e8ff;border-radius:6px;font-size:11px;line-height:1.5}.note b{color:#eef9ff}.charttitle{font-size:9px;color:#899eae;font-weight:900}.chart{height:250px;margin-top:7px;border-top:1px solid #12334a;border-bottom:1px solid #12334a}.chart svg{width:100%;height:100%}.meta{display:grid;grid-template-columns:1fr;gap:16px;margin-top:9px}.meta span{display:block;font-size:8px;color:#708697}.meta b{display:block;font-size:10px;margin-top:3px}
+.nav{display:flex;gap:6px;margin:12px 0}.nav button{background:#061521;border:1px solid #123b58;color:#8da3b4;padding:8px 12px;border-radius:5px;font-size:10px;font-weight:900}.nav button.active{background:#082944;color:#e8f6ff;border-color:#1698ef}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}.fields3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}textarea{min-height:86px;resize:vertical}
+table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;border-bottom:1px solid #102c40;text-align:left}th{font-size:8px;color:#74899a}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.calh{text-align:center;color:#87a0b3;font-size:10px;font-weight:900;padding:6px}.month-total{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:12px;padding-top:11px;border-top:1px solid #12344e}.month-total .mt-box{border:1px solid #123f5d;background:#06131f;border-radius:7px;padding:10px 12px}.month-total .mt-label{display:block;font-size:9px;font-weight:900;color:#8aa2b4;margin-bottom:5px}.month-total .mt-value{font-size:19px;font-weight:950;color:#edf6ff}.month-total .mt-r{color:#17e99f}.month-total .mt-cash{color:#2aaaff}.calendar-card{padding:16px}.calendar-month-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-month-title{font-size:18px;font-weight:950;letter-spacing:.2px}.cald{min-height:112px;border:1px solid #113249;background:#06111a;border-radius:6px;padding:9px}.cald .num{font-size:10px;font-weight:900;color:#8aa2b4}.cald .cash{font-size:18px;font-weight:950;margin-top:15px;line-height:1.05;white-space:nowrap}.cald .rrsmall{font-size:10px;font-weight:800;margin-top:5px;color:#8ba1b2;line-height:1.25}.cald.pos{border-color:#0b6145;background:#06241b}.cald.neg{border-color:#651821;background:#22090e}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{border:1px solid #11334d;background:#06111a;padding:11px;border-radius:6px}.metric span{display:block;font-size:8px;color:#718799}.metric strong{display:block;font-size:15px;margin-top:4px}
+.locked{position:relative;overflow:hidden;min-height:155px}.veil{position:absolute;inset:0;background:#02070de8;display:flex;align-items:center;justify-content:center;text-align:center;z-index:2}.veil p{font-size:9px;color:#9fb1bf;max-width:300px;line-height:1.5}
+.modal{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.show{display:flex}.modalbox{width:min(430px,100%);background:#071521;border:1px solid #175277;border-radius:8px;padding:16px;box-shadow:0 25px 70px #000}
+.status{position:fixed;right:18px;bottom:18px;max-width:min(460px,calc(100vw - 36px));background:#061521;border:1px solid #17608b;color:#e7f7ff;padding:14px 17px;border-radius:10px;font-size:12px;line-height:1.45;display:none;z-index:60;box-shadow:0 12px 35px #0008}
+.access-title{font-size:11px!important;color:#a9d8ff!important;letter-spacing:1px;margin:0 0 2px}.setup{margin-top:9px;padding:10px 11px;background:#071b29;border:1px solid #1b4f70;color:#a8cfe7;border-radius:6px;font-size:10px;line-height:1.55}
+
+/* Journal readability improvements */
+.journal-form-title{font-size:12px;color:#b9dff5;margin:0 0 10px;font-weight:900;letter-spacing:.3px}
+#tradeForm .field label{font-size:10px;color:#a9c2d2;letter-spacing:.25px;margin-bottom:6px}
+#tradeForm .input,#tradeForm .select{font-size:13px}
+.required-mark{color:#2aaaff;font-weight:950;margin-left:2px}
+.access-title{font-size:13px!important;color:#b9dff5!important;letter-spacing:1.2px;margin:0 0 4px}
+#access .note{font-size:13px;line-height:1.6;padding:13px 14px;color:#d6efff;background:#061a2a;border-color:#1c648f}
+.setup{margin-top:11px;padding:13px 14px;background:#061a2a;border:1px solid #1c648f;color:#d2edff;border-radius:7px;font-size:13px;line-height:1.65}
+
+.profile-modal-box{width:min(420px,100%);background:#071521;border:1px solid #1b6c9c;border-radius:10px;padding:18px;box-shadow:0 25px 70px #000}
+.profile-modal-box h3{margin:0;color:#e9f7ff;font-size:18px}
+.profile-modal-box p{font-size:11px;color:#91a8ba;line-height:1.55;margin:6px 0 14px}
+.profile-modal-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:12px}
+@media(max-width:900px){.top{flex-direction:column}.controls{grid-template-columns:repeat(3,1fr)}.days{grid-template-columns:1fr 1fr}.lower,.grid2{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.controls,.fields3{grid-template-columns:1fr 1fr}.days{grid-template-columns:1fr}.lower{grid-template-columns:1fr}}
+
+<style>
+#tradeForm input[type="date"]{cursor:pointer}
+#tradeForm input[type="date"]::-webkit-calendar-picker-indicator{opacity:1;cursor:pointer;filter:invert(1)}
+
+<style>
+.journal-money{font-weight:900;white-space:nowrap}
+.journal-shot{display:inline-flex;align-items:center;gap:4px}
+.journal-shot img{width:52px;height:38px;object-fit:contain;background:#02060b;border-radius:3px;border:1px solid #16405c}
+.journal-shot-count{font-size:8px;color:#7e93a5}
+</style>
+</style>
+</style>
+
+<style>
+.image-preview-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.image-preview{position:relative;width:72px;height:54px;border:1px solid #16405c;border-radius:4px;overflow:hidden;background:#030a11}
+.image-preview img{width:100%;height:100%;object-fit:contain;background:#02060b;display:block}
+.image-preview button{position:absolute;top:2px;right:2px;width:18px;height:18px;border:1px solid #1b5679;background:#061521cc;color:#fff;border-radius:3px;font-size:11px;line-height:1;padding:0}
+.journal-shot{cursor:pointer}
+.journal-shot:hover img,.image-preview:hover img{border-color:#159eff;filter:brightness(1.08)}
+.trade-manage-bar{display:flex;align-items:center;gap:10px;justify-content:space-between;margin:0 0 9px;padding:8px 10px;border:1px solid #123c59;background:#06131f;border-radius:6px}
+.trade-manage-left{display:flex;align-items:center;gap:9px;font-size:10px;color:#a8bfd0;font-weight:850}
+.trade-manage-left label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.trade-select{width:15px;height:15px;accent-color:#078fff;cursor:pointer;vertical-align:middle}
+.trade-selected-count{color:#7590a4;font-size:9px}
+.btn.danger{border-color:#6b202a;background:#22090e;color:#ff7a84}
+.btn.danger:hover{border-color:#ff5c69;background:#350b11}
+#deleteSelectedTrades:disabled{opacity:.42;cursor:not-allowed;border-color:#214058;background:#071521;color:#70869a}
+.trade-actions{display:flex;gap:4px;flex-wrap:wrap}
+.trade-actions .btn{padding:5px 7px;font-size:8px}
+.edit-banner{display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:7px 9px;border:1px solid #164b70;background:#05131f;border-radius:5px;color:#a8bdd0;font-size:9px;font-weight:800}
+.edit-banner.show{display:flex}
+
+.image-viewer{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+.image-viewer.show{display:flex}
+.image-viewer-box{width:min(1100px,96vw);height:min(90vh,850px);background:#071521;border:1px solid #175277;border-radius:8px;display:flex;flex-direction:column;box-shadow:0 25px 90px #000;overflow:hidden}
+.image-viewer-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #10334e;color:#9eb1c1;font-size:9px;font-weight:900}
+.image-viewer-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;background:#02060b;padding:14px;overflow:hidden;cursor:grab}
+.image-viewer-stage.dragging{cursor:grabbing}
+.image-viewer-stage img{max-width:none;max-height:none;object-fit:contain;border-radius:4px;transform-origin:center center;user-select:none;will-change:transform;box-shadow:0 10px 40px #0008}
+.image-viewer-actions{display:flex;justify-content:center;gap:7px;padding:9px;border-top:1px solid #10334e;flex-wrap:wrap}
+.viewer-zoom-label{min-width:64px;text-align:center;color:#9eb1c1;font-size:9px;font-weight:900;align-self:center}
+.image-viewer-actions .btn[disabled]{opacity:.35;cursor:default}
+.image-viewer-close{font-size:18px;padding:4px 9px}
+
+<style>
+.account-wrap{position:relative;display:flex;align-items:flex-start;z-index:200}
+.account-trigger{display:flex;align-items:center;gap:8px;background:#061521;border:1px solid #16567c;color:#edf6ff;padding:7px 10px;border-radius:8px;min-height:36px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0004}
+.account-trigger:hover{border-color:#1d99ed;background:#082033}
+.account-avatar{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#1a9dff,#0d5f9b);border:1px solid #55bfff;color:#fff;font-size:11px;font-weight:950;flex:0 0 26px}
+.account-label{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-menu{position:absolute;right:0;top:calc(100% + 7px);width:240px;background:#071521;border:1px solid #1a6b97;border-radius:10px;box-shadow:0 18px 45px #000b;padding:7px;display:none;z-index:9999}
+.account-menu.show{display:block}
+.account-menu-head{padding:9px 10px 10px;border-bottom:1px solid #11374f}
+.account-menu-name{font-size:13px;font-weight:900;color:#edf6ff}
+.account-menu-email{font-size:10px;color:#89a8bb;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-menu-item{width:100%;text-align:left;background:transparent;border:0;color:#dff3ff;border-radius:7px;padding:10px 10px;font-size:12px;font-weight:850;margin-top:4px}
+.account-menu-item:hover{background:#0a2437}
+.account-menu-item.danger{color:#ff7c87}
+.account-menu-item.danger:hover{background:#2a1015}
+.name-setup-box{width:min(420px,100%);background:#071521;border:1px solid #1b6c9c;border-radius:10px;padding:18px;box-shadow:0 25px 70px #000}.name-setup-box h3{margin:0;color:#e9f7ff;font-size:18px}.name-setup-box p{font-size:11px;color:#91a8ba;line-height:1.55;margin:6px 0 14px}
+
+/* Journal readability */
+.journal-form-title{font-size:13px!important;color:#d8efff!important;margin:0 0 10px;font-weight:950;letter-spacing:.4px}
+#tradeForm .field label{font-size:10px!important;color:#d6e8f5!important;letter-spacing:.3px;margin-bottom:6px}
+#tradeForm .input,#tradeForm .select,#tradeForm textarea{font-size:13px}
+.required-mark{color:#33aaff;font-weight:950;margin-left:2px}
+.access-title{font-size:14px!important;color:#d9efff!important;letter-spacing:1.2px;margin:0 0 5px}
+#access .note{font-size:13px;line-height:1.65;padding:14px 15px;color:#e3f5ff;background:#071e31;border:1px solid #218bd0;border-radius:8px}
+.setup{margin-top:11px;padding:16px 15px;background:#061b2d;border:1px solid #1b6c9c;color:#dff3ff;border-radius:8px;font-size:15px;line-height:1.7;font-weight:650;box-shadow:inset 0 0 0 1px #0b2d43}
+.setup b{color:#ffffff}
+
+@media(max-width:560px){.account-label{max-width:72px}.account-menu{width:200px}}
+</style>
+
+</style>
+
+
+<style>
+.admin-page-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.admin-title{font-size:18px;font-weight:950}.admin-sub{font-size:10px;color:#8da4b5;line-height:1.5;margin-top:4px}.admin-form{display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;align-items:end;margin-top:14px}.admin-table-wrap{overflow:auto;margin-top:14px}.admin-table{width:100%;border-collapse:collapse;font-size:10px;min-width:620px}.admin-table th{font-size:8px;color:#718799;text-transform:uppercase}.admin-table td,.admin-table th{padding:9px 7px;border-bottom:1px solid #102c40}.admin-table .muted{color:#8197a8}.admin-pill{display:inline-flex;padding:4px 7px;border-radius:999px;border:1px solid #17608b;background:#061f31;color:#9fddff;font-weight:900;font-size:8px}.admin-empty{padding:20px;color:#718799;font-size:10px;text-align:center;border:1px dashed #173a54;border-radius:7px}
+@media(max-width:700px){.admin-form{grid-template-columns:1fr}.admin-table{min-width:0}.admin-table th:nth-child(4),.admin-table td:nth-child(4){display:none}}
+</style>
+
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
+  <div class="account-wrap">
+    <button class="account-trigger" id="authBtn" type="button" aria-haspopup="true" aria-expanded="false">
+      <span class="account-avatar" id="authAvatar">K</span>
+      <span class="account-label" id="authName">Sign in</span>
+    </button>
+    <div class="account-menu" id="accountMenu" aria-hidden="true">
+      <div class="account-menu-head">
+        <div class="account-menu-name" id="accountMenuName">Kushal</div>
+        <div class="account-menu-email" id="accountMenuEmail"></div>
+      </div>
+      <button class="account-menu-item" id="editNameMenu" type="button">Edit name</button>
+      <button class="account-menu-item" id="signOutMenu" type="button">Sign out</button><button class="account-menu-item danger" id="deleteAccountMenu" type="button">Delete account permanently</button>
+    </div>
+  </div>
+</header>
+
+<div class="nav">
+  <button class="active" data-nav="home">Home</button><button data-nav="journal">Journal</button><button data-nav="calendar">Calendar</button><button data-nav="analytics">Analytics</button><button data-nav="pro">Pro</button><button data-nav="admin" id="adminNav" class="hidden">Admin</button>
+</div>
+
+<section id="page-home" class="page active">
+<div class="card">
+  <div class="controls">
+    <div class="field"><label>INSTRUMENT</label><select id="instrument" class="select"><option>NQ mini ($20/pt)</option><option>MNQ ($2/pt)</option><option>ES mini ($50/pt)</option><option>GC ($100/pt)</option></select></div>
+    <div class="field"><label>MAX TRADES / DAY</label><input id="maxTrades" class="input" value="3" type="number" min="1"></div>
+    <div class="field"><label>RISK-TO-REWARD</label><input id="rr" class="input" value="1.5" type="number" min=".1" step=".1"></div>
+    <div class="field"><label>WIN RATE</label><div style="display:flex;gap:4px;align-items:center"><input id="winRate" class="input" value="60" type="number" min="0" max="100" step="1" style="flex:1"><span style="font-size:11px;color:#8fa6b8">%</span></div></div>
+    <div class="field"><label>1R =</label><input id="oneR" class="input" value="500" type="number" min="1" step="25"></div>
+    <div><div class="field"><label>&nbsp;</label><button id="run" class="btn primary" style="width:100%">Randomize week</button></div></div>
+  </div>
+  <div class="checks"><label><input id="showMoney" type="checkbox" checked> Show $</label></div>
+  <div id="days" class="days"></div>
+  <div class="lower">
+    <div class="card"><div style="font-size:9px;color:#899eae;font-weight:900">END OF WEEK</div><div id="totalR" class="big pos">0R</div><div id="totalMoney" class="money">$0</div><div class="tag">BLUEBIRD WEEK</div><div class="stats"><div><span>Wins</span><b id="wins">0</b></div><div><span>Losses</span><b id="losses">0</b></div><div><span>Win rate</span><b id="actualWR">—</b></div><div><span>Break-even win rate</span><b id="be">40%</b></div></div><div class="note" id="note">One win at 1:1.5 pays for 1.5 losses.</div></div>
+    <div class="card"><div class="charttitle">EQUITY THROUGH THE WEEK, TRADE BY TRADE (R)</div><div id="chart" class="chart"></div><div class="meta"><div><span>ACCOUNT DRAWDOWN</span><b>$2,000</b></div></div></div>
+  </div>
+</div>
+</section>
+
+<section id="page-journal" class="page">
+<div class="grid2">
+ <div class="card">
+  <h3 class="journal-form-title">JOURNAL ENTRY</h3>
+  <form id="tradeForm">
+   <div class="fields3">
+    <div class="field"><label>DATE <span class="required-mark">*</span></label><input class="input" name="date" type="date" required onclick="this.showPicker && this.showPicker()"></div>
+    <div class="field"><label>INSTRUMENT</label><input class="input" name="instrument" value=""></div>
+    <div class="field"><label>DIRECTION</label><select class="select" name="direction"><option value="">—</option><option>Long</option><option>Short</option></select></div>
+    <div class="field"><label>RESULT R</label><input class="input" name="r" type="number" step=".25"></div>
+    <div class="field"><label>RESULT $</label><input class="input" name="usd" type="number" step="1"></div>
+    <div class="field"><label>SETUP</label><input class="input" name="setup"></div>
+    <div class="field"><label>SESSION</label><input class="input" name="session"></div>
+    <div class="field"><label>TAG</label><input class="input" name="tag"></div>
+    <div class="field"><label>SCREENSHOTS</label><input class="input" name="images" type="file" accept="image/*" multiple><div id="imagePreview" class="image-preview-wrap"></div></div>
+   </div>
+   <div class="field" style="margin-top:8px"><label>NOTES</label><textarea name="notes"></textarea></div>
+   <div class="actions" style="justify-content:flex-start;margin-top:9px"><button class="btn primary" id="saveTradeBtn" type="submit">Save trade</button><button class="btn hidden" id="cancelEditBtn" type="button">Cancel edit</button><span style="align-self:center;font-size:9px;color:#6f8496">R and $ are saved separately.</span><button class="btn" type="button" id="exportBtn">Export visible CSV</button></div>
+   <div id="editBanner" class="edit-banner"><span id="editBannerText">Editing saved trade</span><button class="btn" type="button" id="editManageImages">Manage screenshots</button></div>
+  </form>
+ </div>
+ <div class="card"><h3 class="access-title">ACCESS</h3><div id="access"></div><div id="accessRule" class="setup"></div></div>
+</div>
+<div class="card" style="margin-top:10px"><h3 style="font-size:10px;color:#899eae">SAVED TRADES</h3><div id="trades"></div></div>
+</section>
+
+<section id="page-calendar" class="page">
+<div class="card calendar-card"><div class="calendar-month-head"><button class="btn" id="prevMonth">←</button><strong id="monthTitle" class="calendar-month-title"></strong><button class="btn" id="nextMonth">→</button></div><div id="monthTotal" class="month-total"></div><div id="calendar" class="calendar" style="margin-top:14px"></div></div>
+</section>
+
+<section id="page-analytics" class="page">
+<div class="card"><h3 style="font-size:10px;color:#899eae">BASIC JOURNAL ANALYSIS</h3><div id="analytics" class="metrics"></div></div>
+<div class="grid2" style="margin-top:10px"><div class="card"><h3 style="font-size:10px;color:#899eae">JOURNAL EQUITY CURVE</h3><div id="journalCurve" class="chart"></div></div><div class="card"><h3 style="font-size:10px;color:#899eae">RESULT BY SETUP</h3><div id="setupStats"></div></div></div>
+<div class="grid2" style="margin-top:10px"><div class="card locked"><div class="veil"><div><h3>Monte Carlo — Pro</h3><p>Run thousands of possible future paths from your actual results.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div><div class="card locked"><div class="veil"><div><h3>AI Trading Review — Pro</h3><p>Analyze your own journal for recurring strengths, weaknesses and patterns.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div></div>
+</section>
+
+<section id="page-pro" class="page">
+<div id="proAccessNotice" class="card"><div class="smallbrand">BLUEBIRD PRO</div><h2 style="margin:6px 0">The full analytics layer</h2><p id="proAccessNoticeText" style="color:#8ea2b2;font-size:11px;line-height:1.5">Full history, unlimited journaling, advanced analytics, Prop Firm Simulator, Monte Carlo, AI reviews, strategy analysis and deeper exports.</p></div>
+<div class="grid2" style="margin-top:10px"><div class="card"><h3 style="font-size:10px;color:#899eae">FULL HISTORY</h3><div class="big" style="color:#2aaaff">ALL</div><p style="font-size:10px;color:#8196a7">1 month, 3 months, 6 months, 1 year and all-time history.</p></div><div class="card"><h3 style="font-size:10px;color:#899eae">PROP FIRM SIMULATOR</h3><div class="big" style="color:#2aaaff">RULES</div><p style="font-size:10px;color:#8196a7">Use your own statistics against target, drawdown, consistency and payout rules.</p></div></div>
+</section>
+
+<section id="page-admin" class="page">
+  <div class="card">
+    <div class="admin-page-head">
+      <div><div class="smallbrand">BLUEBIRD ADMIN</div><div class="admin-title">Manual Pro Access</div><div class="admin-sub">Grant selected users full Pro access without changing their password or payment status. Access is controlled by the expiry date you choose.</div></div>
+      <button class="btn" id="adminRefresh" type="button">Refresh list</button>
+    </div>
+    <div class="admin-form">
+      <div class="field"><label>USER EMAIL</label><input id="adminEmail" class="input" type="email" placeholder="friend@example.com"></div>
+      <div class="field"><label>ACCESS UNTIL</label><input id="adminUntil" class="input" type="datetime-local"></div>
+      <button class="btn primary" id="adminGrant" type="button">Grant Pro Access</button>
+    </div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Access until</th><th>Status</th><th></th></tr></thead><tbody id="adminRows"></tbody></table></div>
+  </div>
+</section>
+</div>
+
+<div id="authModal" class="modal"><div class="modalbox"><h2 style="margin:0">Bluebird account</h2><p style="font-size:10px;color:#8ea5b6;line-height:1.5">Email/password and Google login are handled by Supabase. Your Bluebird database never stores your password.</p><div class="field" style="margin-top:8px"><label>EMAIL</label><input id="email" class="input" type="email"></div><div class="field" style="margin-top:8px"><label>PASSWORD</label><input id="password" class="input" type="password"></div><div class="actions" style="justify-content:flex-start;margin-top:10px"><button class="btn primary" id="login">Sign in</button><button class="btn" id="signup">Create account</button><button class="btn" id="google">Google</button><button class="btn" id="closeAuth">Close</button></div></div></div>
+<div id="profileModal" class="modal"><div class="profile-modal-box"><h3>Edit your name</h3><p>This name is shown beside your profile icon and can be changed anytime.</p><div class="field"><label>YOUR NAME</label><input id="profileNameInput" class="input" type="text" placeholder="Your name"></div><div class="profile-modal-actions"><button class="btn" id="closeProfile">Cancel</button><button class="btn primary" id="saveProfileName">Save name</button></div></div></div>
+<div id="nameSetupModal" class="modal"><div class="name-setup-box"><h3>Welcome to Bluebird</h3><p>Set the name you want Bluebird to show on your account. You only need to do this once.</p><div class="field"><label>YOUR NAME</label><input id="nameSetupInput" class="input" type="text" placeholder="Your name"></div><div class="profile-modal-actions"><button class="btn primary" id="saveNameSetup">Continue</button></div></div></div>
+<div id="imageViewer" class="image-viewer" aria-hidden="true">
+  <div class="image-viewer-box">
+    <div class="image-viewer-head"><span id="imageViewerTitle">Trade screenshot</span><button class="btn image-viewer-close" id="imageViewerClose" type="button">×</button></div>
+    <div class="image-viewer-stage" id="imageViewerStage"><img id="imageViewerImg" alt="Trade screenshot" draggable="false"></div>
+    <div class="image-viewer-actions">
+      <button class="btn" id="imageViewerPrev" type="button">← Previous</button>
+      <button class="btn" id="imageViewerZoomOut" type="button">−</button>
+      <span class="viewer-zoom-label" id="imageViewerZoomLabel">100%</span>
+      <button class="btn" id="imageViewerZoomIn" type="button">+</button>
+      <button class="btn" id="imageViewerReset" type="button">Fit</button>
+      <button class="btn" id="imageViewerAdd" type="button">Add image</button>
+      <button class="btn" id="imageViewerReplace" type="button">Replace image</button>
+      <button class="btn" id="imageViewerDelete" type="button">Delete image</button>
+      <button class="btn primary" id="imageViewerDownload" type="button">Download image</button>
+      <button class="btn" id="imageViewerNext" type="button">Next →</button>
+    </div>
+  </div>
+</div>
+<input id="addImagesInput" type="file" accept="image/*" multiple hidden>
+<input id="replaceImagesInput" type="file" accept="image/*" hidden>
+<div id="status" class="status"></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+"use strict";
+const CFG=window.BLUEBIRD_CONFIG||{};
+let sb=null, session=null, profile=null;
+const state={days:[[],[],[],[],[]],trades:[],month:new Date(new Date().getFullYear(),new Date().getMonth(),1)};
+const LOCAL_KEY="bluebird_ready_v2";
+
+function $(id){return document.getElementById(id)}
+function toast(msg){const e=$("status");e.textContent=msg;e.style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>e.style.display="none",2600)}
+function fmt(n){return Math.abs(n-Math.round(n))<1e-9?String(Math.round(n)):Number(n).toFixed(2).replace(/0+$/,"").replace(/\.$/,"")}
+function money(n){return (n>=0?"+":"-")+"$"+Math.abs(Math.round(n)).toLocaleString()}
+function localDateKey(d){const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,"0");const day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`}
+function todayDateKey(){return localDateKey(new Date())}
+function iso(d){return localDateKey(d)}
+function saveLocal(){localStorage.setItem(LOCAL_KEY,JSON.stringify({days:state.days,trades:state.trades}))}
+function loadLocal(){try{const x=JSON.parse(localStorage.getItem(LOCAL_KEY));if(x){state.days=x.days||state.days;state.trades=x.trades||[]}}catch{}}
+function settings(){return{p:Math.max(0,Math.min(100,+$("winRate").value||0))/100,rr:Math.max(.1,+$("rr").value||.1),risk:Math.max(1,+$("oneR").value||1),max:Math.max(1,Math.floor(+$("maxTrades").value||1))}}
+function dayR(a,rr){return a.reduce((s,x)=>s+(x==="W"?rr:-1),0)}
+function totalR(rr){return state.days.reduce((s,a)=>s+dayR(a,rr),0)}
+function manualAccessEndsAt(){return profile?.manual_access_until?new Date(profile.manual_access_until).getTime():0}
+function manualAccessActive(){return !!profile && !!manualAccessEndsAt() && Date.now()<manualAccessEndsAt()}
+function trialEndsAt(){return profile?.trial_started_at?new Date(profile.trial_started_at).getTime()+7*86400000:0}
+function trialActive(){if(!profile)return true;return profile.plan==="trial" && Date.now()<trialEndsAt()}
+function trialExpired(){return !!profile && profile.plan==="trial" && !trialActive()}
+function proActive(){
+  if(profile?.plan!=="pro")return false;
+  const exp=profile.subscription_expires_at?new Date(profile.subscription_expires_at).getTime():0;
+  return !exp || Date.now()<exp;
+}
+// Unified Pro entitlement: either a paid Pro subscription or admin-granted manual access.
+function proAccessActive(){return !!profile && (manualAccessActive() || proActive())}
+function everSubscribed(){return !!profile && !!(profile.subscription_started_at || profile.subscription_expires_at)}
+function hasFullJournalAccess(){return !profile || manualAccessActive() || trialActive() || proActive()}
+function canJournal(){return !sb || !profile || manualAccessActive() || trialActive() || proActive()}
+function visibleTrades(){
+  if(!profile)return state.trades;
+  if(manualAccessActive()||trialActive()||proActive())return state.trades;
+  if(!everSubscribed())return [];
+  const cutoff=new Date();
+  cutoff.setHours(0,0,0,0);
+  cutoff.setDate(cutoff.getDate()-29);
+  const cutoffKey=localDateKey(cutoff);
+  return state.trades.filter(t=>String(t.trade_date||"").slice(0,10)>=cutoffKey);
+}
+function durationText(ms){
+  if(ms<=0)return "0m 0s";
+  const totalSec=Math.floor(ms/1000);
+  const days=Math.floor(totalSec/86400);
+  const hours=Math.floor((totalSec%86400)/3600);
+  const mins=Math.floor((totalSec%3600)/60);
+  const secs=totalSec%60;
+  const parts=[];
+  if(days)parts.push(days+"d");
+  if(hours || days)parts.push(hours+"h");
+  if(mins || hours || days)parts.push(mins+"m");
+  parts.push(secs+"s");
+  return parts.join(" ");
+}
+async function initCloud(){
+ if(!CFG.SUPABASE_URL||!CFG.SUPABASE_KEY){toast("Offline mode: add your Supabase public key to config.js when you are ready.");return}
+ const tag=document.createElement("script");tag.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+ tag.onload=async()=>{
+  sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const res=await sb.auth.getSession();session=res.data.session||null;
+  if(session) await loadCloud();
+  updateAuthButton();
+  sb.auth.onAuthStateChange(async(_event,s)=>{
+    session=s||null;
+    if(session) await loadCloud(); else {profile=null;loadLocal();renderAll()}
+    updateAuthButton();
+  });
+ };
+ tag.onerror=()=>toast("Cloud library could not load; staying offline.");
+ document.head.appendChild(tag);
+}
+async function loadCloud(){
+ try{
+  const p=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
+  profile=p.data;
+  if(!profile){profile={id:session.user.id,plan:"trial",trial_started_at:new Date().toISOString(),name_setup_complete:false};await sb.from("profiles").upsert(profile)}
+  const r=await sb.from("trades").select("*").order("trade_date",{ascending:false}).order("created_at",{ascending:false});
+  if(r.error)throw r.error;
+  state.trades=r.data||[];
+  const im=await sb.from("trade_images").select("trade_id,storage_path");
+  const map={};(im.data||[]).forEach(x=>(map[x.trade_id]??=[]).push(x.storage_path));
+  state.trades.forEach(t=>t.images=map[t.id]||[]);
+  saveLocal();renderAll();
+  if(profile && profile.name_setup_complete===false) setTimeout(openNameSetup,160);
+  toast("Bluebird cloud journal loaded.");
+ }catch(e){console.error(e);loadLocal();renderAll();toast("Cloud read failed; showing only data allowed by your current access.")}
+}
+async function signIn(create){
+ if(!sb){toast("Add the Supabase public key in config.js first.");return}
+ const email=$("email").value.trim(),password=$("password").value;
+ if(!email||!password){toast("Enter email and password.");return}
+ if(create && password.length<6){toast("Password must be at least 6 characters.");return}
+ const r=create?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
+ if(r.error){toast(r.error.message);return}
+ if(create&&!r.data.session){toast("Account created. Check the confirmation email, then sign in.");return}
+ $("authModal").classList.remove("show");
+}
+async function google(){
+ if(!sb){toast("Add the Supabase public key in config.js first.");return}
+ const r=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href.split("#")[0]}});
+ if(r.error)toast(r.error.message);
+}
+async function signOut(){if(sb)await sb.auth.signOut();session=null;profile=null;closeAccountMenu();loadLocal();updateAuthButton();renderAll()}
+function getUserDisplayName(){
+  const profileName=String(profile?.display_name||"").trim();
+  if(profileName)return profileName;
+  const u=session?.user; const meta=u?.user_metadata||{};
+  const full=String(meta.full_name||meta.name||meta.display_name||"").trim();
+  if(full)return full.split(/\s+/)[0];
+  const email=String(u?.email||"");
+  const prefix=email.split("@")[0]||""; const firstPart=prefix.split(/[._-]+/)[0];
+  return firstPart ? firstPart.charAt(0).toUpperCase()+firstPart.slice(1).toLowerCase() : "Account";
+}
+function getUserAvatar(){return getUserDisplayName().slice(0,1).toUpperCase()||"U"}
+function openAccountMenu(){
+  const m=$("accountMenu"); if(!session||!m)return;
+  m.classList.add("show"); m.setAttribute("aria-hidden","false"); $("authBtn").setAttribute("aria-expanded","true");
+}
+function closeAccountMenu(){const m=$("accountMenu");if(m){m.classList.remove("show");m.setAttribute("aria-hidden","true")}const b=$("authBtn");if(b)b.setAttribute("aria-expanded","false")}
+function toggleAccountMenu(){
+  const m=$("accountMenu"); if(!session||!m)return;
+  if(m.classList.contains("show"))closeAccountMenu(); else openAccountMenu();
+}
+function updateAuthButton(){
+  const btn=$("authBtn"), avatar=$("authAvatar"), name=$("authName"), email=$("accountMenuEmail"), menuName=$("accountMenuName");
+  updateAdminVisibility();
+  if(!session){
+    avatar.textContent=""; avatar.style.display="none"; name.textContent="Sign in"; email.textContent=""; menuName.textContent=""; btn.classList.add("signed-out"); closeAccountMenu(); return;
+  }
+  const display=getUserDisplayName(); avatar.textContent=getUserAvatar(); avatar.style.display="inline-flex"; name.textContent=display; email.textContent=session.user.email||""; menuName.textContent=display; btn.classList.remove("signed-out");
+}
+function openProfileModal(){
+  if(!session)return;
+  closeAccountMenu(); const i=$("profileNameInput"); i.value=String(profile?.display_name||getUserDisplayName()||""); $("profileModal").classList.add("show"); setTimeout(()=>i.focus(),30);
+}
+function closeProfileModal(){$("profileModal").classList.remove("show")}
+async function saveProfileName(){
+  if(!session||!sb)return;
+  const i=$("profileNameInput"), name=i.value.trim();
+  if(!name){toast("Enter a name first.");i.focus();return}
+  const now=new Date().toISOString();
+  const {error}=await sb.from("profiles").update({display_name:name,updated_at:now}).eq("id",session.user.id);
+  if(error){toast(error.message);return}
+  try{await sb.auth.updateUser({data:{full_name:name,display_name:name}})}catch(_e){}
+  profile={...(profile||{}),display_name:name,updated_at:now}; updateAuthButton(); closeProfileModal(); toast("Name updated.");
+}
+function openNameSetup(){
+  if(!session||!profile||profile.name_setup_complete===true)return;
+  $("nameSetupInput").value="";
+  $("nameSetupModal").classList.add("show");
+  setTimeout(()=>$("nameSetupInput").focus(),30);
+}
+function closeNameSetup(){ $("nameSetupModal").classList.remove("show"); }
+async function saveNameSetup(){
+  if(!session||!sb)return;
+  const i=$("nameSetupInput"), name=i.value.trim();
+  if(!name){toast("Enter a name first.");i.focus();return}
+  const now=new Date().toISOString();
+  const {error}=await sb.from("profiles").update({display_name:name,name_setup_complete:true,updated_at:now}).eq("id",session.user.id);
+  if(error){toast(error.message);return}
+  try{await sb.auth.updateUser({data:{full_name:name,display_name:name}})}catch(_e){}
+  profile={...(profile||{}),display_name:name,name_setup_complete:true,updated_at:now};
+  updateAuthButton(); closeNameSetup(); toast("Welcome, "+name+".");
+}
+async function deleteAccountPermanently(){
+  if(!session||!sb)return;
+  const ok=confirm("Delete your Bluebird account permanently? This will permanently delete your journal, screenshots, profile and sign-in account. This cannot be undone.");
+  if(!ok)return;
+  const typed=prompt("Type DELETE to permanently delete your account.");
+  if(typed!=="DELETE"){toast("Account deletion cancelled.");return}
+  const {error}=await sb.rpc("delete_my_account");
+  if(error){toast("Account deletion failed: "+error.message);return}
+  session=null;profile=null;closeAccountMenu();loadLocal();updateAuthButton();renderAll();toast("Your Bluebird account has been permanently deleted.");
+}
+async function uploadScreenshots(tradeId,files){
+ if(!sb||!session)return[];
+ const paths=[];
+ for(const file of files){
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+  const path=`${session.user.id}/${tradeId}/${crypto.randomUUID()}.${ext}`;
+  const up=await sb.storage.from("trade-images").upload(path,file,{upsert:false,contentType:file.type||"image/jpeg"});
+  if(up.error)throw up.error;
+  const row=await sb.from("trade_images").insert({trade_id:tradeId,user_id:session.user.id,storage_path:path}).select("storage_path").single();
+  if(row.error)throw row.error; paths.push(path);
+ }
+ return paths;
+}
+async function removeCloudImage(tradeId,path){
+  if(!sb||!session||!path||String(path).startsWith("data:")) return;
+  const rm=await sb.storage.from("trade-images").remove([path]);
+  if(rm.error) throw rm.error;
+  const del=await sb.from("trade_images").delete().eq("trade_id",tradeId).eq("user_id",session.user.id).eq("storage_path",path);
+  if(del.error) throw del.error;
+}
+async function deleteTradeRecords(tradeIds){
+  if(!canJournal()){toast(journalLockMessage());return}
+  const ids=[...new Set((tradeIds||[]).map(String).filter(Boolean))];
+  const targets=state.trades.filter(t=>ids.includes(String(t.id)));
+  if(!targets.length){toast("Select at least one journal entry.");return}
+  try{
+    if(sb&&session){
+      for(const trade of targets){
+        const imgs=(trade.images||[]).filter(x=>!String(x).startsWith("data:"));
+        if(imgs.length){
+          const rm=await sb.storage.from("trade-images").remove(imgs);
+          if(rm.error) throw rm.error;
+          const delImgs=await sb.from("trade_images").delete().eq("trade_id",trade.id).eq("user_id",session.user.id);
+          if(delImgs.error) throw delImgs.error;
+        }
+        const del=await sb.from("trades").delete().eq("id",trade.id).eq("user_id",session.user.id);
+        if(del.error) throw del.error;
+      }
+    }
+    state.trades=state.trades.filter(t=>!ids.includes(String(t.id)));
+    if(editTradeId && ids.includes(String(editTradeId))) cancelEdit();
+    saveLocal();renderAll();
+    toast(ids.length===1?"Journal entry deleted.":`${ids.length} journal entries deleted.`);
+  }catch(e){toast("Could not delete selected entries: "+e.message)}
+}
+async function deleteTradeRecord(tradeId){ await deleteTradeRecords([tradeId]); }
+function updateTradeSelectionUI(){
+  const checks=[...document.querySelectorAll("[data-select-trade]")];
+  const selected=checks.filter(x=>x.checked).map(x=>x.dataset.selectTrade);
+  const top=$("selectAllTrades");
+  if(top){
+    top.checked=checks.length>0 && selected.length===checks.length;
+    top.indeterminate=selected.length>0 && selected.length<checks.length;
+  }
+  const count=$("selectedTradeCount"); if(count)count.textContent=selected.length?`${selected.length} selected`:"0 selected";
+  const del=$("deleteSelectedTrades"); if(del)del.disabled=selected.length===0;
+}
+function toggleAllTradeSelection(){
+  const top=$("selectAllTrades");
+  document.querySelectorAll("[data-select-trade]").forEach(x=>x.checked=!!top?.checked);
+  updateTradeSelectionUI();
+}
+async function deleteSelectedTrades(){
+  const ids=[...document.querySelectorAll("[data-select-trade]:checked")].map(x=>x.dataset.selectTrade);
+  await deleteTradeRecords(ids);
+}
+function startEditTrade(tradeId){
+  if(!canJournal()){toast(journalLockMessage());return}
+  const trade=state.trades.find(t=>t.id===tradeId); if(!trade)return;
+  const f=$("tradeForm"); editTradeId=tradeId;
+  f.date.value=trade.trade_date||"";
+  f.instrument.value=trade.instrument||"";
+  f.direction.value=trade.direction||"";
+  f.r.value=trade.result_r===null||trade.result_r===undefined?"":trade.result_r;
+  f.usd.value=trade.result_usd===null||trade.result_usd===undefined?"":trade.result_usd;
+  f.setup.value=trade.setup||"";
+  f.session.value=trade.session||"";
+  f.tag.value=trade.tag||"";
+  f.notes.value=trade.notes||"";
+  f.images.value="";
+  if($("imagePreview"))$("imagePreview").innerHTML="";
+  $("saveTradeBtn").textContent="Save changes";
+  $("cancelEditBtn").classList.remove("hidden");
+  $("editBanner").classList.add("show");
+  $("editBannerText").textContent=`Editing saved trade${trade.trade_date?` — ${trade.trade_date}`:""}`;
+  window.scrollTo({top:Math.max(0,$("page-journal").offsetTop-20),behavior:"smooth"});
+}
+function cancelEdit(){
+  editTradeId=null;
+  const f=$("tradeForm");
+  f.reset();
+  f.date.value=todayDateKey();
+  if($("imagePreview"))$("imagePreview").innerHTML="";
+  $("saveTradeBtn").textContent="Save trade";
+  $("cancelEditBtn").classList.add("hidden");
+  $("editBanner").classList.remove("show");
+}
+async function appendImagesToTrade(tradeId,files){
+  const trade=state.trades.find(t=>t.id===tradeId); if(!trade)return;
+  const selected=[...files].filter(f=>f.type.startsWith("image/"));
+  if(!selected.length)return;
+  try{
+    if(sb&&session){
+      const paths=await uploadScreenshots(tradeId,selected);
+      trade.images=[...(trade.images||[]),...paths];
+    }else{
+      const local=[];
+      for(const file of selected){ if(file.size<=6*1024*1024)local.push(await fileData(file)); }
+      trade.images=[...(trade.images||[]),...local];
+    }
+    saveLocal();renderAll();
+    const refreshed=state.trades.find(t=>t.id===tradeId);
+    if(refreshed&&refreshed.images.length)openImageViewer(refreshed.images,Math.max(0,refreshed.images.length-selected.length),tradeId);
+    toast("Image(s) added to the saved journal entry.");
+  }catch(e){toast("Could not add image(s): "+e.message)}
+}
+async function replaceCurrentImage(tradeId,index,file){
+  const trade=state.trades.find(t=>t.id===tradeId); if(!trade||!trade.images?.length||!file)return;
+  const oldPath=trade.images[index];
+  try{
+    if(sb&&session && !String(oldPath).startsWith("data:")){
+      const newPaths=await uploadScreenshots(tradeId,[file]);
+      const newPath=newPaths[0];
+      try{ await removeCloudImage(tradeId,oldPath); }
+      catch(err){ try{ await removeCloudImage(tradeId,newPath); }catch{}; throw err; }
+      trade.images[index]=newPath;
+    }else{
+      trade.images[index]=await fileData(file);
+    }
+    saveLocal();renderAll();
+    openImageViewer(trade.images,index,tradeId);
+    toast("Image replaced.");
+  }catch(e){toast("Could not replace image: "+e.message)}
+}
+async function deleteCurrentImage(){
+  const tradeId=imageViewer.tradeId;
+  if(!tradeId)return;
+  const trade=state.trades.find(t=>t.id===tradeId); if(!trade||!trade.images?.length)return;
+  const idx=imageViewer.index, path=trade.images[idx];
+  if(!confirm("Delete this image only? The journal entry will stay.")) return;
+  try{
+    if(sb&&session && !String(path).startsWith("data:")) await removeCloudImage(tradeId,path);
+    trade.images.splice(idx,1);
+    saveLocal();
+    if(!trade.images.length){closeImageViewer();} else {imageViewer.items=[...trade.images];imageViewer.index=Math.min(idx,trade.images.length-1);imageViewer.urls=[];renderViewerImage();}
+    renderTrades();
+    toast("Image deleted. The journal entry was kept.");
+  }catch(e){toast("Could not delete image: "+e.message)}
+}
+function openAddImagePicker(tradeId){
+  const inp=$("addImagesInput"); if(!inp)return;
+  inp.value=""; inp.dataset.tradeId=tradeId; inp.onchange=()=>{appendImagesToTrade(tradeId,inp.files);}; inp.click();
+}
+function openReplaceImagePicker(tradeId,index){
+  const inp=$("replaceImagesInput"); if(!inp)return;
+  inp.value=""; inp.dataset.tradeId=tradeId; inp.dataset.index=index; inp.onchange=()=>{if(inp.files[0])replaceCurrentImage(tradeId,index,inp.files[0]);}; inp.click();
+}
+
+async function saveTrade(e){
+ e.preventDefault();
+ if(!canJournal()){toast(journalLockMessage());return}
+ const f=e.target;
+ if(!f.date.value){toast("Please enter the date for this journal entry.");f.date.focus();return}
+ const existing=editTradeId?state.trades.find(t=>t.id===editTradeId):null;
+ if(editTradeId && !existing){toast("That journal entry could not be found.");return}
+
+ const trade={
+   id:editTradeId||crypto.randomUUID(),
+   trade_date:f.date.value || null,
+   instrument:f.instrument.value.trim() || "",
+   direction:f.direction.value || "",
+   result_r:f.r.value==="" ? null : Number(f.r.value),
+   result_usd:f.usd.value==="" ? null : Number(f.usd.value),
+   setup:f.setup.value.trim() || "",
+   session:f.session.value.trim() || "",
+   tag:f.tag.value.trim() || "",
+   notes:f.notes.value.trim() || "",
+   created_at:existing?.created_at||new Date().toISOString(),
+   images:[]
+ };
+
+ const files=[...f.images.files];
+
+ // Don't create a completely empty journal entry.
+ const hasContent =
+   trade.trade_date ||
+   trade.instrument ||
+   trade.direction ||
+   trade.result_r !== null ||
+   trade.result_usd !== null ||
+   trade.setup ||
+   trade.session ||
+   trade.tag ||
+   trade.notes ||
+   files.length;
+
+ if(!hasContent){
+   toast("Add at least one thing to the journal entry.");
+   return;
+ }
+
+ // Local/offline mode and cloud mode both support partial edits.
+ if(!sb || !session){
+   trade.images=[...(existing?.images||[])];
+   for(const file of files){
+     if(file.size>6*1024*1024) continue;
+     trade.images.push(await fileData(file));
+   }
+   if(existing){Object.assign(existing,trade);}
+   else state.trades.push(trade);
+ } else {
+   const payload={
+     trade_date:trade.trade_date,
+     instrument:trade.instrument,
+     direction:trade.direction,
+     result_r:trade.result_r,
+     result_usd:trade.result_usd,
+     setup:trade.setup,
+     session:trade.session,
+     tag:trade.tag,
+     notes:trade.notes
+   };
+   const dbCall=editTradeId
+     ? await sb.from("trades").update(payload).eq("id",trade.id).eq("user_id",session.user.id)
+     : await sb.from("trades").insert({id:trade.id,user_id:session.user.id,...payload,created_at:trade.created_at});
+   if(dbCall.error){toast(dbCall.error.message);return}
+   try{
+     const added=await uploadScreenshots(trade.id,files);
+     trade.images=[...(existing?.images||[]),...added];
+   }catch(err){
+     trade.images=[...(existing?.images||[])];
+     toast("Trade saved, but one or more screenshots failed: "+err.message);
+   }
+   if(existing){Object.assign(existing,trade);} else state.trades.push(trade);
+ }
+ saveLocal();
+ const wasEditing=!!editTradeId;
+ cancelEdit();
+ renderAll();
+ toast(sb&&session ? (wasEditing?"Journal entry updated in Bluebird cloud.":"Trade saved to Bluebird cloud.") : (wasEditing?"Journal entry updated offline.":"Trade saved offline on this device."));
+}
+function fileData(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
+function signedImage(path){return sb?sb.storage.from("trade-images").createSignedUrl(path,3600).then(x=>x.data?.signedUrl||""):Promise.resolve(path)}
+
+const imageViewer={items:[],index:0,urls:[],loading:false,zoom:1,fitScale:1,x:0,y:0,dragging:false,startX:0,startY:0,originX:0,originY:0,tradeId:null};
+let editTradeId=null;
+function updateViewerTransform(){
+  const img=$("imageViewerImg"), label=$("imageViewerZoomLabel");
+  if(!img)return;
+  const z=imageViewer.zoom||1;
+  img.style.transform=`translate(${imageViewer.x}px, ${imageViewer.y}px) scale(${z})`;
+  if(label)label.textContent=`${Math.round(z*100)}%`;
+}
+function fitViewerImage(){
+  const stage=$("imageViewerStage"), img=$("imageViewerImg");
+  if(!stage||!img||!img.naturalWidth||!img.naturalHeight)return;
+  const sw=Math.max(10,stage.clientWidth-28), sh=Math.max(10,stage.clientHeight-28);
+  imageViewer.fitScale=Math.min(sw/img.naturalWidth, sh/img.naturalHeight, 1);
+  imageViewer.zoom=imageViewer.fitScale;
+  imageViewer.x=0; imageViewer.y=0;
+  img.style.width=img.naturalWidth+'px'; img.style.height=img.naturalHeight+'px';
+  updateViewerTransform();
+}
+function setViewerZoom(z){
+  const next=Math.max(imageViewer.fitScale||0.1,Math.min(5,z));
+  const stage=$("imageViewerStage");
+  if(stage&&imageViewer.zoom>0){
+    const rect=stage.getBoundingClientRect();
+    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    const ratio=next/imageViewer.zoom;
+    imageViewer.x=(imageViewer.x*ratio); imageViewer.y=(imageViewer.y*ratio);
+  }
+  imageViewer.zoom=next;
+  updateViewerTransform();
+}
+function closeImageViewer(){
+  const v=$("imageViewer");
+  if(!v)return;
+  v.classList.remove("show");
+  v.setAttribute("aria-hidden","true");
+  $("imageViewerImg").src="";
+  imageViewer.items=[];imageViewer.urls=[];imageViewer.index=0;imageViewer.zoom=1;imageViewer.fitScale=1;imageViewer.x=0;imageViewer.y=0;imageViewer.tradeId=null;
+}
+async function resolveViewerUrl(item){
+  if(String(item).startsWith("data:" ) || /^https?:\/\//i.test(String(item))) return String(item);
+  return await signedImage(item);
+}
+async function renderViewerImage(){
+  const img=$("imageViewerImg"), title=$("imageViewerTitle"), prev=$("imageViewerPrev"), next=$("imageViewerNext"), dl=$("imageViewerDownload");
+  if(!img||!imageViewer.items.length)return;
+  const total=imageViewer.items.length, idx=imageViewer.index;
+  title.textContent=`Trade screenshot ${idx+1} of ${total}`;
+  prev.disabled=idx<=0; next.disabled=idx>=total-1;
+  dl.disabled=true; imageViewer.zoom=1; imageViewer.fitScale=1; imageViewer.x=0; imageViewer.y=0;
+  img.alt=`Trade screenshot ${idx+1}`;
+  img.onload=()=>{fitViewerImage()};
+  try{
+    const src=await resolveViewerUrl(imageViewer.items[idx]);
+    if(!src)throw new Error("Image URL unavailable");
+    imageViewer.urls[idx]=src;
+    img.src=src;
+    dl.disabled=false;
+  }catch(e){
+    img.removeAttribute("src");
+    title.textContent=`Trade screenshot ${idx+1} — unavailable`;
+  }
+}
+function openImageViewer(items,index=0,tradeId=null){
+  imageViewer.items=Array.isArray(items)?items.filter(Boolean):[];
+  imageViewer.tradeId=tradeId;
+  imageViewer.index=Math.max(0,Math.min(index,imageViewer.items.length-1));
+  imageViewer.urls=[];
+  const v=$("imageViewer"); if(!v||!imageViewer.items.length)return;
+  v.classList.add("show");v.setAttribute("aria-hidden","false");
+  renderViewerImage();
+}
+async function downloadCurrentImage(){
+  if(!imageViewer.items.length)return;
+  const src=imageViewer.urls[imageViewer.index] || await resolveViewerUrl(imageViewer.items[imageViewer.index]);
+  if(!src){toast("Image is unavailable right now.");return}
+  try{
+    const resp=await fetch(src);
+    if(!resp.ok)throw new Error("Download failed");
+    const blob=await resp.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download=`bluebird-trade-screenshot-${imageViewer.index+1}.${(blob.type.split("/")[1]||"jpg").replace(/[^a-z0-9]/gi,"")||"jpg"}`;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){
+    // Fallback for browsers that block cross-origin fetch/download of a signed URL.
+    const a=document.createElement("a");a.href=src;a.target="_blank";a.rel="noopener";a.download=`bluebird-trade-screenshot-${imageViewer.index+1}`;document.body.appendChild(a);a.click();a.remove();
+  }
+}
+function renderImagePreview(files){
+  const box=$("imagePreview"); if(!box)return;
+  box.innerHTML="";
+  [...files].forEach((file,i)=>{
+    if(!file.type.startsWith("image/"))return;
+    const holder=document.createElement("div");holder.className="image-preview";
+    const img=document.createElement("img");img.alt=`Selected screenshot ${i+1}`;
+    const r=new FileReader();r.onload=()=>img.src=r.result;r.readAsDataURL(file);
+    holder.appendChild(img);
+    holder.onclick=()=>{
+      const selected=[...files].filter(f=>f.type.startsWith("image/"));
+      Promise.all(selected.map(f=>new Promise(res=>{const rr=new FileReader();rr.onload=()=>res(rr.result);rr.readAsDataURL(f)}))).then(urls=>openImageViewer(urls,i));
+    };
+    box.appendChild(holder);
+  });
+}
+async function renderTrades(){
+ const rows=visibleTrades();
+ const b=$("trades");
+ if(!rows.length){
+   b.innerHTML='<div class="trade-manage-bar"><div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox" disabled> Select all</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div><button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button></div><div style="padding:20px;text-align:center;color:#718799;font-size:10px">No saved trades yet.</div>';
+   const sel=$("selectAllTrades"); if(sel)sel.onchange=toggleAllTradeSelection;
+   return;
+ }
+
+ b.innerHTML =
+   '<div class="trade-manage-bar">'+
+     '<div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox"> Select all</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div>'+
+     '<button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button>'+
+   '</div>'+
+   '<table><thead><tr>'+ 
+   '<th style="width:30px"></th><th>DATE</th><th>INSTR.</th><th>DIR</th><th>R</th><th>RESULT $</th>'+ 
+   '<th>SETUP</th><th>SESSION</th><th>SCREENSHOT</th><th>NOTES</th><th>ACTIONS</th>'+ 
+   '</tr></thead><tbody>'+ 
+   rows.slice(0,100).map(t=>{
+     const moneyValue = t.result_usd ?? t.usd ?? null;
+     const moneyText = moneyValue===null || moneyValue==="" ? "—" :
+       (Number(moneyValue)>=0?"+$":"-$")+Math.abs(Number(moneyValue)).toLocaleString();
+
+     let shotHtml = "—";
+     if(Array.isArray(t.images) && t.images.length){
+       if(!sb || String(t.images[0]).startsWith("data:")){
+         shotHtml =
+           `<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${t.images[0]}" alt=""><span class="journal-shot-count">${t.images.length>1?("+"+(t.images.length-1)):""}</span></span>`;
+       }else{
+         shotHtml = `<span id="img-${t.id}" class="journal-shot" data-view-trade="${t.id}">Loading…</span>`;
+       }
+     }
+
+     return `<tr>
+       <td><input class="trade-select" type="checkbox" data-select-trade="${t.id}" aria-label="Select journal entry"></td>
+       <td>${t.trade_date||"—"}</td>
+       <td>${t.instrument||"—"}</td>
+       <td>${t.direction||"—"}</td>
+       <td class="${t.result_r>0?"pos":t.result_r<0?"neg":""}">${t.result_r===null||t.result_r===undefined?"—":((t.result_r>=0?"+":"")+fmt(t.result_r)+"R")}</td>
+       <td class="journal-money">${moneyText}</td>
+       <td>${t.setup||"—"}</td>
+       <td>${t.session||"—"}</td>
+       <td>${shotHtml}</td>
+       <td>${(t.notes||"").slice(0,70)}</td>
+       <td><div class="trade-actions"><button class="btn" data-edit-trade="${t.id}" type="button">Edit</button><button class="btn" data-add-image="${t.id}" type="button">Add image</button></div></td>
+     </tr>`;
+   }).join("")+ 
+   "</tbody></table>";
+
+ const selectAll=$("selectAllTrades");
+ if(selectAll)selectAll.addEventListener("change",toggleAllTradeSelection);
+ const delSelected=$("deleteSelectedTrades");
+ if(delSelected)delSelected.addEventListener("click",deleteSelectedTrades);
+ b.querySelectorAll("[data-select-trade]").forEach(el=>el.addEventListener("change",updateTradeSelectionUI));
+ updateTradeSelectionUI();
+
+ if(sb && session){
+   for(const t of rows.slice(0,100)){
+     if(!Array.isArray(t.images) || !t.images.length) continue;
+     const cell=$("img-"+t.id);
+     if(!cell) continue;
+     try{
+       const src=await signedImage(t.images[0]);
+       if(src){
+         cell.innerHTML =
+           `<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${src}" alt=""><span class="journal-shot-count">${t.images.length>1?("+"+(t.images.length-1)):""}</span></span>`;
+       }
+     }catch{}
+   }
+ }
+ b.querySelectorAll("[data-view-trade]").forEach(el=>el.addEventListener("click",()=>{
+   const trade=state.trades.find(x=>x.id===el.dataset.viewTrade);
+   if(trade&&trade.images&&trade.images.length)openImageViewer(trade.images,0,trade.id);
+ }));
+ b.querySelectorAll("[data-edit-trade]").forEach(el=>el.addEventListener("click",()=>startEditTrade(el.dataset.editTrade)));
+ b.querySelectorAll("[data-add-image]").forEach(el=>el.addEventListener("click",()=>{
+   const trade=state.trades.find(x=>x.id===el.dataset.addImage);
+   if(trade) openAddImagePicker(trade.id);
+ }));
+}
+function renderCalendar(){
+ const box=$("calendar");
+ if(!box) return;
+
+ const y=state.month.getFullYear();
+ const m=state.month.getMonth();
+ const monthName=state.month.toLocaleString(undefined,{month:"long",year:"numeric"});
+ const first=new Date(y,m,1).getDay();
+ const days=new Date(y,m+1,0).getDate();
+
+ // Aggregate trades by their exact stored YYYY-MM-DD value.
+ const map={};
+ visibleTrades().forEach(t=>{
+   const d=String(t.trade_date||"").slice(0,10);
+   if(!d) return;
+   if(!map[d]) map[d]={usd:0,r:0,count:0};
+   const usd=Number(t.result_usd ?? t.usd);
+   const r=Number(t.result_r ?? t.r);
+   if(Number.isFinite(usd)) map[d].usd += usd;
+   if(Number.isFinite(r)) map[d].r += r;
+   map[d].count++;
+ });
+
+ const monthPrefix=`${y}-${String(m+1).padStart(2,"0")}-`;
+ let monthUsd=0, monthR=0, monthTrades=0;
+ Object.entries(map).forEach(([d,v])=>{
+   if(d.startsWith(monthPrefix)){
+     monthUsd+=Number(v.usd)||0;
+     monthR+=Number(v.r)||0;
+     monthTrades+=Number(v.count)||0;
+   }
+ });
+
+ const title=$("monthTitle");
+ if(title) title.textContent=monthName;
+ const monthTotal=$("monthTotal");
+ if(monthTotal){
+   const cashText=monthUsd===0 ? "$0" : (monthUsd>=0?"+":"-")+"$"+Math.abs(Math.round(monthUsd)).toLocaleString();
+   const rText=(monthR>=0?"+":"")+fmt(monthR)+"R";
+   monthTotal.innerHTML=
+     `<div class="mt-box"><span class="mt-label">MONTH TOTAL $</span><span class="mt-value mt-cash">${cashText}</span></div>`+
+     `<div class="mt-box"><span class="mt-label">MONTH TOTAL R</span><span class="mt-value mt-r">${rText}</span></div>`+
+     `<div class="mt-box"><span class="mt-label">TRADES</span><span class="mt-value">${monthTrades}</span></div>`;
+ }
+
+ box.innerHTML="";
+ ["SU","MO","TU","WE","TH","FR","SA"].forEach(x=>{
+   const h=document.createElement("div");
+   h.className="calh";
+   h.textContent=x;
+   box.appendChild(h);
+ });
+
+ for(let i=0;i<first;i++) box.appendChild(document.createElement("div"));
+
+ for(let day=1;day<=days;day++){
+   // IMPORTANT: never convert a local calendar day through UTC.
+   const date=`${monthPrefix}${String(day).padStart(2,"0")}`;
+   const data=map[date];
+   const c=document.createElement("div");
+   c.className="cald";
+
+   if(data){
+     if(data.usd>0 || data.r>0) c.classList.add("pos");
+     if(data.usd<0 || data.r<0) c.classList.add("neg");
+
+     const cash=data.usd;
+     const cashText = cash===0
+       ? (data.r===0 ? "$0" : "—")
+       : (cash>=0?"+":"-")+"$"+Math.abs(Math.round(cash)).toLocaleString();
+
+     const rrText = data.r===0 ? "" : (data.r>=0?"+":"")+fmt(data.r)+"R";
+     const tradeText = data.count>1 ? ` · ${data.count} trades` : "";
+
+     c.innerHTML=
+       '<div class="num">'+day+'</div>' +
+       '<div class="cash">'+cashText+'</div>' +
+       '<div class="rrsmall">'+rrText+tradeText+'</div>';
+   }else{
+     c.innerHTML='<div class="num">'+day+'</div>';
+   }
+
+   box.appendChild(c);
+ }
+}
+
+function renderAnalytics(){
+ const rows=visibleTrades(),wins=rows.filter(t=>t.result_r>0),losses=rows.filter(t=>t.result_r<0),R=rows.reduce((a,t)=>a+t.result_r,0),wr=rows.length?wins.length/rows.length*100:0;
+ const avg=rows.length?R/rows.length:0;const avgW=wins.length?wins.reduce((a,t)=>a+t.result_r,0)/wins.length:0;const avgL=losses.length?losses.reduce((a,t)=>a+t.result_r,0)/losses.length:0;
+ $("analytics").innerHTML=`<div class="metric"><span>TRADES</span><strong>${rows.length}</strong></div><div class="metric"><span>WIN RATE</span><strong>${rows.length?wr.toFixed(1)+"%":"—"}</strong></div><div class="metric"><span>TOTAL R</span><strong class="${R>=0?"pos":"neg"}">${R>=0?"+":""}${fmt(R)}R</strong></div><div class="metric"><span>EXPECTANCY</span><strong>${rows.length?(avg>=0?"+":"")+fmt(avg)+"R":"—"}</strong></div><div class="metric"><span>AVG WIN</span><strong class="pos">${wins.length?fmt(avgW)+"R":"—"}</strong></div><div class="metric"><span>AVG LOSS</span><strong class="neg">${losses.length?fmt(avgL)+"R":"—"}</strong></div><div class="metric"><span>LONGEST L STREAK</span><strong>${longest(rows,false)}</strong></div><div class="metric"><span>LONGEST W STREAK</span><strong>${longest(rows,true)}</strong></div>`;
+ const map={};rows.forEach(t=>{let k=t.setup||"Unspecified";(map[k]??=0);map[k]+=t.result_r});
+ $("setupStats").innerHTML=Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #102c40;font-size:9px"><span>${k}</span><b class="${v>=0?"pos":"neg"}">${v>=0?"+":""}${fmt(v)}R</b></div>`).join("")||'<div style="padding:20px;color:#718799;font-size:9px">Add setup names to see the breakdown.</div>';
+ const e=[0];let cur=0;[...rows].sort((a,b)=>a.trade_date.localeCompare(b.trade_date)||a.created_at.localeCompare(b.created_at)).forEach(t=>{cur+=t.result_r;e.push(cur)});
+ const W=900,H=220,min=Math.min(0,...e),max=Math.max(2,...e),range=max-min||1,pts=e.map((v,i)=>{let x=10+(W-20)*(i/(e.length-1||1)),y=H-10-(H-20)*(v-min)/range;return[x,y]});
+ $("journalCurve").innerHTML=rows.length?`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:100%"><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#18eaa0" stroke-width="3"/></svg>`:'<div style="padding:25px;color:#718799;font-size:9px">Add trades to see your journal equity curve.</div>';
+}
+function longest(rows,win){let best=0,cur=0;for(const t of [...rows].sort((a,b)=>a.trade_date.localeCompare(b.trade_date)||a.created_at.localeCompare(b.created_at))){if((t.result_r>0)===win){cur++;best=Math.max(best,cur)}else cur=0}return best}
+function journalLockMessage(){
+  if(trialExpired())return "Your 7-day journal trial has ended. Subscribe to restore journal access and your stored history.";
+  return "Your subscription has ended. Journaling is locked until you resubscribe.";
+}
+function setJournalControls(){
+  const locked=!canJournal();
+  document.querySelectorAll('#tradeForm input,#tradeForm select,#tradeForm textarea').forEach(el=>{
+    el.disabled=locked;
+  });
+  $("saveTradeBtn").disabled=locked;
+  $("cancelEditBtn").disabled=locked;
+  const note=document.querySelector('#tradeForm .actions span');
+  if(note)note.textContent=locked?journalLockMessage():"R and $ are saved separately.";
+}
+function renderAccess(){
+  const a=$("access"), rule=$("accessRule");
+  if(!a)return;
+  if(!profile){
+    a.innerHTML='<div class="note"><b>Sign in to sync your journal.</b><br>Your weekly simulator works free without an account.</div>';
+    if(rule)rule.textContent="Create an account to start your 7-day journal trial.";
+  }else if(manualAccessActive()){
+    const left=manualAccessEndsAt()-Date.now();
+    const exp=new Date(manualAccessEndsAt());
+    a.innerHTML='<div class="access-status pro"><div class="access-status-main"><b>Manual access</b><span>FULL JOURNAL ACCESS</span></div><div class="access-countdown">'+durationText(left)+' remaining</div></div>';
+    if(rule)rule.innerHTML='You have been granted complimentary access until <b>'+exp.toLocaleDateString()+'.</b><br>Full history and unlimited journaling are unlocked during this period.';
+  }else if(trialActive()){
+    const left=trialEndsAt()-Date.now();
+    a.innerHTML='<div class="access-status"><div class="access-status-main"><b>7-day journal trial</b><span>FULL JOURNAL ACCESS</span></div><div class="access-countdown">'+durationText(left)+' remaining</div></div>';
+    if(rule)rule.innerHTML='<b>During the trial:</b> unlimited journaling and full access to your trial history.<br><b>When the trial ends:</b> journaling locks and trial journal history is hidden until you subscribe.';
+  }else if(proActive()){
+    const exp=profile.subscription_expires_at?new Date(profile.subscription_expires_at):null;
+    const left=exp?exp.getTime()-Date.now():Infinity;
+    a.innerHTML='<div class="access-status pro"><div class="access-status-main"><b>Pro active</b><span>FULL JOURNAL ACCESS</span></div><div class="access-countdown">'+(exp?durationText(left)+' remaining':'No expiry set')+'</div></div>';
+    if(rule)rule.innerHTML=exp?('Full history and unlimited journaling until <b>'+exp.toLocaleDateString()+'.</b><br>After expiry, journaling locks and only the most recent 30 days remain visible.'):'Full history and unlimited journaling are unlocked.';
+  }else if(everSubscribed()){
+    a.innerHTML='<div class="access-status expired"><div class="access-status-main"><b>Subscription ended</b><span>READ-ONLY · 30-DAY WINDOW</span></div><div class="access-countdown">0 days remaining</div></div>';
+    if(rule)rule.innerHTML='<b>Journaling is locked.</b> You can still view the most recent 30 days of journal data. Older stored data remains safe and becomes visible again when you resubscribe.';
+  }else{
+    a.innerHTML='<div class="access-status expired"><div class="access-status-main"><b>Trial ended</b><span>JOURNAL LOCKED</span></div><div class="access-countdown">0 days remaining</div></div>';
+    if(rule)rule.innerHTML='<b>Your trial journal history is hidden after the 7-day trial.</b> Your simulator remains free. Subscribe to restore journal access and stored trial data.';
+  }
+  setJournalControls();
+  const pn=$("proAccessNoticeText");
+  if(pn){
+    if(proAccessActive()) pn.innerHTML='<b style="color:#2aaaff">Pro access unlocked.</b> All Pro features on this account can be enabled through the same Pro entitlement.';
+    else pn.textContent='Pro features require an active paid subscription or complimentary manual access.';
+  }
+}
+function renderTop(){updateAuthButton();renderAccess()}
+function renderAll(){renderTop();renderTrades();renderCalendar();renderAnalytics()}
+
+function randomWeek(){
+ const s=settings();state.days=[[],[],[],[],[]];for(let d=0;d<5;d++){for(let i=0;i<s.max;i++)state.days[d].push(Math.random()<s.p?"W":"L");for(let i=s.max-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[state.days[d][i],state.days[d][j]]=[state.days[d][j],state.days[d][i]]}}
+ saveWeek();renderSimulator()
+}
+function preset(type){
+ if(type==="example")state.days=[["W","W","L"],["W","W","W"],["W","W"],["W","W","L"],["W","L"]];
+ if(type==="red")state.days=[["L","L","L"],["L","L"],["W","W"],["L","L"],["L","L","W"]];
+ if(type==="bad")state.days=[["L"],["L","L"],["L","L"],["W","L"],["L"]];
+ saveWeek();renderSimulator()
+}
+function saveWeek(){localStorage.setItem("bluebird_week_v2",JSON.stringify(state.days))}
+function loadWeek(){try{const x=JSON.parse(localStorage.getItem("bluebird_week_v2"));if(x)state.days=x}catch{}}
+function renderSimulator(){
+ const s=settings();$("days").innerHTML="";const names=["MON","TUE","WED","THU","FRI"];
+ state.days.forEach((a,i)=>{let r=dayR(a,s.rr),week=state.days.slice(0,i+1).reduce((x,d)=>x+dayR(d,s.rr),0),d=document.createElement("div");d.className="day";d.innerHTML=`<div class="dayh"><span>${names[i]}</span><span class="dots">${a.length?a.map(x=>x==="W"?"•":"○").join(""):"○○"}</span></div><div class="dr ${r>=0?"pos":"neg"}">${r>=0?"+":""}${fmt(r)}R</div><div class="cash">${$("showMoney").checked?money(r*s.risk):""}</div><div class="chips">${a.map(x=>`<span class="chip ${x==="L"?"l":""}">${x==="W"?"+"+fmt(s.rr)+"R":"-1R"}</span>`).join("")}</div><div class="daybtns"><button class="win" data-i="${i}" data-v="W">+ Win</button><button class="loss" data-i="${i}" data-v="L">+ Loss</button></div><div class="foot"><span>Week so far ${week>=0?"+":""}${fmt(week)}R</span><button data-clear="${i}">clear</button></div>`;$("days").appendChild(d)});
+ $("days").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{let i=+b.dataset.i;if(state.days[i].length>=settings().max)return;state.days[i].push(b.dataset.v);saveWeek();renderSimulator()});
+ $("days").querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>{state.days[+b.dataset.clear]=[];saveWeek();renderSimulator()});
+ const all=state.days.flat(),w=all.filter(x=>x==="W").length,l=all.length-w,R=totalR(s.rr);$("totalR").textContent=(R>=0?"+":"")+fmt(R)+"R";$("totalR").className="big "+(R>=0?"pos":"neg");$("totalMoney").textContent=$("showMoney").checked?money(R*s.risk):"";$("wins").textContent=w+" × +"+fmt(s.rr)+"R";$("losses").textContent=l+" × -1R";$("actualWR").textContent=all.length?(w/all.length*100).toFixed(1)+"%":"—";$("be").textContent=(100/(s.rr+1)).toFixed(1)+"%";$("note").textContent="One win at 1:"+fmt(s.rr)+" pays for "+fmt(s.rr)+" losses";
+ const e=[0];let c=0;state.days.forEach(a=>a.forEach(x=>{c+=x==="W"?s.rr:-1;e.push(c)}));const W=920,H=245,min=Math.min(0,...e),max=Math.max(2,...e),range=max-min||1,pts=e.map((v,i)=>[15+(W-30)*(i/(e.length-1||1)),H-15-(H-30)*((v-min)/range)]);$("chart").innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="15" x2="${W-15}" y1="${H-15}" y2="${H-15}" stroke="#123851"/><line x1="15" x2="${W-15}" y1="${H/2}" y2="${H/2}" stroke="#10324a" stroke-dasharray="4 7"/><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#18eaa0" stroke-width="3"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${e[i]>=0?"#18eaa0":"#ff5360"}"/>`).join("")}</svg>`;
+}
+function exportCSV(){const rows=visibleTrades();if(!rows.length){toast("No visible trades.");return}const ks=["trade_date","instrument","direction","result_r","result_usd","setup","session","tag","notes"];const csv=[ks.join(","),...rows.map(t=>ks.map(k=>`"${String(t[k]??"").replaceAll('"','""')}"`).join(","))].join("\\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="bluebird-journal.csv";a.click()}
+function isAdmin(){return !!session && !!profile && profile.is_admin===true}
+function setDefaultAdminUntil(){
+  const el=$("adminUntil");
+  if(!el)return;
+  const d=new Date(Date.now()+30*86400000);
+  d.setSeconds(0,0);
+  const pad=n=>String(n).padStart(2,"0");
+  el.value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T23:59`;
+}
+function updateAdminVisibility(){
+  const navBtn=$("adminNav");
+  if(navBtn)navBtn.classList.toggle("hidden",!isAdmin());
+}
+async function adminRefresh(){
+  if(!isAdmin()||!sb)return;
+  const body=$("adminRows");
+  if(body)body.innerHTML='<tr><td colspan="5" class="muted">Loading…</td></tr>';
+  const {data,error}=await sb.rpc("admin_list_manual_access");
+  if(error){toast("Admin list failed: "+error.message);if(body)body.innerHTML='<tr><td colspan="5" class="muted">Unable to load access list.</td></tr>';return}
+  if(!data||!data.length){body.innerHTML='<tr><td colspan="5"><div class="admin-empty">No manual access grants yet.</div></td></tr>';return}
+  body.innerHTML=data.map(row=>{
+    const exp=row.manual_access_until?new Date(row.manual_access_until):null;
+    const active=exp&&exp.getTime()>Date.now();
+    const expText=exp?exp.toLocaleString():"—";
+    const name=(row.display_name||"—").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;","\\\"":"&quot;"}[c]));
+    const email=String(row.email||"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;","\\\"":"&quot;"}[c]));
+    const safeEmail=encodeURIComponent(row.email||"");
+    return `<tr><td>${name}</td><td>${email}</td><td>${expText}</td><td><span class="admin-pill">${active?"ACTIVE":"EXPIRED"}</span></td><td><button class="btn" type="button" data-admin-revoke="${safeEmail}">Revoke</button></td></tr>`;
+  }).join("");
+  body.querySelectorAll("[data-admin-revoke]").forEach(btn=>btn.onclick=async()=>{
+    const email=decodeURIComponent(btn.dataset.adminRevoke);
+    const {error}=await sb.rpc("admin_revoke_manual_access",{target_email:email});
+    if(error){toast("Revoke failed: "+error.message);return}
+    toast("Manual access revoked.");
+    adminRefresh();
+  });
+}
+async function adminGrant(){
+  if(!isAdmin()||!sb)return;
+  const email=$("adminEmail").value.trim();
+  const untilLocal=$("adminUntil").value;
+  if(!email){toast("Enter the user's email.");$("adminEmail").focus();return}
+  if(!untilLocal){toast("Choose an access expiry date.");$("adminUntil").focus();return}
+  const until=new Date(untilLocal);
+  if(Number.isNaN(until.getTime())||until.getTime()<=Date.now()){toast("Choose a future expiry date.");return}
+  const {error}=await sb.rpc("admin_grant_manual_access",{target_email:email,until_at:until.toISOString()});
+  if(error){toast("Grant failed: "+error.message);return}
+  toast("Pro access granted to "+email+".");
+  $("adminEmail").value="";
+  adminRefresh();
+}
+function nav(page){
+  if(page==="admin" && !isAdmin()){toast("Admin access required.");page="home";}
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  const target=document.getElementById("page-"+page);
+  if(target) target.classList.add("active");
+
+  // Keep the main navigation tab highlighted wherever navigation was triggered from.
+  document.querySelectorAll(".nav button[data-nav]").forEach(b=>{
+    b.classList.toggle("active", b.dataset.nav===page);
+  });
+
+  if(page==="journal") renderTrades();
+  if(page==="calendar") renderCalendar();
+  if(page==="analytics") renderAnalytics();
+  if(page==="admin") adminRefresh();
+}
+
+$("run").onclick=randomWeek;
+["winRate","maxTrades","rr","oneR","showMoney"].forEach(id=>$(id).addEventListener(id==="showMoney"?"change":"input",renderSimulator));
+document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));
+$("tradeForm").addEventListener("submit",saveTrade);$("exportBtn").onclick=exportCSV;
+$("cancelEditBtn").onclick=cancelEdit;
+$("editManageImages").onclick=()=>{if(editTradeId){const trade=state.trades.find(x=>x.id===editTradeId);if(trade&&trade.images?.length)openImageViewer(trade.images,0,editTradeId);else openAddImagePicker(editTradeId)}};
+const imageInput=document.querySelector('#tradeForm input[name="images"]');
+if(imageInput) imageInput.addEventListener("change",()=>renderImagePreview(imageInput.files));
+$("imageViewerClose").onclick=closeImageViewer;
+$("imageViewer").addEventListener("click",e=>{if(e.target.id==="imageViewer")closeImageViewer()});
+$("imageViewerPrev").onclick=()=>{if(imageViewer.index>0){imageViewer.index--;renderViewerImage()}};
+$("imageViewerNext").onclick=()=>{if(imageViewer.index<imageViewer.items.length-1){imageViewer.index++;renderViewerImage()}};
+$("imageViewerAdd").onclick=()=>{if(imageViewer.tradeId)openAddImagePicker(imageViewer.tradeId)};
+$("imageViewerReplace").onclick=()=>{if(imageViewer.tradeId)openReplaceImagePicker(imageViewer.tradeId,imageViewer.index)};
+$("imageViewerDelete").onclick=deleteCurrentImage;
+$("imageViewerDownload").onclick=downloadCurrentImage;
+$("imageViewerZoomIn").onclick=()=>setViewerZoom(imageViewer.zoom*1.25);
+$("imageViewerZoomOut").onclick=()=>setViewerZoom(imageViewer.zoom/1.25);
+$("imageViewerReset").onclick=fitViewerImage;
+const viewerStage=$("imageViewerStage");
+viewerStage.addEventListener("wheel",e=>{if(!$("imageViewer").classList.contains("show"))return;e.preventDefault();setViewerZoom(imageViewer.zoom*(e.deltaY<0?1.15:1/1.15))},{passive:false});
+viewerStage.addEventListener("mousedown",e=>{if(imageViewer.zoom<=imageViewer.fitScale+0.001)return;imageViewer.dragging=true;imageViewer.startX=e.clientX;imageViewer.startY=e.clientY;imageViewer.originX=imageViewer.x;imageViewer.originY=imageViewer.y;viewerStage.classList.add("dragging")});
+window.addEventListener("mousemove",e=>{if(!imageViewer.dragging)return;imageViewer.x=imageViewer.originX+(e.clientX-imageViewer.startX);imageViewer.y=imageViewer.originY+(e.clientY-imageViewer.startY);updateViewerTransform()});
+window.addEventListener("mouseup",()=>{imageViewer.dragging=false;viewerStage.classList.remove("dragging")});
+viewerStage.addEventListener("dblclick",()=>{setViewerZoom(imageViewer.zoom>imageViewer.fitScale*1.5?imageViewer.fitScale:Math.min(2.5,imageViewer.fitScale*2))});
+document.addEventListener("keydown",e=>{if(!$("imageViewer").classList.contains("show"))return;if(e.key==="Escape")closeImageViewer();if(e.key==="ArrowLeft"&&imageViewer.index>0){imageViewer.index--;renderViewerImage()}if(e.key==="ArrowRight"&&imageViewer.index<imageViewer.items.length-1){imageViewer.index++;renderViewerImage()}if(e.key==="+"||e.key==="="){setViewerZoom(imageViewer.zoom*1.25)}if(e.key==="-"){setViewerZoom(imageViewer.zoom/1.25)}if(e.key==="0"){fitViewerImage()}});
+
+$("adminGrant").onclick=adminGrant;
+$("adminRefresh").onclick=adminRefresh;
+setDefaultAdminUntil();
+$("authBtn").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();if(session)toggleAccountMenu();else $("authModal").classList.add("show")});
+$("accountMenu").addEventListener("click",e=>e.stopPropagation());
+$("editNameMenu").onclick=e=>{e.stopPropagation();openProfileModal()};
+$("signOutMenu").onclick=e=>{e.stopPropagation();signOut()};
+$("deleteAccountMenu").onclick=e=>{e.stopPropagation();deleteAccountPermanently()};
+$("closeAuth").onclick=()=>$("authModal").classList.remove("show");
+$("login").onclick=()=>signIn(false);$("signup").onclick=()=>signIn(true);$("google").onclick=google;
+$("closeProfile").onclick=closeProfileModal;$("saveProfileName").onclick=saveProfileName;
+$("saveNameSetup").onclick=saveNameSetup;
+$("profileModal").addEventListener("click",e=>{if(e.target.id==="profileModal")closeProfileModal()});
+$("nameSetupModal").addEventListener("keydown",e=>{if(e.key==="Enter")saveNameSetup()});
+$("prevMonth").onclick=()=>{state.month.setMonth(state.month.getMonth()-1);renderCalendar()};$("nextMonth").onclick=()=>{state.month.setMonth(state.month.getMonth()+1);renderCalendar()};
+
+document.addEventListener("click",e=>{if(!session)return;if(e.target.closest("#authBtn")||e.target.closest("#accountMenu"))return;closeAccountMenu()});
+loadLocal();loadWeek();renderSimulator();nav("home");
+setInterval(()=>{if(profile)renderAccess()},1000);
+const journalDate = document.querySelector('#tradeForm input[name="date"]');
+if (journalDate && !journalDate.value) {
+  journalDate.value = todayDateKey();
+}
+renderAll();initCloud();
+})();
+</script>
+</body></html>
