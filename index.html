@@ -887,71 +887,6 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 
 <div class="pro-callout"><b style="color:#eaf8ff">Product tools are ready.</b> Payment is the remaining storefront connection. The Monte Carlo and Prop Firm tools above are available to Pro-entitled accounts while we build the billing layer.</div>
 
-<div class="pro-tools">
-  <div class="pro-tool-card" id="monteCarloTool">
-    <div class="pro-tool-head">
-      <div>
-        <div class="pro-tool-kicker">PRO ANALYSIS</div>
-        <h3 class="pro-tool-title">Monte Carlo</h3>
-        <p class="pro-tool-sub">Bootstrap your own recorded R results to explore a range of possible future paths. It is a scenario tool, not a forecast.</p>
-      </div>
-      <span class="pro-tool-badge">YOUR JOURNAL</span>
-    </div>
-    <div class="pro-tool-controls">
-      <div class="pro-tool-field"><label>SIMULATIONS</label><input id="mcRuns" type="number" min="100" max="10000" step="100" value="2000"></div>
-      <div class="pro-tool-field"><label>TRADES / PATH</label><input id="mcTrades" type="number" min="10" max="500" step="10" value="100"></div>
-      <div class="pro-tool-field"><label>RISK / TRADE ($)</label><input id="mcRisk" type="number" min="1" step="1" value="250"></div>
-      <div class="pro-tool-field"><label>STARTING BALANCE ($)</label><input id="mcStart" type="number" min="0" step="100" value="50000"></div>
-    </div>
-    <div class="pro-tool-actions"><button class="btn primary" id="runMonteCarlo" type="button">Run Monte Carlo</button><button class="btn" id="clearMonteCarlo" type="button">Reset</button></div>
-    <div class="pro-tool-note" id="mcSourceNote">Uses your recorded R results only. Break-even trades remain 0R.</div>
-    <div class="pro-tool-results" id="mcResults" hidden>
-      <div class="pro-tool-metrics">
-        <div class="pro-tool-metric"><span>Median final R</span><b id="mcMedianR">—</b></div>
-        <div class="pro-tool-metric good"><span>95th percentile</span><b id="mcP95R">—</b></div>
-        <div class="pro-tool-metric bad"><span>5th percentile</span><b id="mcP5R">—</b></div>
-        <div class="pro-tool-metric"><span>Chance positive</span><b id="mcPositive">—</b></div>
-        <div class="pro-tool-metric warn"><span>Median max DD</span><b id="mcDD">—</b></div>
-        <div class="pro-tool-metric"><span>Recorded samples</span><b id="mcSamples">—</b></div>
-      </div>
-      <div class="pro-tool-chart"><canvas id="mcCanvas" width="900" height="190"></canvas></div>
-    </div>
-    <div class="pro-lock" id="mcLock" hidden>Monte Carlo is a Pro feature. Your journal results are already stored; activating Pro will unlock the tool.</div>
-  </div>
-
-  <div class="pro-tool-card" id="propSimTool">
-    <div class="pro-tool-head">
-      <div>
-        <div class="pro-tool-kicker">PRO ANALYSIS</div>
-        <h3 class="pro-tool-title">Prop Firm Simulator</h3>
-        <p class="pro-tool-sub">Replay your actual chronological journal against a rule set you enter. Bluebird reports where that historical path would have hit a rule.</p>
-      </div>
-      <span class="pro-tool-badge">HISTORICAL REPLAY</span>
-    </div>
-    <div class="pro-tool-controls">
-      <div class="pro-tool-field"><label>STARTING BALANCE ($)</label><input id="pfStart" type="number" min="1" step="100" value="50000"></div>
-      <div class="pro-tool-field"><label>PROFIT TARGET ($)</label><input id="pfTarget" type="number" min="0" step="100" value="3000"></div>
-      <div class="pro-tool-field"><label>MAX DRAWDOWN ($)</label><input id="pfDD" type="number" min="0" step="100" value="2000"></div>
-      <div class="pro-tool-field"><label>DAILY LOSS LIMIT ($)</label><input id="pfDaily" type="number" min="0" step="50" value="0"></div>
-      <div class="pro-tool-field"><label>RISK / TRADE ($)</label><input id="pfRisk" type="number" min="1" step="1" value="250"></div>
-      <div class="pro-tool-field"><label>ACCOUNT RULE</label><select id="pfDDType"><option value="fixed">Fixed max drawdown</option><option value="trailing">Trailing max drawdown</option></select></div>
-    </div>
-    <div class="pro-tool-actions"><button class="btn primary" id="runPropSim" type="button">Replay Journal</button><button class="btn" id="clearPropSim" type="button">Reset</button></div>
-    <div class="pro-tool-note" id="pfSourceNote">Uses actual recorded trades in chronological order. This is a historical rule replay, not a claim about future account performance.</div>
-    <div class="pro-tool-results" id="pfResults" hidden>
-      <div class="pro-tool-metrics">
-        <div class="pro-tool-metric"><span>Ending balance</span><b id="pfEnding">—</b></div>
-        <div class="pro-tool-metric"><span>Peak balance</span><b id="pfPeak">—</b></div>
-        <div class="pro-tool-metric bad"><span>Max DD used</span><b id="pfMaxDD">—</b></div>
-        <div class="pro-tool-metric"><span>Recorded trades</span><b id="pfTrades">—</b></div>
-        <div class="pro-tool-metric"><span>Net R</span><b id="pfR">—</b></div>
-        <div class="pro-tool-metric" id="pfStatusMetric"><span>Historical status</span><b id="pfStatus">—</b></div>
-      </div>
-      <div class="pro-tool-table" id="pfRuleTable"></div>
-    </div>
-    <div class="pro-lock" id="pfLock" hidden>Prop Firm Simulator is a Pro feature. Activate Pro to replay your journal against custom account rules.</div>
-  </div>
-</div>
 
 <script>
 // v68 Pro tools: Monte Carlo + historical Prop Firm replay
@@ -989,7 +924,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
   }
   function runMonteCarlo(){
     if(typeof proAccessActive==='function'&&!proAccessActive()){ $('mcLock').hidden=false; toast('Monte Carlo is a Pro feature.'); return; }
-    const samples=actualRecordedR(); if(samples.length<2){ $('mcResults').hidden=false; $('mcSourceNote').textContent='Monte Carlo needs at least 2 recorded R results. Add more journaled trades before running it.'; $('mcSamples').textContent=String(samples.length); return; }
+    const samples=actualRecordedR(); if(samples.length<1){ $('mcResults').hidden=false; $('mcSourceNote').textContent='Monte Carlo needs at least 1 recorded R result. Add a journaled trade before running it.'; $('mcSamples').textContent='0 R results'; return; }
     const runs=Math.min(10000,Math.max(100,+$('mcRuns').value||2000)), trades=Math.min(500,Math.max(10,+$('mcTrades').value||100)), risk=Math.max(1,+$('mcRisk').value||250), start=Math.max(0,+$('mcStart').value||50000);
     const finals=[],dds=[],paths=[]; let positive=0;
     for(let r=0;r<runs;r++){
@@ -998,7 +933,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       finals.push(eq); dds.push(dd); if(eq>0)positive++; if(r<80)paths.push(path);
     }
     $('mcResults').hidden=false; $('mcMedianR').textContent=fmtR(percentile(finals,.5)); $('mcP95R').textContent=fmtR(percentile(finals,.95)); $('mcP5R').textContent=fmtR(percentile(finals,.05)); $('mcPositive').textContent=(positive/runs*100).toFixed(1)+'%'; $('mcDD').textContent=fmtR(percentile(dds,.5)); $('mcSamples').textContent=String(samples.length)+' R results';
-    $('mcSourceNote').textContent=`Bootstrapped ${runs.toLocaleString()} paths from ${samples.length} recorded R results · ${trades} trades/path · ${fmtUSD(risk)} risk/trade · start ${fmtUSD(start)}.`;
+    $('mcSourceNote').textContent=`Bootstrapped ${runs.toLocaleString()} paths from ${samples.length} recorded R result${samples.length===1?'':'s'} · ${trades} trades/path · ${fmtUSD(risk)} risk/trade · start ${fmtUSD(start)}.${samples.length<10?' Small sample: treat this as a test, not a statistical conclusion.':''}`;
     drawMC(paths);
   }
   function runPropSim(){
@@ -2198,30 +2133,19 @@ function renderAIMockSnapshot(rows){
    <div class="ai-mock-stat"><span>COMMON DAY SEQ</span><b>${topSeq}</b></div>`;
 }
 
-function clearStaleAIState(){
- const box=$('aiContextResult');
- const note=$('aiReviewNote');
- const ask=$('aiAskPanel');
- if(box){ box.hidden=true; box.className='ai-context-result'; box.innerHTML=''; }
- if(note)note.textContent='';
- if(ask)ask.hidden=true;
-}
-
 async function prepareAIReview(){
  const btn=$('aiPrepareReview'),note=$('aiReviewNote'),box=$('aiContextResult');
  if(!btn||!box)return;
  if(!sb||!session){toast('Sign in first to run your private AI review.');return;}
  const range=analyticsGetRange();
  btn.disabled=true; btn.textContent='Analyzing…';
- // Always discard any previous stale error/result before a new run.
  box.hidden=false; box.className='ai-context-result';
  box.innerHTML='Running your private journal analysis securely…';
- const ask=$('aiAskPanel'); if(ask)ask.hidden=true;
 
- const friendlyError=(message)=>{
-   box.hidden=false;
+ const friendlyError=()=>{
    box.className='ai-context-result ai-context-warn';
-   box.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:5px">'+(message||'Your journal is safe. Please wait a moment and try the review again.')+'</div>';
+   box.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:5px">Your journal is safe. Please wait a moment and try the review again.</div>';
+   const ask=$('aiAskPanel'); if(ask)ask.hidden=true;
    if(note)note.textContent='Your journal data was not changed.';
  };
 
@@ -2255,10 +2179,6 @@ async function prepareAIReview(){
  const runOnce=async()=>{
    const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
    if(error)throw error;
-   // Some clients/proxies can return the JSON body as a string.
-   if(typeof data==='string'){
-     try{return JSON.parse(data);}catch{return {review:data};}
-   }
    return data;
  };
 
@@ -2279,9 +2199,6 @@ async function prepareAIReview(){
      }
    }
    if(!data)throw lastErr||new Error('AI review unavailable');
-   if(data?.error && !data?.review && !data?.answer){
-     throw new Error(String(data.message||data.error));
-   }
 
    const ctx=data?.context||{};
    const summary=ctx.summary||{};
@@ -2310,12 +2227,20 @@ async function prepareAIReview(){
    }
 
    if(review){
-     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReviewText(review)}</div></div>`;
+     let renderedReview='';
+     try{
+       renderedReview=renderAIReviewText(review);
+     }catch(renderErr){
+       console.error('AI review formatting error',renderErr);
+       const safe=String(review).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+       renderedReview=`<div class="ai-review-section ai-review-section-single"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${safe.replace(/\n/g,'<br>')}</p></div>`;
+     }
+     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderedReview}</div></div>`;
    }
    box.className='ai-context-result';
    box.innerHTML=html;
-   showAIAskPanel();
-   wireAIAsk();
+   try{ showAIAskPanel(); }catch(e){ console.warn('AI ask panel setup skipped',e); }
+   try{ wireAIAsk(); }catch(e){ console.warn('AI ask wiring skipped',e); }
  }catch(err){
    console.error('AI review error',err);
    friendlyError();
@@ -2323,12 +2248,6 @@ async function prepareAIReview(){
    btn.disabled=false; btn.textContent='Run AI Review';
  }
 }
-// Never let an old temporary-error card survive a fresh page load.
-document.addEventListener('DOMContentLoaded',()=>{
-  const box=$('aiContextResult');
-  if(box){ box.hidden=true; box.className='ai-context-result'; box.innerHTML=''; }
-});
-
 function normalizeAIReviewText(text){
   let s=String(text??'')
     .replace(/\r\n?/g,'\n')
@@ -2354,7 +2273,7 @@ function normalizeAIReviewText(text){
   // returns the whole answer as one continuous paragraph.
   for(const heading of headings){
     const escaped=heading.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    const re=new RegExp('\\s*(?:#{1,6}\\s*)?(?:\*{1,2}\\s*)?'+escaped+'(?:\\s*\*{1,2})?\\s*:?', 'gi');
+    const re=new RegExp('\\s*(?:#{1,6}\\s*)?(?:\\*{1,2}\\s*)?'+escaped+'(?:\\s*\\*{1,2})?\\s*:?', 'gi');
     s=s.replace(re,'\n'+heading+'\n');
   }
 
@@ -2392,8 +2311,8 @@ function sanitizeAIText(txt){
     .replace(/\bempty field\b/gi,'not entered')
     .replace(/\bfield is blank\b/gi,'was not entered')
     .replace(/\bfield\b/gi,'entry')
-    .replace(/\s{2,}/g,' ')
-    .trim();
+    .replace(/[ \t]{2,}/g,' ')
+   .trim();
 }
 
 function renderAIReviewText(text){
