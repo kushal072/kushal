@@ -291,6 +291,95 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 @media(max-width:480px){.analytics-custom-range{grid-template-columns:1fr 1fr}.analytics-apply{grid-column:1 / -1}.analytics-metrics{grid-template-columns:1fr 1fr}.analytics-metrics .metric{min-height:72px;padding:10px}.analytics-metrics .metric strong,.analytics-metrics .metric:nth-child(3) strong,.analytics-metrics .metric:nth-child(4) strong{font-size:16px}.analytics-chart{height:240px}}
 </style>
 
+
+<style id="journal-v45-polish">
+/* Bluebird Journal v45 — softer, cleaner journal UI inspired by the user's reference */
+#page-journal{--j-border:rgba(160,180,195,.14);--j-border-strong:rgba(160,180,195,.20);--j-surface:#111416;--j-surface-2:#0d1012;--j-surface-3:#0a0c0e;--j-muted:#89939b;--j-text:#edf2f5}
+#page-journal .grid2{align-items:stretch;gap:18px;margin-bottom:12px}
+#page-journal .grid2>.card{background:linear-gradient(180deg,#121618 0%,#0d1113 100%);border:1px solid var(--j-border);border-radius:14px;box-shadow:0 14px 36px rgba(0,0,0,.28);padding:18px}
+#page-journal .journal-form-title{font-size:12px!important;letter-spacing:1.15px!important;color:#dfe7eb!important;margin-bottom:14px!important}
+#page-journal #tradeForm .fields3{gap:11px}
+#page-journal #tradeForm .field label{font-size:9px;color:#a9b3ba;letter-spacing:.7px;margin-bottom:7px}
+#page-journal #tradeForm .input,#page-journal #tradeForm .select,#page-journal #tradeForm textarea{background:#0a0d0f;border:1px solid rgba(160,180,195,.16);border-radius:8px;color:#edf2f5;box-shadow:inset 0 1px 0 rgba(255,255,255,.025);transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+#page-journal #tradeForm .input,#page-journal #tradeForm .select{height:38px;font-size:12px;font-weight:750;padding:9px 11px}
+#page-journal #tradeForm textarea{min-height:92px;padding:10px 11px;font-size:12px}
+#page-journal #tradeForm .input:focus,#page-journal #tradeForm .select:focus,#page-journal #tradeForm textarea:focus{border-color:rgba(42,170,255,.52);background:#0b1013;box-shadow:0 0 0 3px rgba(42,170,255,.08)}
+#page-journal #tradeForm .actions{margin-top:12px!important;align-items:center}
+#page-journal #tradeForm .actions .btn{border-radius:8px;padding:8px 12px;background:#0b1114;border-color:rgba(160,180,195,.18);font-size:10px;letter-spacing:.1px}
+#page-journal #tradeForm .actions .btn.primary{background:#1288d7;border-color:#2aaaff;box-shadow:0 6px 18px rgba(18,136,215,.18)}
+#page-journal #tradeForm .actions .btn:hover{background:#11181d;border-color:rgba(160,180,195,.32)}
+#page-journal #tradeForm .actions .btn.primary:hover{background:#1a96e6;border-color:#53bbff}
+#page-journal .edit-banner{background:#0b1013;border:1px solid rgba(160,180,195,.15);border-radius:8px;padding:8px 10px;margin-top:10px;color:#9eabb2}
+
+/* Cleaner access panel */
+#page-journal .access-title{font-size:9px!important;letter-spacing:1.6px!important;color:#9da9b1!important;margin:1px 0 10px!important}
+#page-journal #access{min-height:46px}
+#page-journal .access-status{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:13px 14px;border-radius:11px;background:#0b0f11;border:1px solid rgba(160,180,195,.15);box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
+#page-journal .access-status.pro{background:linear-gradient(180deg,rgba(10,41,31,.78),rgba(9,18,15,.92));border-color:rgba(33,193,130,.23)}
+#page-journal .access-status.expired{background:linear-gradient(180deg,rgba(48,25,29,.65),rgba(25,14,17,.9));border-color:rgba(255,82,96,.20)}
+#page-journal .access-status-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+#page-journal .access-status-main b{font-size:14px;color:#f0f4f6;line-height:1.1;font-weight:850;letter-spacing:-.15px}
+#page-journal .access-status-main span{font-size:8px;color:#9aa6ad;letter-spacing:1.1px;font-weight:850}
+#page-journal .access-countdown{font-size:10px;color:#b9c4c9;white-space:nowrap;text-align:right;padding-top:2px;font-weight:750}
+#page-journal #accessRule{margin-top:9px;padding:12px 14px;background:#0b0f11;border:1px solid rgba(160,180,195,.12);border-radius:10px;color:#98a6ae;font-size:10px;line-height:1.65}
+#page-journal #accessRule b{color:#dfe7eb;font-weight:800}
+
+/* Public journal controls: clean filter strip */
+#page-journal .journal-history-toolbar{margin:0 0 12px;padding:11px 12px;background:#0f1315;border:1px solid rgba(160,180,195,.13);border-radius:10px;align-items:center}
+#page-journal .journal-history-left{align-items:center;gap:10px}
+#page-journal .journal-history-field{min-width:200px}
+#page-journal .journal-history-field label{font-size:8px;color:#8f9ba3;letter-spacing:1px;margin-bottom:5px}
+#page-journal .journal-history-field .select,#page-journal .journal-custom-range .input{height:34px;border-radius:8px;background:#0b0f11;border-color:rgba(160,180,195,.14);font-size:11px;font-weight:750}
+#page-journal .journal-history-summary{font-size:9px;color:#77858e;margin:0 2px 0 auto}
+#page-journal .journal-custom-range{gap:8px}
+
+/* Hide implementation hint from normal trader UI; the structured data remains available to AI/export */
+#page-journal .journal-ai-hint{display:none!important}
+
+/* Saved Trades — softer, Notion-like table */
+#page-journal .grid2 + .card{margin-top:0!important;background:linear-gradient(180deg,#101416 0%,#0c1012 100%);border:1px solid var(--j-border);border-radius:14px;padding:16px;box-shadow:0 14px 36px rgba(0,0,0,.24)}
+#page-journal .grid2 + .card>h3{font-size:9px!important;letter-spacing:1.4px!important;color:#97a3ab!important;margin:0 0 10px!important}
+#page-journal .trade-manage-bar{margin:0 0 10px;padding:8px 9px;background:#0b0f11;border:1px solid rgba(160,180,195,.12);border-radius:9px}
+#page-journal .trade-manage-left{font-size:9px;color:#98a6ae}
+#page-journal table{border-collapse:separate;border-spacing:0;width:100%;font-size:10px}
+#page-journal table thead th{padding:9px 8px;border-bottom:1px solid rgba(160,180,195,.14);color:#7f8a92;font-size:8px;letter-spacing:.8px;font-weight:850;background:#0d1113}
+#page-journal table tbody td{padding:10px 8px;border-bottom:1px solid rgba(160,180,195,.09);color:#dfe6ea;background:transparent;vertical-align:middle}
+#page-journal table tbody tr{transition:background .15s ease}
+#page-journal table tbody tr:hover td{background:rgba(255,255,255,.018)}
+#page-journal table tbody tr:last-child td{border-bottom:0}
+#page-journal table th:first-child,#page-journal table td:first-child{border-top-left-radius:7px}
+#page-journal table th:last-child,#page-journal table td:last-child{border-top-right-radius:7px}
+#page-journal .trade-actions .btn{border-radius:7px;padding:6px 8px;font-size:8px;background:#0b1114;border-color:rgba(160,180,195,.15)}
+#page-journal .trade-actions .btn:hover{border-color:rgba(42,170,255,.45);background:#101a20}
+#page-journal .seq-order{background:#11171b;border:1px solid rgba(160,180,195,.17);color:#c9d3d8;border-radius:6px;padding:4px 6px;font-size:8px}
+#page-journal .seq-token{min-width:21px;height:21px;border-radius:6px;font-size:8px;border-width:1px;box-shadow:none}
+#page-journal .seq-token.w{background:rgba(22,132,92,.18);border-color:rgba(33,193,130,.32);color:#66e1b3}
+#page-journal .seq-token.l{background:rgba(173,42,58,.16);border-color:rgba(255,82,96,.26);color:#ff8c95}
+#page-journal .seq-token.be{background:rgba(87,113,130,.16);border-color:rgba(154,180,196,.25);color:#c0ccd2}
+#page-journal .seq-token.current{box-shadow:0 0 0 2px rgba(42,170,255,.16),0 0 0 1px rgba(42,170,255,.55) inset;transform:none}
+#page-journal .journal-shot img{width:58px;height:40px;border-radius:6px;border:1px solid rgba(160,180,195,.14);background:#070a0c}
+#page-journal .journal-shot-count{font-size:8px;color:#7e8b94}
+#page-journal .journal-money{font-weight:800;color:#dce7eb}
+#page-journal .pos{color:#36d99e}.neg{color:#ff6973}
+#page-journal .trade-manage-left .trade-select{width:14px;height:14px}
+#page-journal #deleteSelectedTrades{border-radius:7px}
+
+/* Desktop proportions closer to the cleaner reference */
+@media(min-width:901px){
+  #page-journal .grid2{grid-template-columns:1.12fr .88fr}
+  #page-journal .grid2>.card{min-height:100%}
+}
+
+@media(max-width:700px){
+  #page-journal .grid2{gap:10px}
+  #page-journal .grid2>.card,#page-journal .grid2 + .card{border-radius:12px;padding:12px}
+  #page-journal .journal-history-toolbar{padding:9px;border-radius:9px}
+  #page-journal .journal-history-field{min-width:160px}
+  #page-journal .journal-history-summary{width:100%;margin:2px 0 0}
+  #page-journal table{min-width:760px}
+  #page-journal .trade-manage-bar{border-radius:8px}
+}
+</style>
 </head>
 <body>
 <div class="app">
