@@ -684,7 +684,10 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
         <textarea id="aiQuestion" class="ai-ask-input" rows="2" placeholder="Ask Bluebird AI about this journal period..."></textarea>
         <button id="aiAskButton" class="btn primary ai-ask-send" type="button">Ask AI</button>
       </div>
-      <div id="aiAskResult" class="ai-ask-result" hidden></div>
+      <div class="ai-ask-history" id="aiAskHistory" hidden></div>
+      <div class="ai-ask-footer" id="aiAskFooter" hidden>
+        <button id="aiEndAnalysis" class="btn ai-end-analysis" type="button">End Analysis</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2303,8 +2306,14 @@ async function prepareAIReview(){
  }
 }
 function normalizeAIReviewText(text){
-  let s=String(text||'').replace(/\r\n?/g,'\n').trim();
-  s=s.replace(/^```(?:markdown|text)?\s*/i,'').replace(/\s*```$/,'');
+  let s=String(text??'')
+    .replace(/\r\n?/g,'\n')
+    .replace(/\\r\\n/g,'\n')
+    .replace(/\\n/g,'\n')
+    .replace(/\\t/g,'\t')
+    .trim();
+
+  s=s.replace(/^```(?:markdown|md|text)?\s*/i,'').replace(/\s*```$/,'');
 
   const headings=[
     'PERFORMANCE SUMMARY',
@@ -2317,83 +2326,104 @@ function normalizeAIReviewText(text){
     'DATA LIMITATIONS'
   ];
 
-  // Gemini sometimes places headings directly after the previous sentence.
-  // Force a clean break before/after recognized headings.
-  const alt=headings.map(h=>h.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')).join('|');
-  const headingRe=new RegExp('\\s*\\*{0,2}(' + alt + ')\\*{0,2}\\s*:?(?=\\s|$)','gi');
-  s=s.replace(headingRe,'\\n## $1\\n');
+  // Put recognized section headings on their own line even when Gemini
+  // returns the whole answer as one continuous paragraph.
+  for(const heading of headings){
+    const escaped=heading.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp('\\s*(?:#{1,6}\\s*)?(?:\*{1,2}\\s*)?'+escaped+'(?:\\s*\*{1,2})?\\s*:?', 'gi');
+    s=s.replace(re,'\n'+heading+'\n');
+  }
 
-  // Normalize markdown heading syntax and repeated separators.
-  s=s.replace(/^\\s*#{1,6}\\s*/gm,'');
-  s=s.replace(/^\\s*[-_=]{3,}\\s*$/gm,'');
-  s=s.replace(/\\n{3,}/g,'\\n\\n');
+  s=s.replace(/^\s*#{1,6}\s*/gm,'');
+  s=s.replace(/^\s*[-_=]{3,}\s*$/gm,'');
+  s=s.replace(/[ ]{2,}/g,' ');
+  s=s.replace(/\n[ \t]+/g,'\n');
+  s=s.replace(/\n{3,}/g,'\n\n');
+
   return s.trim();
 }
 
 function sanitizeAIText(txt){
   return String(txt??'')
-    .replace(/\\btrade_count\\b/gi,'number of trades')
-    .replace(/\\brecorded_trade_count\\b/gi,'recorded trades')
-    .replace(/\\bdeclared_trade_count\\b/gi,'declared trades')
-    .replace(/\\bresult_r\\b/gi,'R result')
-    .replace(/\\bresult_usd\\b/gi,'dollar result')
-    .replace(/\\btrade_id\\b/gi,'trade')
-    .replace(/\\bmanual_sequence\\b/gi,'day sequence')
-    .replace(/\\br_derived_sequence\\b/gi,'actual recorded sequence')
-    .replace(/\\brecorded_total_trades\\b/gi,'recorded trades')
-    .replace(/\\bdeclared_total_trades\\b/gi,'declared trades')
-    .replace(/\\bavg_r_per_trade\\b/gi,'average R per trade')
-    .replace(/\\bavg_r_per_day\\b/gi,'average R per day')
-    .replace(/\\bmax_drawdown_r\\b/gi,'maximum drawdown in R')
-    .replace(/\\blongest_loss_streak\\b/gi,'longest losing streak')
-    .replace(/\\s*\\(Trade ID:\\s*[0-9a-f-]{20,}\\)\\s*/gi,' ')
-    .replace(/\\bTrade ID:\\s*[0-9a-f-]{20,}\\b/gi,'')
-    .replace(/\\bUUID\\b/gi,'')
-    .replace(/\\bJSON\\b/gi,'')
-    .replace(/\\bdatabase record\\b/gi,'journaled trade')
-    .replace(/\\bdata record\\b/gi,'journaled trade')
-    .replace(/\\bempty field\\b/gi,'not entered')
-    .replace(/\\bfield is blank\\b/gi,'was not entered')
-    .replace(/\\bfield\\b/gi,'entry')
-    .replace(/\\s{2,}/g,' ')
+    .replace(/\btrade_count\b/gi,'number of trades')
+    .replace(/\brecorded_trade_count\b/gi,'recorded trades')
+    .replace(/\bdeclared_trade_count\b/gi,'declared trades')
+    .replace(/\bresult_r\b/gi,'R result')
+    .replace(/\bresult_usd\b/gi,'dollar result')
+    .replace(/\btrade_id\b/gi,'trade')
+    .replace(/\bmanual_sequence\b/gi,'day sequence')
+    .replace(/\br_derived_sequence\b/gi,'actual recorded sequence')
+    .replace(/\brecorded_total_trades\b/gi,'recorded trades')
+    .replace(/\bdeclared_total_trades\b/gi,'declared trades')
+    .replace(/\bavg_r_per_trade\b/gi,'average R per trade')
+    .replace(/\bavg_r_per_day\b/gi,'average R per day')
+    .replace(/\bmax_drawdown_r\b/gi,'maximum drawdown in R')
+    .replace(/\blongest_loss_streak\b/gi,'longest losing streak')
+    .replace(/\s*\(Trade ID:\s*[0-9a-f-]{20,}\)\s*/gi,' ')
+    .replace(/\bTrade ID:\s*[0-9a-f-]{20,}\b/gi,'')
+    .replace(/\bUUID\b/gi,'')
+    .replace(/\bJSON\b/gi,'')
+    .replace(/\bdatabase record\b/gi,'journaled trade')
+    .replace(/\bdata record\b/gi,'journaled trade')
+    .replace(/\bempty field\b/gi,'not entered')
+    .replace(/\bfield is blank\b/gi,'was not entered')
+    .replace(/\bfield\b/gi,'entry')
+    .replace(/\s{2,}/g,' ')
     .trim();
 }
 
 function renderAIReviewText(text){
-  const normalized=normalizeAIReviewText(text);
+  const normalized=normalizeAIReviewText(sanitizeAIText(text));
   const esc=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const inline=value=>esc(sanitizeAIText(value))
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g,'<strong>$1</strong>')
     .replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
 
+  const headings=/^(PERFORMANCE SUMMARY|TRADE BEHAVIOR & CHARTS|TRADE BEHAVIOR|SEQUENCE PATTERNS|TRADE-FREQUENCY ANALYSIS|WHAT STANDS OUT|POSSIBLE EXPERIMENTS|DATA LIMITATIONS)$/i;
   const sections=[];
   let current=null;
+
   const push=()=>{
     if(!current)return;
-    const cleaned=current.lines.map(x=>x.trimEnd()).filter(x=>x.trim()&&x.trim()!=='---');
-    if(cleaned.length)sections.push({...current,lines:cleaned});
+    const lines=current.lines.map(x=>x.trim()).filter(Boolean);
+    if(lines.length)sections.push({...current,lines});
   };
 
   for(const raw of normalized.split(/\n/)){
-    let line=raw.trim();
+    const line=raw.trim();
     if(!line)continue;
 
-    const heading=line.replace(/^#{1,3}\s+/,'').replace(/^\*{1,2}/,'').replace(/\*{1,2}$/,'').trim();
+    const heading=line
+      .replace(/^#{1,6}\s+/,'')
+      .replace(/^\*{1,2}\s*/,'')
+      .replace(/\s*\*{1,2}$/,'')
+      .replace(/:$/,'')
+      .trim();
 
-    if(/^(PERFORMANCE SUMMARY|TRADE BEHAVIOR & CHARTS|TRADE BEHAVIOR|SEQUENCE PATTERNS|TRADE-FREQUENCY ANALYSIS|WHAT STANDS OUT|POSSIBLE EXPERIMENTS|DATA LIMITATIONS)$/i.test(heading)){
+    if(headings.test(heading)){
       push();
       current={title:heading.toUpperCase(),lines:[]};
       continue;
     }
 
     if(!current)current={title:'AI TRADING REVIEW',lines:[]};
-    current.lines.push(line);
+
+    // Break out inline bullets / numbered points that Gemini sometimes
+    // returns without line breaks.
+    const pieces=line
+      .replace(/\s+(?=(?:[-*•]|\d+[.)])\s+)/g,'\n')
+      .split(/\n/)
+      .map(x=>x.trim())
+      .filter(Boolean);
+
+    current.lines.push(...pieces);
   }
   push();
 
   if(!sections.length){
-    return `<div class="ai-review-section ai-review-section-single"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${inline(normalized).replace(/\n/g,'<br>')}</p></div>`;
+    const clean=normalized.replace(/(?:^|\n)#{1,6}\s*/g,'').trim();
+    return `<div class="ai-review-section ai-review-section-single"><p class="ai-review-paragraph">${inline(clean).replace(/\n/g,'<br>')}</p></div>`;
   }
 
   return sections.map(sec=>{
@@ -2409,7 +2439,7 @@ function renderAIReviewText(text){
 
     for(const raw of sec.lines){
       const line=raw.trim();
-      if(!line) { flush(); continue; }
+      if(!line){ flush(); continue; }
 
       if(/^[-*•]\s+/.test(line)){
         flush();
@@ -2432,37 +2462,125 @@ function renderAIReviewText(text){
 }
 
 function showAIAskPanel(){
-  const panel=$('aiAskPanel'); if(panel)panel.hidden=false;
+  const panel=$('aiAskPanel');
+  const history=$('aiAskHistory');
+  const footer=$('aiAskFooter');
+  if(panel)panel.hidden=false;
+  if(history && history.children.length)history.hidden=false;
+  if(footer)footer.hidden=false;
+  wireAIAsk();
+}
+
+function clearAIAskHistory(){
+  const history=$('aiAskHistory');
+  const footer=$('aiAskFooter');
+  const input=$('aiQuestion');
+  if(history){history.innerHTML='';history.hidden=true;}
+  if(footer)footer.hidden=true;
+  if(input)input.value='';
+}
+
+function appendAIAskHistory(question,answer,model){
+  const history=$('aiAskHistory');
+  if(!history)return;
+
+  const item=document.createElement('article');
+  item.className='ai-ask-history-item';
+  item.innerHTML=`
+    <div class="ai-ask-history-question">
+      <span class="ai-ask-history-label">YOU</span>
+      <span>${String(question).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+    </div>
+    <div class="ai-ask-history-answer">
+      <div class="ai-ask-history-answer-head">
+        <span>BLUEBIRD AI</span>
+        <small>${String(model||'Gemini').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</small>
+      </div>
+      <div class="ai-review-output-body">${renderAIReviewText(answer)}</div>
+    </div>`;
+
+  history.appendChild(item);
+  history.hidden=false;
+  const footer=$('aiAskFooter');
+  if(footer)footer.hidden=false;
 }
 
 async function askAIQuestion(){
-  const input=$('aiQuestion'),btn=$('aiAskButton'),result=$('aiAskResult');
-  if(!input||!btn||!result)return;
+  const input=$('aiQuestion'),btn=$('aiAskButton');
+  if(!input||!btn)return;
+
   const question=String(input.value||'').trim();
   if(!question){toast('Type a question for Bluebird AI.');return;}
   if(!sb||!session){toast('Sign in first to ask your private AI review.');return;}
+
   const range=analyticsGetRange();
-  btn.disabled=true;btn.textContent='Thinking…';result.hidden=false;result.className='ai-ask-result';result.innerHTML='<div class="ai-ask-loading">Bluebird is analyzing your selected journal period…</div>';
+  btn.disabled=true;
+  btn.textContent='Thinking…';
+  showAIAskPanel();
+
+  const history=$('aiAskHistory');
+  const loading=document.createElement('div');
+  loading.className='ai-ask-loading-item';
+  loading.innerHTML='<span>Bluebird AI is analyzing your selected journal period…</span>';
+  if(history){history.hidden=false;history.appendChild(loading);}
+
   try{
     const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null,question}});
     if(error)throw error;
+
     const answer=String(data?.answer||data?.review||'').trim();
     if(!answer)throw new Error('No AI answer returned');
-    result.className='ai-ask-result';
-    result.innerHTML=`<div class="ai-review-output" style="margin:0"><div class="ai-review-output-head"><span>BLUEBIRD AI</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReviewText(answer)}</div></div>`;
+
+    if(loading)loading.remove();
+    appendAIAskHistory(question,answer,data?.model||'Gemini');
+    input.value='';
   }catch(err){
     console.error('AI question error',err);
-    result.className='ai-ask-result ai-ask-error';
-    result.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:4px">Your journal is safe. Please try the question again in a moment.</div>';
+    if(loading){
+      loading.innerHTML='<div class="ai-ask-history-error"><strong>Bluebird AI is temporarily busy.</strong><div>Your journal is safe. Please try the question again in a moment.</div></div>';
+    }
   }finally{
-    btn.disabled=false;btn.textContent='Ask AI';
+    btn.disabled=false;
+    btn.textContent='Ask AI';
   }
 }
 
 function wireAIAsk(){
-  const btn=$('aiAskButton'),input=$('aiQuestion');
-  if(btn&&!btn.dataset.wired){btn.dataset.wired='1';btn.addEventListener('click',askAIQuestion);}
-  document.querySelectorAll('.ai-quick-btn').forEach(b=>{if(b.dataset.wired)return;b.dataset.wired='1';b.addEventListener('click',()=>{if(input){input.value=b.dataset.aiQ||'';input.focus();}});});
+  const btn=$('aiAskButton'),input=$('aiQuestion'),endBtn=$('aiEndAnalysis');
+
+  if(btn&&!btn.dataset.wired){
+    btn.dataset.wired='1';
+    btn.addEventListener('click',askAIQuestion);
+  }
+
+  if(endBtn&&!endBtn.dataset.wired){
+    endBtn.dataset.wired='1';
+    endBtn.addEventListener('click',()=>{
+      clearAIAskHistory();
+      toast('AI analysis ended. Your journal was not changed.');
+    });
+  }
+
+  if(input&&!input.dataset.enterWired){
+    input.dataset.enterWired='1';
+    input.addEventListener('keydown',e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+        e.preventDefault();
+        btn?.click();
+      }
+    });
+  }
+
+  document.querySelectorAll('.ai-quick-btn').forEach(b=>{
+    if(b.dataset.wired)return;
+    b.dataset.wired='1';
+    b.addEventListener('click',()=>{
+      if(input){
+        input.value=b.dataset.aiQ||'';
+        input.focus();
+      }
+    });
+  });
 }
 
 document.addEventListener('DOMContentLoaded',()=>wireAIAsk());
@@ -3241,6 +3359,134 @@ document.addEventListener('click',e=>{
 @media(max-width:760px){
   .ai-review-output-body{font-size:12px!important;line-height:1.78!important;padding:14px!important}
   .ai-review-section{padding-bottom:13px!important;margin-bottom:13px!important}
+}
+
+/* Bluebird AI transcript cleanup — v69 */
+.ai-review-output{
+  border:1px solid #183f56!important;
+  background:#07131c!important;
+  box-shadow:none!important;
+  border-radius:10px!important;
+}
+.ai-review-output-head{
+  background:#081723!important;
+  border-bottom:1px solid #17384b!important;
+  color:#7fc9ef!important;
+}
+.ai-review-output-body{
+  padding:16px 18px!important;
+  font-size:12px!important;
+  line-height:1.8!important;
+}
+.ai-review-section{
+  border:0!important;
+  background:transparent!important;
+  padding:0 0 16px!important;
+  margin:0 0 16px!important;
+  border-bottom:1px solid #17394b!important;
+  border-radius:0!important;
+}
+.ai-review-section:last-child{
+  border-bottom:0!important;
+  padding-bottom:0!important;
+  margin-bottom:0!important;
+}
+.ai-review-section-title{
+  color:#69c6f7!important;
+  font-size:10px!important;
+  letter-spacing:1.5px!important;
+  margin-bottom:9px!important;
+}
+.ai-review-paragraph{margin:0 0 9px!important;color:#d9e7ed!important}
+.ai-review-bullets{margin:6px 0 0!important;color:#d9e7ed!important}
+.ai-review-bullets li{margin:0 0 7px!important}
+.ai-ask-panel{
+  border:0!important;
+  border-top:1px solid #183b50!important;
+  background:transparent!important;
+  border-radius:0!important;
+  padding:16px 0 0!important;
+  margin-top:16px!important;
+}
+.ai-ask-history{
+  margin-top:14px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:12px!important;
+}
+.ai-ask-history-item{
+  border-top:1px solid #17384b!important;
+  padding-top:12px!important;
+}
+.ai-ask-history-question{
+  display:flex!important;
+  gap:9px!important;
+  align-items:flex-start!important;
+  color:#dcebf2!important;
+  font-size:11px!important;
+  line-height:1.55!important;
+}
+.ai-ask-history-label{
+  flex:0 0 auto!important;
+  font-size:8px!important;
+  letter-spacing:1.2px!important;
+  font-weight:950!important;
+  color:#66bff0!important;
+  padding-top:2px!important;
+}
+.ai-ask-history-answer{
+  margin-top:8px!important;
+  border:1px solid #183f56!important;
+  background:#07131c!important;
+  border-radius:9px!important;
+  overflow:hidden!important;
+}
+.ai-ask-history-answer-head{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  padding:9px 12px!important;
+  border-bottom:1px solid #17384b!important;
+  background:#081723!important;
+  color:#72c8f2!important;
+  font-size:8px!important;
+  font-weight:950!important;
+  letter-spacing:1.2px!important;
+}
+.ai-ask-history-answer-head small{color:#6f8798!important;font-size:7px!important;letter-spacing:.2px!important}
+.ai-ask-history-answer .ai-review-output-body{padding:14px 15px!important}
+.ai-ask-loading-item{
+  padding:10px 12px!important;
+  border:1px dashed #23485d!important;
+  border-radius:8px!important;
+  color:#9eb2be!important;
+  font-size:10px!important;
+  background:#06131d!important;
+}
+.ai-ask-history-error{
+  padding:10px 12px!important;
+  border:1px solid #5b2830!important;
+  border-radius:8px!important;
+  background:#180b0e!important;
+  color:#efc2c9!important;
+  font-size:10px!important;
+  line-height:1.5!important;
+}
+.ai-ask-footer{
+  display:flex!important;
+  justify-content:flex-end!important;
+  margin-top:10px!important;
+}
+.ai-end-analysis{
+  border-color:#24485b!important;
+  color:#8da6b5!important;
+  background:#071520!important;
+  font-size:8px!important;
+}
+.ai-end-analysis:hover{border-color:#3a6f88!important;color:#c3dbe7!important}
+@media(max-width:760px){
+  .ai-review-output-body{font-size:12px!important;line-height:1.8!important;padding:14px!important}
+  .ai-ask-history-question{font-size:11px!important}
 }
 </style>
 </body></html>
