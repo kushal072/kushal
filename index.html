@@ -638,7 +638,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div>
       <div class="smallbrand ai-kicker">AI TRADING REVIEW</div>
       <h3 class="ai-review-title">A structured review of your own journal</h3>
-      <p class="ai-review-sub">This is the Bluebird AI report layout. The future AI engine will use your actual journal, trade order, daily sequences, screenshots, statistics and selected period to produce the review.</p>
+      <p class="ai-review-sub">Bluebird AI uses your actual journal, chronological trade order, daily sequences, statistics, notes and selected period. Historical trade-limit comparisons are calculated from the recorded trades before Gemini interprets them.</p>
     </div>
     <div class="ai-review-status">PRO · AI ENGINE CONNECTED</div>
   </div>
@@ -652,6 +652,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       <div class="ai-chip-grid">
         <span class="ai-chip">Trade count & order</span>
         <span class="ai-chip">W / L / BE sequences</span>
+        <span class="ai-chip">1–4 trades/day tests</span>
         <span class="ai-chip">R & $ performance</span>
         <span class="ai-chip">Drawdown & streaks</span>
         <span class="ai-chip">Session / setup patterns</span>
@@ -664,10 +665,10 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div class="ai-preview-body">
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Performance summary</b><p>AI will summarize what actually happened during the selected period.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Trade behavior</b><p>AI will identify recurring trade-order and sequence patterns without inventing missing results.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>What changes if you trade less</b><p>Bluebird will compare your actual recorded trade behavior and daily order before the AI explains the patterns.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Bluebird tests the first 1, 2, 3 and 4 recorded trades per day, plus all recorded trades, before Gemini interprets the differences.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
-    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Analyzes the selected journal period using your secure Bluebird AI pipeline.</span></div>
+    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Uses your selected journal period plus the private historical comparison engine. Missing trades are never invented.</span></div><div id="aiEngineInfo" class="ai-engine-info" hidden></div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
   </div>
 </div>
@@ -698,7 +699,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 .ai-preview-dot{width:6px;height:6px;flex:0 0 6px;border-radius:50%;margin-top:4px;background:#27d7a0;box-shadow:0 0 0 3px rgba(39,215,160,.08)}
 .ai-preview-item b{font-size:9px;color:#e8f5ff}
 .ai-preview-item p{margin:3px 0 0;font-size:8.5px;color:#7f98a9;line-height:1.5}
-.ai-review-actions{display:flex;align-items:center;gap:9px;margin-top:10px}.ai-review-note{font-size:8px;color:#6f8798;line-height:1.4}.ai-review-output{margin-top:10px;border:1px solid #17684f;background:linear-gradient(145deg,#061a16,#06131d);border-radius:8px;overflow:hidden}.ai-review-output-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #153f36;color:#8ee1bd;font-size:9px;font-weight:900;letter-spacing:1px}.ai-review-output-head small{font-size:8px;color:#6f8798;letter-spacing:.2px;font-weight:700}.ai-review-output-body{padding:11px;color:#d8e8ee;font-size:11px;line-height:1.65}.ai-review-section{border:1px solid #123c35;background:#06151a;border-radius:8px;padding:10px 11px;margin-bottom:8px}.ai-review-section:last-child{margin-bottom:0}.ai-review-section-title{font-size:9px;letter-spacing:1.1px;font-weight:950;color:#8ee1bd;margin-bottom:7px}.ai-review-paragraph{margin:0 0 7px;color:#d6e7ec}.ai-review-paragraph:last-child{margin-bottom:0}.ai-review-bullets{margin:0;padding-left:18px;color:#d6e7ec}.ai-review-bullets li{margin:0 0 5px}.ai-review-bullets li:last-child{margin-bottom:0}.ai-inline-code{display:inline-block;padding:1px 5px;border-radius:4px;border:1px solid #17455a;background:#071b25;color:#ccecff;font-size:.92em}.ai-review-output-body strong{color:#f1fbff}@media(max-width:760px){.ai-review-output-body{font-size:12px;line-height:1.7}.ai-review-section{padding:10px}.ai-review-section-title{font-size:10px}}
+.ai-review-actions{display:flex;align-items:center;gap:9px;margin-top:10px}.ai-review-note{font-size:8px;color:#6f8798;line-height:1.4}.ai-engine-info{margin-top:8px;padding:8px 10px;border:1px solid #133b53;background:#06131d;border-radius:7px;color:#7f97a8;font-size:8px;line-height:1.45}.ai-engine-info strong{color:#b9d7e8}.ai-review-output{margin-top:10px;border:1px solid #17684f;background:linear-gradient(145deg,#061a16,#06131d);border-radius:8px;overflow:hidden}.ai-review-output-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #153f36;color:#8ee1bd;font-size:9px;font-weight:900;letter-spacing:1px}.ai-review-output-head small{font-size:8px;color:#6f8798;letter-spacing:.2px;font-weight:700}.ai-review-output-body{padding:11px;color:#d8e8ee;font-size:11px;line-height:1.65}.ai-review-section{border:1px solid #123c35;background:#06151a;border-radius:8px;padding:10px 11px;margin-bottom:8px}.ai-review-section:last-child{margin-bottom:0}.ai-review-section-title{font-size:9px;letter-spacing:1.1px;font-weight:950;color:#8ee1bd;margin-bottom:7px}.ai-review-paragraph{margin:0 0 7px;color:#d6e7ec}.ai-review-paragraph:last-child{margin-bottom:0}.ai-review-bullets{margin:0;padding-left:18px;color:#d6e7ec}.ai-review-bullets li{margin:0 0 5px}.ai-review-bullets li:last-child{margin-bottom:0}.ai-inline-code{display:inline-block;padding:1px 5px;border-radius:4px;border:1px solid #17455a;background:#071b25;color:#ccecff;font-size:.92em}.ai-review-output-body strong{color:#f1fbff}@media(max-width:760px){.ai-review-output-body{font-size:12px;line-height:1.7}.ai-review-section{padding:10px}.ai-review-section-title{font-size:10px}}
 @media(max-width:760px){.ai-review-head{flex-direction:column}.ai-review-grid{grid-template-columns:1fr}.ai-mock-stats{grid-template-columns:1fr 1fr}.ai-preview-body{grid-template-columns:1fr}.ai-review-status{white-space:normal}}
 </style>
 <style>
@@ -1946,7 +1947,13 @@ async function prepareAIReview(){
    const ctx=data?.context||{};
    const summary=ctx.summary||{};
    const days=Array.isArray(ctx.days)?ctx.days:[];
+   const scenarios=Array.isArray(data?.scenarios)?data.scenarios:(Array.isArray(ctx.scenarios)?ctx.scenarios:[]);
    const review=String(data?.review||'').trim();
+   const engineInfo=$('aiEngineInfo');
+   if(engineInfo){
+     engineInfo.hidden=false;
+     engineInfo.innerHTML=`<strong>Historical engine included.</strong> Gemini received chronological comparisons for first 1, 2, 3 and 4 recorded trades/day, plus all recorded trades, using the selected period.`;
+   }
 
    const seqForDay=d=>String(d.manual_sequence||d.observed_sequence||'—').replace(/\s+/g,'');
    const clsForSeq=s=>s==='—'?'':(/W/.test(s)&&!/L|BE/.test(s)?'w':(/L/.test(s)&&!/W|BE/.test(s)?'l':'be'));
@@ -2013,6 +2020,7 @@ async function prepareAIReview(){
  }catch(err){
    console.error('AI review error',err);
    box.className='ai-context-result ai-context-error';
+   const engineInfo=$('aiEngineInfo'); if(engineInfo) engineInfo.hidden=true;
    const msg=String(err?.message||err||'Unknown error');
    box.innerHTML=`<strong>AI review could not be completed.</strong><div style="margin-top:5px">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
    if(note)note.textContent='The journal context is secure, but the AI request returned an error. No journal data was deleted.';
