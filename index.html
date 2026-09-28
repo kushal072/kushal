@@ -1277,7 +1277,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
         <label class="pf-check"><input id="pfPayoutAnalysisOn" type="checkbox" checked><span><b>Continue into first-payout analysis</b><span>After an evaluation pass, continue the funded phase until the buffer and funded consistency rules are satisfied or the account fails.</span></span></label>
       </div>
       <div id="pfCycleInputs" class="pf-grid-2" style="margin-top:9px">
-        <div class="pf-field"><label>COMPLETE CYCLES TO SIMULATE</label><input id="pfSimRuns" type="number" min="100" max="20000" step="100" value="5000"></div>
+        <div class="pf-field"><label>COMPLETE CYCLES TO SIMULATE</label><input id="pfSimRuns" type="number" min="1" max="20000" step="1" value="5000"></div>
       </div>
     </div>
 
@@ -1490,7 +1490,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       }
       const consistencyRaw=mode==='journal'?($id('pfConsistencyPct')?.value??''):($id('pfStrategyConsistencyPct')?.value??'');const consistencyPct=consistencyRaw===''?null:Math.min(100,Math.max(1,Number(consistencyRaw)));
       const fundedConsistencyRaw=$id('pfFundedConsistencyPct')?.value??'';const fundedConsistencyPct=fundedConsistencyRaw===''?null:Math.min(100,Math.max(1,Number(fundedConsistencyRaw)));
-      const fundedDD=Math.max(0,num('pfFundedDD',2000)),bufferRaw=num('pfBuffer',0),buffer=bufferRaw>0?bufferRaw:null,fundedTrailing=$id('pfFundedDDType')?.value==='trailing';const evalAnalysis=!!$id('pfEvalAnalysisOn')?.checked;const payoutRequested=!!$id('pfPayoutAnalysisOn')?.checked;const payoutAnalysis=payoutRequested&&buffer!==null;const simRuns=Math.min(20000,Math.max(100,Math.floor(num('pfSimRuns',5000))));
+      const fundedDD=Math.max(0,num('pfFundedDD',2000)),bufferRaw=num('pfBuffer',0),buffer=bufferRaw>0?bufferRaw:null,fundedTrailing=$id('pfFundedDDType')?.value==='trailing';const evalAnalysis=!!$id('pfEvalAnalysisOn')?.checked;const payoutRequested=!!$id('pfPayoutAnalysisOn')?.checked;const payoutAnalysis=payoutRequested&&buffer!==null;const simRuns=Math.min(20000,Math.max(1,Math.floor(num('pfSimRuns',5000))));
       const one=simulateOneAttempt(dayFactory,{start,target,evalDD:maxdd,dailyLimit,risk,trailing,consistencyPct});
       $id('pfPlaceholder').hidden=true;$id('pfResultBody').hidden=false;$id('pfEnding').textContent=fmtUSD(one.balance);$id('pfPeak').textContent=fmtUSD(one.peak);$id('pfMaxDD').textContent=fmtUSD(-one.maxDD);$id('pfTrades').textContent=String(one.trades);$id('pfR').textContent=fmtR(one.netR);
       const status=one.failReason?`Failed · ${one.failReason}`:(one.passed?'Evaluation passed':'Evaluation not reached');$id('pfStatus').textContent=status;const sm=$id('pfStatusMetric');sm.classList.toggle('bad',!!one.failReason);sm.classList.toggle('good',one.passed&&!one.failReason);sm.classList.toggle('warn',!one.failReason&&!one.passed);
