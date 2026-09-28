@@ -919,9 +919,9 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       <div>
         <div class="pro-tool-kicker">PRO ANALYSIS</div>
         <h3 class="pro-tool-title">Prop Firm Simulator</h3>
-        <p class="pro-tool-sub">Replay your recorded trades or generate a strategy path, then apply your prop-firm rules to the result.</p>
+        <p class="pro-tool-sub">Model the full journey from evaluation → funded buffer → first-payout ready, with pass rates and time estimates when you enable cycle analysis.</p>
       </div>
-      <span class="pro-tool-badge">RULE REPLAY</span>
+      <span class="pro-tool-badge">EVALUATION → PAYOUT</span>
     </div>
 
     <div class="pro-tool-source">
@@ -930,52 +930,113 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
         <option value="journal">Journal history</option>
         <option value="strategy">Strategy model</option>
       </select>
-      <span class="pro-tool-source-help">Use recorded results or define a clean statistical model.</span>
+      <span class="pro-tool-source-help">Journal mode uses recorded R results. Strategy mode uses your win rate, RR, trades/day and risk.</span>
     </div>
 
-    <div id="pfJournalInputs" class="pro-tool-controls">
-      <div class="pro-tool-field"><label>FROM DATE</label><input id="pfFrom" type="date"></div>
-      <div class="pro-tool-field"><label>TO DATE</label><input id="pfTo" type="date"></div>
-      <div class="pro-tool-field"><label>STARTING BALANCE ($)</label><input id="pfStart" type="number" min="1" step="100" value="50000"></div>
-      <div class="pro-tool-field"><label>PROFIT TARGET ($)</label><input id="pfTarget" type="number" min="0" step="100" value="3000"></div>
-      <div class="pro-tool-field"><label>MAX DRAWDOWN ($)</label><input id="pfDD" type="number" min="0" step="100" value="2000"></div>
-      <div class="pro-tool-field"><label>DAILY LOSS LIMIT ($)</label><input id="pfDaily" type="number" min="0" step="50" value="0"></div>
-      <div class="pro-tool-field"><label>RISK / TRADE ($)</label><input id="pfRisk" type="number" min="1" step="1" value="250"></div>
-      <div class="pro-tool-field"><label>ACCOUNT RULE</label><select id="pfDDType"><option value="fixed">Fixed max drawdown</option><option value="trailing">Trailing max drawdown</option></select></div>
+    <div id="pfJournalInputs">
+      <div class="pf-section">
+        <div class="pf-section-head"><div class="pf-section-title">ACCOUNT & EVALUATION RULES</div><div class="pf-section-note">Set the rules for the account you want to test.</div></div>
+        <div class="pf-grid">
+          <div class="pf-field"><label>FROM DATE</label><input id="pfFrom" type="date"></div>
+          <div class="pf-field"><label>TO DATE</label><input id="pfTo" type="date"></div>
+          <div class="pf-field"><label>STARTING BALANCE ($)</label><input id="pfStart" type="number" min="1" step="100" value="50000"></div>
+          <div class="pf-field"><label>EVALUATION PROFIT TARGET ($)</label><input id="pfTarget" type="number" min="0" step="100" value="3000"></div>
+          <div class="pf-field"><label>EVALUATION MAX DRAWDOWN ($)</label><input id="pfDD" type="number" min="0" step="100" value="2000"></div>
+          <div class="pf-field"><label>DAILY LOSS LIMIT ($)</label><input id="pfDaily" type="number" min="0" step="50" value="0"></div>
+          <div class="pf-field"><label>RISK / TRADE ($)</label><input id="pfRisk" type="number" min="1" step="1" value="250"></div>
+          <div class="pf-field"><label>EVALUATION ACCOUNT RULE</label><select id="pfDDType"><option value="fixed">Fixed max drawdown</option><option value="trailing">Trailing max drawdown</option></select></div>
+          <div class="pf-field"><label>MAX DAYS / ATTEMPT</label><input id="pfMaxEvalDays" type="number" min="1" max="3650" step="1" value="260"></div>
+        </div>
+        <div class="pf-check-inline">
+          <input id="pfConsistencyOn" type="checkbox">
+          <label for="pfConsistencyOn">Apply evaluation consistency rule</label>
+          <input id="pfConsistencyPct" class="pf-inline-number" type="number" min="1" max="100" step="1" value="50">
+          <label for="pfConsistencyPct">% max winning-day share</label>
+        </div>
+      </div>
     </div>
 
-    <div id="pfStrategyInputs" class="pro-tool-controls" hidden>
-      <div class="pro-tool-field"><label>WIN RATE (%)</label><input id="pfWinRate" type="number" min="0" max="100" step="0.1" value="60"></div>
-      <div class="pro-tool-field"><label>RISK : REWARD</label><input id="pfRR" type="number" min="0.1" max="20" step="0.1" value="1.5"></div>
-      <div class="pro-tool-field"><label>MAX TRADES / DAY</label><input id="pfMaxTrades" type="number" min="1" max="20" step="1" value="3"></div>
-      <div class="pro-tool-field"><label>TRADING DAYS</label><input id="pfDays" type="number" min="1" max="3650" step="1" value="30"></div>
-      <div class="pro-tool-field"><label>STARTING BALANCE ($)</label><input id="pfStrategyStart" type="number" min="1" step="100" value="50000"></div>
-      <div class="pro-tool-field"><label>PROFIT TARGET ($)</label><input id="pfStrategyTarget" type="number" min="0" step="100" value="3000"></div>
-      <div class="pro-tool-field"><label>MAX DRAWDOWN ($)</label><input id="pfStrategyDD" type="number" min="0" step="100" value="2000"></div>
-      <div class="pro-tool-field"><label>DAILY LOSS LIMIT ($)</label><input id="pfStrategyDaily" type="number" min="0" step="50" value="0"></div>
-      <div class="pro-tool-field"><label>RISK / TRADE ($)</label><input id="pfStrategyRisk" type="number" min="1" step="1" value="250"></div>
-      <div class="pro-tool-field"><label>ACCOUNT RULE</label><select id="pfStrategyDDType"><option value="fixed">Fixed max drawdown</option><option value="trailing">Trailing max drawdown</option></select></div>
+    <div id="pfStrategyInputs" hidden>
+      <div class="pf-section">
+        <div class="pf-section-head"><div class="pf-section-title">STRATEGY MODEL</div><div class="pf-section-note">Generate trade outcomes from these inputs.</div></div>
+        <div class="pf-grid">
+          <div class="pf-field"><label>WIN RATE (%)</label><input id="pfWinRate" type="number" min="0" max="100" step="0.1" value="60"></div>
+          <div class="pf-field"><label>RISK : REWARD</label><input id="pfRR" type="number" min="0.1" max="20" step="0.1" value="1.5"></div>
+          <div class="pf-field"><label>TRADES / DAY</label><input id="pfMaxTrades" type="number" min="1" max="20" step="1" value="3"></div>
+          <div class="pf-field"><label>TRADING DAYS / MODEL</label><input id="pfDays" type="number" min="1" max="3650" step="1" value="30"></div>
+          <div class="pf-field"><label>RISK / TRADE ($)</label><input id="pfStrategyRisk" type="number" min="1" step="1" value="250"></div>
+          <div class="pf-field"><label>STARTING BALANCE ($)</label><input id="pfStrategyStart" type="number" min="1" step="100" value="50000"></div>
+          <div class="pf-field"><label>EVALUATION PROFIT TARGET ($)</label><input id="pfStrategyTarget" type="number" min="0" step="100" value="3000"></div>
+          <div class="pf-field"><label>EVALUATION MAX DRAWDOWN ($)</label><input id="pfStrategyDD" type="number" min="0" step="100" value="2000"></div>
+          <div class="pf-field"><label>DAILY LOSS LIMIT ($)</label><input id="pfStrategyDaily" type="number" min="0" step="50" value="0"></div>
+          <div class="pf-field"><label>EVALUATION ACCOUNT RULE</label><select id="pfStrategyDDType"><option value="fixed">Fixed max drawdown</option><option value="trailing">Trailing max drawdown</option></select></div>
+          <div class="pf-field"><label>MAX DAYS / ATTEMPT</label><input id="pfStrategyMaxEvalDays" type="number" min="1" max="3650" step="1" value="260"></div>
+        </div>
+        <div class="pf-check-inline">
+          <input id="pfStrategyConsistencyOn" type="checkbox">
+          <label for="pfStrategyConsistencyOn">Apply evaluation consistency rule</label>
+          <input id="pfStrategyConsistencyPct" class="pf-inline-number" type="number" min="1" max="100" step="1" value="50">
+          <label for="pfStrategyConsistencyPct">% max winning-day share</label>
+        </div>
+      </div>
     </div>
 
-    <div class="pro-tool-actions">
-      <button class="btn primary" id="runPropSim" type="button">Run Prop Firm Simulation</button>
-      <button class="btn" id="clearPropSim" type="button">Reset</button>
+    <div class="pf-section">
+      <div class="pf-section-head"><div class="pf-section-title">FUNDED ACCOUNT & FIRST PAYOUT BUFFER</div><div class="pf-section-note">Used when you enable payout-cycle analysis.</div></div>
+      <div class="pf-grid">
+        <div class="pf-field"><label>FUNDED MAX DRAWDOWN ($)</label><input id="pfFundedDD" type="number" min="0" step="100" value="2000"></div>
+        <div class="pf-field"><label>PAYOUT BUFFER ($)</label><input id="pfBuffer" type="number" min="1" step="100" placeholder="Enter required buffer"></div>
+        <div class="pf-field"><label>FUNDED ACCOUNT RULE</label><select id="pfFundedDDType"><option value="trailing">Trailing max drawdown</option><option value="fixed">Fixed max drawdown</option></select></div>
+        <div class="pf-field"><label>BUFFER MAX DAYS</label><input id="pfBufferMaxDays" type="number" min="1" max="3650" step="1" value="260"></div>
+      </div>
+      <div class="pf-blank-note">Example: enter 4000 if the firm requires a $4,000 buffer before the first payout request.</div>
+      <div class="pf-checks">
+        <label class="pf-check"><input id="pfEvalAnalysisOn" type="checkbox"><span><b>Calculate evaluation pass rate</b><span>Estimate pass rate and average time to pass across many attempts.</span></span></label>
+        <label class="pf-check"><input id="pfPayoutAnalysisOn" type="checkbox"><span><b>Calculate first payout cycle</b><span>After a pass, continue the funded path until the required buffer is reached or the account fails.</span></span></label>
+      </div>
+      <div id="pfCycleInputs" class="pf-grid-2" hidden style="margin-top:9px">
+        <div class="pf-field"><label>SIMULATIONS / ATTEMPTS</label><input id="pfSimRuns" type="number" min="100" max="20000" step="100" value="5000"></div>
+        <div class="pf-field"><label>FUNDED MAX DAYS / ATTEMPT</label><input id="pfFundedMaxDays" type="number" min="1" max="3650" step="1" value="260"></div>
+      </div>
     </div>
 
-    <div class="pro-tool-results" id="pfResults">
-      <div class="pro-tool-result-title">SIMULATION RESULTS</div>
-      <div class="pro-tool-placeholder" id="pfPlaceholder">Run the simulator to generate the historical rule results here.</div>
+    <div class="pf-actions pro-tool-actions"><button class="btn primary" id="runPropSim" type="button">Run Prop Firm Simulation</button><button class="btn" id="clearPropSim" type="button">Reset</button></div>
+
+    <div class="pf-results-wrap" id="pfResults">
+      <div class="pf-results-label">SIMULATION RESULTS</div>
+      <div class="pro-tool-placeholder" id="pfPlaceholder">Run the simulator to generate the account path. Enable pass-rate or payout-cycle checks for the full evaluation → payout analysis.</div>
       <div id="pfResultBody" hidden>
-        <div class="pro-tool-metrics">
-          <div class="pro-tool-metric"><span>Ending balance</span><b id="pfEnding">—</b></div>
-          <div class="pro-tool-metric"><span>Peak balance</span><b id="pfPeak">—</b></div>
-          <div class="pro-tool-metric bad"><span>Max DD used</span><b id="pfMaxDD">—</b></div>
-          <div class="pro-tool-metric"><span>Trades processed</span><b id="pfTrades">—</b></div>
-          <div class="pro-tool-metric"><span>Net R</span><b id="pfR">—</b></div>
-          <div class="pro-tool-metric warn" id="pfStatusMetric"><span>Status</span><b id="pfStatus">—</b></div>
+        <div class="pf-result-grid">
+          <div class="pf-result-card"><div class="k">Ending balance</div><div class="v" id="pfEnding">—</div></div>
+          <div class="pf-result-card"><div class="k">Peak balance</div><div class="v" id="pfPeak">—</div></div>
+          <div class="pf-result-card bad"><div class="k">Max DD used</div><div class="v" id="pfMaxDD">—</div></div>
+          <div class="pf-result-card"><div class="k">Trades processed</div><div class="v" id="pfTrades">—</div></div>
+          <div class="pf-result-card"><div class="k">Net R</div><div class="v" id="pfR">—</div></div>
+          <div class="pf-result-card warn" id="pfStatusMetric"><div class="k">Status</div><div class="v" id="pfStatus">—</div></div>
+        </div>
+        <div id="pfCycleResults" hidden>
+          <div class="pf-results-label" style="margin-top:16px">EVALUATION → FUNDED → PAYOUT-READY</div>
+          <div class="pf-result-grid">
+            <div class="pf-result-card good"><div class="k">Evaluation pass rate</div><div class="v" id="pfPassRate">—</div></div>
+            <div class="pf-result-card"><div class="k">Avg days to pass</div><div class="v" id="pfAvgEvalDays">—</div></div>
+            <div class="pf-result-card"><div class="k">Passes in sample</div><div class="v" id="pfPassCount">—</div></div>
+            <div class="pf-result-card good"><div class="k">Buffer reached after pass</div><div class="v" id="pfBufferRate">—</div></div>
+            <div class="pf-result-card"><div class="k">Avg days to buffer</div><div class="v" id="pfAvgBufferDays">—</div></div>
+            <div class="pf-result-card"><div class="k">Avg total days to payout</div><div class="v" id="pfAvgCycleDays">—</div></div>
+            <div class="pf-result-card good"><div class="k">Full cycle completion rate</div><div class="v" id="pfFullCycleRate">—</div></div>
+            <div class="pf-result-card"><div class="k">Approx calendar time</div><div class="v" id="pfCalendarTime">—</div></div>
+            <div class="pf-result-card"><div class="k">Payout-ready attempts</div><div class="v" id="pfPayoutCount">—</div></div>
+          </div>
+          <div class="pf-cycle">
+            <div class="pf-cycle-step"><div class="n">01 · EVALUATION</div><div class="t" id="pfCycleEvalText">—</div><div class="d">Reach the evaluation target before the configured rules are breached.</div></div>
+            <div class="pf-cycle-step"><div class="n">02 · FUNDED BUFFER</div><div class="t" id="pfCycleBufferText">—</div><div class="d">After passing, build the required buffer while staying inside the funded drawdown rule.</div></div>
+            <div class="pf-cycle-step"><div class="n">03 · PAYOUT-READY</div><div class="t" id="pfCyclePayoutText">—</div><div class="d">The modeled first-payout milestone is reached.</div></div>
+          </div>
+          <div class="pf-note" id="pfCycleNote"></div>
         </div>
         <div class="pro-tool-note" id="pfSourceNote"></div>
-        <div class="pro-tool-table" id="pfRuleTable"></div>
+        <div class="pf-results-label" style="margin-top:13px">RECENT DAY PATH</div>
+        <div class="pf-journey-table" id="pfRuleTable"></div>
       </div>
     </div>
     <div class="pro-lock" id="pfLock" hidden>Prop Firm Simulator is a Pro feature. Activate Pro to use the tool.</div>
@@ -1077,49 +1138,36 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     $id('mcSourceNote').textContent=`${sourceText} · ${runs.toLocaleString()} paths · ${tradesPerPath} trades/path · ${fmtUSD(risk)} per 1R · start ${fmtUSD(start)}.`;
     drawMC(paths);
   }
+  const meanFinite=arr=>{const a=arr.filter(Number.isFinite);return a.length?a.reduce((s,v)=>s+v,0)/a.length:null;};
+  const tradingCalendarText=days=>{if(!Number.isFinite(days))return '—';const weeks=days/5;if(weeks<4)return `≈ ${Math.max(1,Math.round(days*7/5))} calendar days`;const months=weeks/4.345;return `≈ ${months.toFixed(1)} months`;};
+  const groupJournalDays=rows=>{const m=new Map();for(const r of rows){const d=dateOnly(r?.trade_date);if(!d)continue;if(!m.has(d))m.set(d,[]);m.get(d).push(Number(r.result_r));}return Array.from(m.entries()).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,rs])=>({date,rs}));};
+  const buildStrategyDay=(wr,rr,maxTrades)=>{const rs=[];for(let i=0;i<maxTrades;i++)rs.push(Math.random()<wr?rr:-1);return rs;};
+  const simulateOneAttempt=(dayFactory,o)=>{let balance=o.start,peak=o.start,netR=0,days=0,trades=0,maxDD=0,failReason='',passed=false,maxWinDay=0,posProfit=0;while(days<o.maxEvalDays){days++;let dayPnl=0;const rs=dayFactory(days,'evaluation');for(const rrRaw of rs){const rr=Number(rrRaw)||0;const pnl=rr*o.risk;balance+=pnl;netR+=rr;trades++;dayPnl+=pnl;peak=Math.max(peak,balance);const dd=o.trailing?Math.max(0,peak-balance):Math.max(0,o.start-balance);maxDD=Math.max(maxDD,dd);if(o.evalDD>0&&dd>=o.evalDD){failReason='Evaluation drawdown';break;}if(o.dailyLimit>0&&dayPnl<=-o.dailyLimit){failReason='Daily loss limit';break;}}if(failReason)break;if(dayPnl>0){posProfit+=dayPnl;maxWinDay=Math.max(maxWinDay,dayPnl);}const targetHit=o.target>0&&(balance-o.start>=o.target);const consistencyOK=!o.consistencyOn||posProfit<=0||maxWinDay<=posProfit*(o.consistencyPct/100);if(targetHit&&consistencyOK){passed=true;break;}}return{passed,balance,peak,netR,days,trades,maxDD,failReason};};
+  const simulateBufferPath=(ev,dayFactory,o)=>{let balance=ev.balance,peak=ev.balance,days=0,trades=0,maxDD=0,failReason='',reached=false;while(days<o.maxFundedDays){days++;let dayPnl=0;const rs=dayFactory(days,'funded');for(const rrRaw of rs){const rr=Number(rrRaw)||0;const pnl=rr*o.risk;balance+=pnl;trades++;dayPnl+=pnl;peak=Math.max(peak,balance);const dd=o.fundedTrailing?Math.max(0,peak-balance):Math.max(0,ev.balance-balance);maxDD=Math.max(maxDD,dd);if(o.fundedDD>0&&dd>=o.fundedDD){failReason='Funded drawdown';break;}if(o.dailyLimit>0&&dayPnl<=-o.dailyLimit){failReason='Daily loss limit';break;}}if(failReason)break;if(balance-ev.balance>=o.buffer){reached=true;break;}}return{bufferReached:reached,days,trades,balance,failReason,maxDD};};
   function runPropSim(){
     if(!proAllowed('pfLock'))return;
     try{
-    const mode=$id('pfSourceMode')?.value||'journal';
-    let rows=[],start,target,maxdd,dailyLimit,risk,trailing,sourceText;
-    if(mode==='journal'){
-      const from=$id('pfFrom')?.value||'',to=$id('pfTo')?.value||'';
-      rows=journalRows(from,to).sort((a,b)=>{const da=dateOnly(a?.trade_date),db=dateOnly(b?.trade_date);if(da!==db)return da.localeCompare(db);return String(a?.created_at||'').localeCompare(String(b?.created_at||''));});
-      start=Math.max(1,num('pfStart',50000));target=Math.max(0,num('pfTarget',3000));maxdd=Math.max(0,num('pfDD',2000));dailyLimit=Math.max(0,num('pfDaily',0));risk=Math.max(1,num('pfRisk',250));trailing=$id('pfDDType')?.value==='trailing';
-      sourceText=`Journal ${from||'all'} → ${to||'all'} · ${rows.length} recorded trades.`;
-    }else{
-      const wr=Math.min(1,Math.max(0,num('pfWinRate',60)/100));const rr=Math.max(.1,num('pfRR',1.5));const maxTrades=Math.min(20,Math.max(1,Math.floor(num('pfMaxTrades',3))));const days=Math.min(3650,Math.max(1,Math.floor(num('pfDays',30))));
-      start=Math.max(1,num('pfStrategyStart',50000));target=Math.max(0,num('pfStrategyTarget',3000));maxdd=Math.max(0,num('pfStrategyDD',2000));dailyLimit=Math.max(0,num('pfStrategyDaily',0));risk=Math.max(1,num('pfStrategyRisk',250));trailing=$id('pfStrategyDDType')?.value==='trailing';
-      const base=new Date();base.setHours(0,0,0,0);
-      for(let d=0;d<days;d++){
-        const dt=new Date(base);dt.setDate(base.getDate()-days+d+1);const date=localDateKeyForTools(dt);
-        for(let t=1;t<=maxTrades;t++) rows.push({trade_date:date,created_at:`${date}T${String(t).padStart(2,'0')}:00:00Z`,result_r:Math.random()<wr?rr:-1});
+      const mode=$id('pfSourceMode')?.value||'journal';let rows=[],start,target,maxdd,dailyLimit,risk,trailing,sourceText='',dayFactory;
+      if(mode==='journal'){
+        const from=$id('pfFrom')?.value||'',to=$id('pfTo')?.value||'';rows=journalRows(from,to).sort((a,b)=>{const da=dateOnly(a?.trade_date),db=dateOnly(b?.trade_date);if(da!==db)return da.localeCompare(db);return String(a?.created_at||'').localeCompare(String(b?.created_at||''));});
+        start=Math.max(1,num('pfStart',50000));target=Math.max(0,num('pfTarget',3000));maxdd=Math.max(0,num('pfDD',2000));dailyLimit=Math.max(0,num('pfDaily',0));risk=Math.max(1,num('pfRisk',250));trailing=$id('pfDDType')?.value==='trailing';sourceText=`Journal ${from||'all'} → ${to||'all'} · ${rows.length} recorded trades.`;
+        const jdays=groupJournalDays(rows);if(!jdays.length){$id('pfPlaceholder').hidden=false;$id('pfResultBody').hidden=true;$id('pfPlaceholder').textContent='No recorded R results were found in that journal date range.';return;}dayFactory=()=>jdays[Math.floor(Math.random()*jdays.length)].rs;
+      }else{
+        const wr=Math.min(1,Math.max(0,num('pfWinRate',60)/100)),rr=Math.max(.1,num('pfRR',1.5)),maxTrades=Math.min(20,Math.max(1,Math.floor(num('pfMaxTrades',3)))),modelDays=Math.min(3650,Math.max(1,Math.floor(num('pfDays',30))));
+        start=Math.max(1,num('pfStrategyStart',50000));target=Math.max(0,num('pfStrategyTarget',3000));maxdd=Math.max(0,num('pfStrategyDD',2000));dailyLimit=Math.max(0,num('pfStrategyDaily',0));risk=Math.max(1,num('pfStrategyRisk',250));trailing=$id('pfStrategyDDType')?.value==='trailing';sourceText=`Strategy · ${Math.round(wr*1000)/10}% win rate · ${rr}:1 RR · ${maxTrades} trades/day · ${modelDays} modeled days.`;dayFactory=()=>buildStrategyDay(wr,rr,maxTrades);
       }
-      sourceText=`Strategy · ${Math.round(wr*1000)/10}% win rate · ${rr}:1 RR · ${maxTrades} trades/day · ${days} days.`;
-    }
-    $id('pfPlaceholder').hidden=true;$id('pfResultBody').hidden=false;
-    if(!rows.length){$id('pfEnding').textContent=fmtUSD(start);$id('pfPeak').textContent=fmtUSD(start);$id('pfMaxDD').textContent=fmtUSD(0);$id('pfTrades').textContent='0';$id('pfR').textContent='+0.00R';$id('pfStatus').textContent='No trades';$id('pfSourceNote').textContent=sourceText;return;}
-    let balance=start,peak=start,maxUsed=0,netR=0,failReason='',hitTarget=false,currentDay='',dayPnl=0;const dayMap=new Map();let processed=0;
-    for(const row of rows){
-      const date=dateOnly(row.trade_date);if(date!==currentDay){currentDay=date;dayPnl=0;}
-      const rr=Number(row.result_r||0);const pnl=rr*risk;netR+=rr;balance+=pnl;peak=Math.max(peak,balance);dayPnl+=pnl;const dd=trailing?Math.max(0,peak-balance):Math.max(0,start-balance);maxUsed=Math.max(maxUsed,dd);processed++;
-      const rec=dayMap.get(date)||{trades:0,pnl:0,balance};rec.trades++;rec.pnl+=pnl;rec.balance=balance;dayMap.set(date,rec);
-      if(maxdd>0&&dd>=maxdd){failReason=`Max drawdown reached on ${date}`;break;}
-      if(dailyLimit>0&&dayPnl<=-dailyLimit){failReason=`Daily loss limit reached on ${date}`;break;}
-      if(target>0&&balance-start>=target){hitTarget=true;break;}
-    }
-    const status=failReason?'Rule hit':(hitTarget?'Target reached':'Not reached');$id('pfEnding').textContent=fmtUSD(balance);$id('pfPeak').textContent=fmtUSD(peak);$id('pfMaxDD').textContent=fmtUSD(-maxUsed);$id('pfTrades').textContent=String(processed);$id('pfR').textContent=fmtR(netR);$id('pfStatus').textContent=failReason||status;
-    const sm=$id('pfStatusMetric');sm.classList.toggle('bad',!!failReason);sm.classList.toggle('good',!failReason&&hitTarget);sm.classList.toggle('warn',!failReason&&!hitTarget);
-    $id('pfSourceNote').textContent=`${sourceText} · ${fmtUSD(risk)} per 1R.${mode==='strategy'?' Random path generated from the strategy inputs.':''}`;
-    const dayRows=Array.from(dayMap.entries()).map(([date,v])=>({date,...v})).slice(-12);
-    $id('pfRuleTable').innerHTML='<div class="pro-tool-row head"><span>Date</span><span>Trades</span><span>Day P/L</span><span>Balance</span></div>'+dayRows.map(r=>`<div class="pro-tool-row"><span><b>${r.date}</b></span><span>${r.trades}</span><span>${fmtUSD(r.pnl)}</span><span>${fmtUSD(r.balance)}</span></div>`).join('');
-    }catch(err){
-      console.error('Prop Firm Simulator failed',err);
-      $id('pfPlaceholder').hidden=false;
-      $id('pfResultBody').hidden=true;
-      $id('pfPlaceholder').textContent='The simulator could not complete. Check the inputs and try again.';
-      window.bluebirdToast?.('Prop Firm Simulator could not complete.');
-    }
+      const consistencyOn=mode==='journal'?!!$id('pfConsistencyOn')?.checked:!!$id('pfStrategyConsistencyOn')?.checked;const consistencyPct=Math.min(100,Math.max(1,mode==='journal'?num('pfConsistencyPct',50):num('pfStrategyConsistencyPct',50)));const maxEvalDays=Math.min(3650,Math.max(1,Math.floor(mode==='journal'?num('pfMaxEvalDays',260):num('pfStrategyMaxEvalDays',260))));
+      const fundedDD=Math.max(0,num('pfFundedDD',2000)),bufferRaw=num('pfBuffer',0),buffer=bufferRaw>0?bufferRaw:null,fundedTrailing=$id('pfFundedDDType')?.value==='trailing';const evalAnalysis=!!$id('pfEvalAnalysisOn')?.checked;const payoutAnalysis=!!$id('pfPayoutAnalysisOn')?.checked&&buffer!==null;const simRuns=Math.min(20000,Math.max(100,Math.floor(num('pfSimRuns',5000)))),fundedMaxDays=Math.min(3650,Math.max(1,Math.floor(num('pfFundedMaxDays',260))));
+      const one=simulateOneAttempt(dayFactory,{start,target,evalDD:maxdd,dailyLimit,risk,trailing,consistencyOn:consistencyOn,consistencyPct,maxEvalDays});
+      $id('pfPlaceholder').hidden=true;$id('pfResultBody').hidden=false;$id('pfEnding').textContent=fmtUSD(one.balance);$id('pfPeak').textContent=fmtUSD(one.peak);$id('pfMaxDD').textContent=fmtUSD(-one.maxDD);$id('pfTrades').textContent=String(one.trades);$id('pfR').textContent=fmtR(one.netR);
+      const status=one.failReason?`Failed · ${one.failReason}`:(one.passed?'Evaluation passed':'Evaluation not reached');$id('pfStatus').textContent=status;const sm=$id('pfStatusMetric');sm.classList.toggle('bad',!!one.failReason);sm.classList.toggle('good',one.passed&&!one.failReason);sm.classList.toggle('warn',!one.failReason&&!one.passed);
+      const dayMap=new Map();for(const row of rows.slice(-36)){const d=dateOnly(row.trade_date);if(!d)continue;const rec=dayMap.get(d)||{trades:0,pnl:0,balance:null};rec.trades++;rec.pnl+=Number(row.result_r||0)*risk;dayMap.set(d,rec);}if(mode==='strategy'){let demo=start;const count=Math.min(12,maxEvalDays);for(let i=0;i<count;i++){const rs=dayFactory(i,'display'),pnl=rs.reduce((s,rr)=>s+Number(rr)*risk,0);demo+=pnl;const d=new Date();d.setDate(d.getDate()-(count-i));dayMap.set(localDateKeyForTools(d),{trades:rs.length,pnl,balance:demo});}}const dayRows=Array.from(dayMap.entries()).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12).map(([date,v])=>({date,...v}));$id('pfRuleTable').innerHTML='<div class="pf-journey-row head"><span>Date</span><span>Trades</span><span>Day P/L</span><span>Balance</span></div>'+dayRows.map(r=>`<div class="pf-journey-row"><span><b>${r.date}</b></span><span>${r.trades}</span><span>${fmtUSD(r.pnl)}</span><span>${r.balance===null?'—':fmtUSD(r.balance)}</span></div>`).join('');
+      $id('pfCycleResults').hidden=!(evalAnalysis||payoutAnalysis);$id('pfCycleInputs').hidden=!(evalAnalysis||payoutAnalysis);
+      if(evalAnalysis||payoutAnalysis){let passCount=0,payoutCount=0;const evalDays=[],bufferDays=[],cycleDays=[];for(let i=0;i<simRuns;i++){const ev=simulateOneAttempt(dayFactory,{start,target,evalDD:maxdd,dailyLimit,risk,trailing,consistencyOn:consistencyOn,consistencyPct,maxEvalDays});if(ev.passed){passCount++;evalDays.push(ev.days);if(payoutAnalysis){const bu=simulateBufferPath(ev,dayFactory,{risk,fundedDD,fundedTrailing,dailyLimit,buffer,maxFundedDays:fundedMaxDays});if(bu.bufferReached){payoutCount++;bufferDays.push(bu.days);cycleDays.push(ev.days+bu.days);}}}}
+        const passRate=passCount/simRuns*100,bufferRate=passCount?bufferDays.length/passCount*100:0,fullRate=payoutAnalysis?payoutCount/simRuns*100:passRate,avgEval=meanFinite(evalDays),avgBuffer=meanFinite(bufferDays),avgCycle=meanFinite(cycleDays);$id('pfPassRate').textContent=passRate.toFixed(1)+'%';$id('pfAvgEvalDays').textContent=avgEval===null?'—':avgEval.toFixed(1);$id('pfPassCount').textContent=`${passCount.toLocaleString()} / ${simRuns.toLocaleString()}`;$id('pfBufferRate').textContent=payoutAnalysis?bufferRate.toFixed(1)+'%':'—';$id('pfAvgBufferDays').textContent=payoutAnalysis&&avgBuffer!==null?avgBuffer.toFixed(1):'—';$id('pfAvgCycleDays').textContent=payoutAnalysis&&avgCycle!==null?avgCycle.toFixed(1):'—';$id('pfFullCycleRate').textContent=payoutAnalysis?fullRate.toFixed(1)+'%':'—';$id('pfCalendarTime').textContent=payoutAnalysis&&avgCycle!==null?tradingCalendarText(avgCycle):(avgEval!==null?tradingCalendarText(avgEval):'—');$id('pfPayoutCount').textContent=payoutAnalysis?`${payoutCount.toLocaleString()} / ${simRuns.toLocaleString()}`:'—';$id('pfCycleEvalText').textContent=`${passRate.toFixed(1)}% pass · ${avgEval===null?'—':avgEval.toFixed(1)+' days avg'}`;$id('pfCycleBufferText').textContent=payoutAnalysis?`${bufferRate.toFixed(1)}% of passes · ${avgBuffer===null?'—':avgBuffer.toFixed(1)+' days avg'}`:'Enable payout cycle';$id('pfCyclePayoutText').textContent=payoutAnalysis?`${fullRate.toFixed(1)}% complete cycle`:'Enable payout cycle';const cTxt=consistencyOn?` Consistency rule enabled: max winning day ≤ ${consistencyPct}% of positive profit.`:'';const pTxt=payoutAnalysis?` Buffer target: ${fmtUSD(buffer)} above funded starting balance. Funded DD: ${fmtUSD(fundedDD)} (${fundedTrailing?'trailing':'fixed'}).`:'';$id('pfCycleNote').textContent=`${sourceText} · ${simRuns.toLocaleString()} evaluation attempts.${cTxt}${pTxt} Approx calendar time assumes 5 trading days/week. These are probabilistic estimates.`;
+      }
+      $id('pfSourceNote').textContent=`${sourceText} · ${fmtUSD(risk)} per 1R.`;
+    }catch(err){console.error('Prop Firm Simulator failed',err);$id('pfPlaceholder').hidden=false;$id('pfResultBody').hidden=true;$id('pfPlaceholder').textContent='The simulator could not complete. Check the inputs and try again.';window.bluebirdToast?.('Prop Firm Simulator could not complete.');}
   }
   function resetMC(){ $id('mcPlaceholder').hidden=false;$id('mcPlaceholder').textContent='Run Monte Carlo to generate the scenario results here.';$id('mcResultBody').hidden=true;const c=$id('mcCanvas');if(c)c.getContext('2d').clearRect(0,0,c.width,c.height); }
   function resetPF(){ $id('pfPlaceholder').hidden=false;$id('pfPlaceholder').textContent='Run the simulator to generate the historical rule results here.';$id('pfResultBody').hidden=true; }
@@ -1135,6 +1183,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     fillJournalDates();
     document.querySelectorAll('.pro-tool-switch').forEach(btn=>btn.addEventListener('click',()=>activateProTool(btn.dataset.proTool||'monteCarloTool')));
     ['mcSourceMode','pfSourceMode'].forEach(id=>{const el=$id(id);if(el)el.addEventListener('change',()=>setSourceUI(id.slice(0,2)));});
+    const syncPfCycleOptions=()=>{const on=!!$id('pfEvalAnalysisOn')?.checked||!!$id('pfPayoutAnalysisOn')?.checked;if($id('pfCycleInputs'))$id('pfCycleInputs').hidden=!on;};
+    ['pfEvalAnalysisOn','pfPayoutAnalysisOn'].forEach(id=>$id(id)?.addEventListener('change',syncPfCycleOptions));
     $id('runMonteCarlo')?.addEventListener('click',runMonteCarlo);$id('clearMonteCarlo')?.addEventListener('click',resetMC);
     $id('runPropSim')?.addEventListener('click',runPropSim);$id('clearPropSim')?.addEventListener('click',resetPF);
     setSourceUI('mc');setSourceUI('pf');
