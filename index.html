@@ -2198,19 +2198,30 @@ function renderAIMockSnapshot(rows){
    <div class="ai-mock-stat"><span>COMMON DAY SEQ</span><b>${topSeq}</b></div>`;
 }
 
+function clearStaleAIState(){
+ const box=$('aiContextResult');
+ const note=$('aiReviewNote');
+ const ask=$('aiAskPanel');
+ if(box){ box.hidden=true; box.className='ai-context-result'; box.innerHTML=''; }
+ if(note)note.textContent='';
+ if(ask)ask.hidden=true;
+}
+
 async function prepareAIReview(){
  const btn=$('aiPrepareReview'),note=$('aiReviewNote'),box=$('aiContextResult');
  if(!btn||!box)return;
  if(!sb||!session){toast('Sign in first to run your private AI review.');return;}
  const range=analyticsGetRange();
  btn.disabled=true; btn.textContent='Analyzing…';
+ // Always discard any previous stale error/result before a new run.
  box.hidden=false; box.className='ai-context-result';
  box.innerHTML='Running your private journal analysis securely…';
+ const ask=$('aiAskPanel'); if(ask)ask.hidden=true;
 
- const friendlyError=()=>{
+ const friendlyError=(message)=>{
+   box.hidden=false;
    box.className='ai-context-result ai-context-warn';
-   box.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:5px">Your journal is safe. Please wait a moment and try the review again.</div>';
-   const ask=$('aiAskPanel'); if(ask)ask.hidden=true;
+   box.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:5px">'+(message||'Your journal is safe. Please wait a moment and try the review again.')+'</div>';
    if(note)note.textContent='Your journal data was not changed.';
  };
 
@@ -2244,6 +2255,10 @@ async function prepareAIReview(){
  const runOnce=async()=>{
    const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
    if(error)throw error;
+   // Some clients/proxies can return the JSON body as a string.
+   if(typeof data==='string'){
+     try{return JSON.parse(data);}catch{return {review:data};}
+   }
    return data;
  };
 
@@ -2264,6 +2279,9 @@ async function prepareAIReview(){
      }
    }
    if(!data)throw lastErr||new Error('AI review unavailable');
+   if(data?.error && !data?.review && !data?.answer){
+     throw new Error(String(data.message||data.error));
+   }
 
    const ctx=data?.context||{};
    const summary=ctx.summary||{};
@@ -2305,6 +2323,12 @@ async function prepareAIReview(){
    btn.disabled=false; btn.textContent='Run AI Review';
  }
 }
+// Never let an old temporary-error card survive a fresh page load.
+document.addEventListener('DOMContentLoaded',()=>{
+  const box=$('aiContextResult');
+  if(box){ box.hidden=true; box.className='ai-context-result'; box.innerHTML=''; }
+});
+
 function normalizeAIReviewText(text){
   let s=String(text??'')
     .replace(/\r\n?/g,'\n')
