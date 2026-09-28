@@ -670,6 +670,22 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     </div>
     <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button></div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
+    <div id="aiAskPanel" class="ai-ask-panel" hidden>
+      <div class="ai-ask-head">
+        <div><div class="ai-panel-label">ASK BLUEBIRD AI</div><div class="ai-ask-sub">Ask a question about the selected journal period. Bluebird uses only your recorded journal data and available screenshots.</div></div>
+      </div>
+      <div class="ai-quick-prompts">
+        <button class="ai-quick-btn" type="button" data-ai-q="What patterns do you see in my daily trade sequences?">Sequences</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="How did the first trades of my days compare with later trades historically?">Trade order</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="What stands out in my chart screenshots and notes?">Charts</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="What should I investigate further in this journal period?">What to investigate</button>
+      </div>
+      <div class="ai-ask-row">
+        <textarea id="aiQuestion" class="ai-ask-input" rows="2" placeholder="Ask Bluebird AI about this journal period..."></textarea>
+        <button id="aiAskButton" class="btn primary ai-ask-send" type="button">Ask AI</button>
+      </div>
+      <div id="aiAskResult" class="ai-ask-result" hidden></div>
+    </div>
   </div>
 </div>
 <div class="grid2" style="margin-top:10px"><div class="card locked"><div class="veil"><div><h3>Monte Carlo — Pro</h3><p>Run thousands of possible future paths from your actual results.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div><div class="card locked"><div class="veil"><div><h3>Prop Firm Simulator — Pro</h3><p>Test your actual journal statistics against your prop-firm rules.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div></div>
@@ -677,7 +693,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 
 <section id="page-pro" class="page">
 <style>
- .ai-context-result{margin-top:10px;border:1px solid #16384d;background:#06131d;border-radius:8px;padding:11px;color:#9bb1c0;font-size:11px;line-height:1.55}.ai-context-warn{border-color:#6b5930;background:#171308}.ai-context-result strong{color:#e7f7ff}.ai-context-ok{border-color:#155f49;background:linear-gradient(145deg,#061a16,#06131d)}.ai-context-error{border-color:#6b2630;background:#190a0d}.ai-context-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-top:8px}.ai-context-day{border:1px solid #17384c;border-radius:7px;padding:8px;background:#07141d}.ai-context-day b{color:#e7f7ff;display:block;margin-bottom:3px}.ai-context-seq{font-weight:800;letter-spacing:1px}.ai-context-seq.w{color:#78d7a7}.ai-context-seq.l{color:#ff9aa3}.ai-context-seq.be{color:#eac779}@media(max-width:760px){.ai-context-days{grid-template-columns:1fr}.ai-review-actions{flex-wrap:wrap}.ai-review-note{width:100%}}
+ .ai-context-result{margin-top:10px;border:1px solid #16384d;background:#06131d;border-radius:8px;padding:11px;color:#9bb1c0;font-size:11px;line-height:1.55}.ai-context-warn{border-color:#6b5930;background:#171308}.ai-context-result strong{color:#e7f7ff}
+.ai-ask-panel{margin-top:10px;border:1px solid #174b63;background:linear-gradient(145deg,#071723,#06121a);border-radius:9px;padding:11px}.ai-ask-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.ai-ask-sub{margin-top:4px;font-size:9px;line-height:1.5;color:#8199aa}.ai-quick-prompts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.ai-quick-btn{appearance:none;border:1px solid #19455c;background:#071824;color:#bfe6fa;border-radius:999px;padding:6px 9px;font-size:8px;font-weight:800;cursor:pointer}.ai-quick-btn:hover{border-color:#287ba5}.ai-ask-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch;margin-top:9px}.ai-ask-input{width:100%;min-height:62px;resize:vertical;border:1px solid #1a4257;background:#050f16;color:#e5f5fb;border-radius:7px;padding:9px;font:inherit;font-size:10px;line-height:1.45;outline:none}.ai-ask-input:focus{border-color:#2b8bc0;box-shadow:0 0 0 2px rgba(43,139,192,.12)}.ai-ask-send{align-self:stretch;min-width:90px}.ai-ask-result{margin-top:9px;border:1px solid #17684f;background:#061715;border-radius:8px;padding:9px}.ai-ask-loading{color:#9bb1c0;font-size:10px}.ai-ask-error{border-color:#6b2630!important;background:#190a0d!important;color:#efb6bd!important}@media(max-width:760px){.ai-ask-row{grid-template-columns:1fr}.ai-ask-send{width:100%}.ai-quick-prompts{overflow:auto;flex-wrap:nowrap;padding-bottom:2px}.ai-quick-btn{white-space:nowrap}}.ai-context-ok{border-color:#155f49;background:linear-gradient(145deg,#061a16,#06131d)}.ai-context-error{border-color:#6b2630;background:#190a0d}.ai-context-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-top:8px}.ai-context-day{border:1px solid #17384c;border-radius:7px;padding:8px;background:#07141d}.ai-context-day b{color:#e7f7ff;display:block;margin-bottom:3px}.ai-context-seq{font-weight:800;letter-spacing:1px}.ai-context-seq.w{color:#78d7a7}.ai-context-seq.l{color:#ff9aa3}.ai-context-seq.be{color:#eac779}@media(max-width:760px){.ai-context-days{grid-template-columns:1fr}.ai-review-actions{flex-wrap:wrap}.ai-review-note{width:100%}}
 .ai-review-card{margin-top:10px;border:1px solid #154968;background:linear-gradient(145deg,#061521,#050d14);border-radius:10px;padding:15px;box-shadow:0 16px 36px rgba(0,0,0,.18)}
 .ai-review-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
 .ai-kicker{font-size:8px;letter-spacing:2px;color:#49b8ff}
@@ -1945,6 +1962,7 @@ async function prepareAIReview(){
  const friendlyError=()=>{
    box.className='ai-context-result ai-context-warn';
    box.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:5px">Your journal is safe. Please wait a moment and try the review again.</div>';
+   const ask=$('aiAskPanel'); if(ask)ask.hidden=true;
    if(note)note.textContent='Your journal data was not changed.';
  };
 
@@ -2026,53 +2044,12 @@ async function prepareAIReview(){
    }
 
    if(review){
-     const escText=(value)=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-     const inline=(value)=>escText(sanitizeAI(value)).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
-     const renderAIReview=(text)=>{
-       const sections=[];
-       let current=null;
-       const lines=String(text||'').split(/\r?\n/);
-       const push=()=>{ if(current){ const cleaned=current.lines.filter(x=>x.trim() && x.trim()!=='---'); if(cleaned.length) sections.push({...current,lines:cleaned}); } };
-       for(const raw of lines){
-         const line=raw.trim();
-         if(/^#{2,3}\s+/.test(line)){
-           push();
-           current={title:line.replace(/^#{2,3}\s+/,'').trim(),lines:[]};
-         }else if(line==='---'){
-           if(current) current.lines.push('');
-         }else{
-           if(!current) current={title:'AI Trading Review',lines:[]};
-           current.lines.push(raw);
-         }
-       }
-       push();
-       if(!sections.length){
-         return `<div class="ai-review-section"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${inline(text).replace(/\n/g,'<br>')}</p></div>`;
-       }
-       return sections.map(sec=>{
-         const bullets=[];
-         const paras=[];
-         let pending=[];
-         const flush=()=>{ if(pending.length){ paras.push(pending.join(' ')); pending=[]; } };
-         for(const raw of sec.lines){
-           const line=raw.trim();
-           if(!line){ flush(); continue; }
-           if(/^[-*]\s+/.test(line)){
-             flush(); bullets.push(line.replace(/^[-*]\s+/,''));
-           }else if(/^\d+[.)]\s+/.test(line)){
-             flush(); bullets.push(line.replace(/^\d+[.)]\s+/,''));
-           }else{
-             pending.push(line);
-           }
-         }
-         flush();
-         return `<div class="ai-review-section"><div class="ai-review-section-title">${escText(sanitizeAI(sec.title))}</div>${paras.map(x=>`<p class="ai-review-paragraph">${inline(x)}</p>`).join('')}${bullets.length?`<ul class="ai-review-bullets">${bullets.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`:''}</div>`;
-       }).join('');
-     };
-     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReview(review)}</div></div>`;
+     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReviewText(review)}</div></div>`;
    }
    box.className='ai-context-result ai-context-ok';
    box.innerHTML=html;
+   showAIAskPanel();
+   wireAIAsk();
  }catch(err){
    console.error('AI review error',err);
    friendlyError();
@@ -2080,6 +2057,113 @@ async function prepareAIReview(){
    btn.disabled=false; btn.textContent='Run AI Review';
  }
 }
+function normalizeAIReviewText(text){
+  let s=String(text||'').replace(/\r/g,'').trim();
+  const headings=[
+    'PERFORMANCE SUMMARY',
+    'TRADE BEHAVIOR & CHARTS',
+    'TRADE BEHAVIOR',
+    'SEQUENCE PATTERNS',
+    'TRADE-FREQUENCY ANALYSIS',
+    'WHAT STANDS OUT',
+    'POSSIBLE EXPERIMENTS',
+    'DATA LIMITATIONS'
+  ];
+  headings.forEach(h=>{
+    const re=new RegExp('\\s*('+h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')\\s*','gi');
+    s=s.replace(re,'\\n## $1\\n');
+  });
+  s=s.replace(/\\n{3,}/g,'\\n\\n');
+  return s.trim();
+}
+
+function sanitizeAIText(txt){
+  return String(txt??'')
+    .replace(/\\btrade_count\\b/gi,'number of trades')
+    .replace(/\\brecorded_trade_count\\b/gi,'recorded trades')
+    .replace(/\\bdeclared_trade_count\\b/gi,'declared trades')
+    .replace(/\\bresult_r\\b/gi,'R result')
+    .replace(/\\bresult_usd\\b/gi,'dollar result')
+    .replace(/\\btrade_id\\b/gi,'trade')
+    .replace(/\\bmanual_sequence\\b/gi,'day sequence')
+    .replace(/\\br_derived_sequence\\b/gi,'actual recorded sequence')
+    .replace(/\\brecorded_total_trades\\b/gi,'recorded trades')
+    .replace(/\\bdeclared_total_trades\\b/gi,'declared trades')
+    .replace(/\\bavg_r_per_trade\\b/gi,'average R per trade')
+    .replace(/\\bavg_r_per_day\\b/gi,'average R per day')
+    .replace(/\\bmax_drawdown_r\\b/gi,'maximum drawdown in R')
+    .replace(/\\blongest_loss_streak\\b/gi,'longest losing streak')
+    .replace(/\\s*\\(Trade ID:\\s*[0-9a-f-]{20,}\\)\\s*/gi,' ')
+    .replace(/\\bTrade ID:\\s*[0-9a-f-]{20,}\\b/gi,'')
+    .replace(/\\bUUID\\b/gi,'')
+    .replace(/\\bJSON\\b/gi,'')
+    .replace(/\\bdatabase record\\b/gi,'journaled trade')
+    .replace(/\\bdata record\\b/gi,'journaled trade')
+    .replace(/\\bempty field\\b/gi,'not entered')
+    .replace(/\\bfield is blank\\b/gi,'was not entered')
+    .replace(/\\bfield\\b/gi,'entry')
+    .replace(/\\s{2,}/g,' ')
+    .trim();
+}
+
+function renderAIReviewText(text){
+  const normalized=normalizeAIReviewText(sanitizeAIText(text));
+  const esc=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline=value=>esc(sanitizeAIText(value)).replace(/\\*\\*(.+?)\\*\\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
+  const sections=[];let current=null;
+  const push=()=>{if(current){const cleaned=current.lines.filter(x=>x.trim()&&x.trim()!=='---');if(cleaned.length)sections.push({...current,lines:cleaned});}};
+  for(const raw of normalized.split(/\\n/)){
+    const line=raw.trim();
+    if(/^#{2,3}\\s+/.test(line)){push();current={title:line.replace(/^#{2,3}\\s+/,'').trim(),lines:[]};}
+    else if(line==='---'){if(current)current.lines.push('');}
+    else{if(!current)current={title:'AI Trading Review',lines:[]};current.lines.push(raw);}
+  }
+  push();
+  if(!sections.length)return `<div class="ai-review-section"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${inline(normalized).replace(/\\n/g,'<br>')}</p></div>`;
+  return sections.map(sec=>{
+    const bullets=[];const paras=[];let pending=[];const flush=()=>{if(pending.length){paras.push(pending.join(' '));pending=[];}};
+    for(const raw of sec.lines){const line=raw.trim();if(!line){flush();continue;}if(/^[-*]\\s+/.test(line)){flush();bullets.push(line.replace(/^[-*]\\s+/,''));}else if(/^\\d+[.)]\\s+/.test(line)){flush();bullets.push(line.replace(/^\\d+[.)]\\s+/,''));}else{pending.push(line);}}
+    flush();
+    return `<div class="ai-review-section"><div class="ai-review-section-title">${esc(sanitizeAIText(sec.title))}</div>${paras.map(x=>`<p class="ai-review-paragraph">${inline(x)}</p>`).join('')}${bullets.length?`<ul class="ai-review-bullets">${bullets.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`:''}</div>`;
+  }).join('');
+}
+
+function showAIAskPanel(){
+  const panel=$('aiAskPanel'); if(panel)panel.hidden=false;
+}
+
+async function askAIQuestion(){
+  const input=$('aiQuestion'),btn=$('aiAskButton'),result=$('aiAskResult');
+  if(!input||!btn||!result)return;
+  const question=String(input.value||'').trim();
+  if(!question){toast('Type a question for Bluebird AI.');return;}
+  if(!sb||!session){toast('Sign in first to ask your private AI review.');return;}
+  const range=analyticsGetRange();
+  btn.disabled=true;btn.textContent='Thinking…';result.hidden=false;result.className='ai-ask-result';result.innerHTML='<div class="ai-ask-loading">Bluebird is analyzing your selected journal period…</div>';
+  try{
+    const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null,question}});
+    if(error)throw error;
+    const answer=String(data?.answer||data?.review||'').trim();
+    if(!answer)throw new Error('No AI answer returned');
+    result.className='ai-ask-result';
+    result.innerHTML=`<div class="ai-review-output" style="margin:0"><div class="ai-review-output-head"><span>BLUEBIRD AI</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReviewText(answer)}</div></div>`;
+  }catch(err){
+    console.error('AI question error',err);
+    result.className='ai-ask-result ai-ask-error';
+    result.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:4px">Your journal is safe. Please try the question again in a moment.</div>';
+  }finally{
+    btn.disabled=false;btn.textContent='Ask AI';
+  }
+}
+
+function wireAIAsk(){
+  const btn=$('aiAskButton'),input=$('aiQuestion');
+  if(btn&&!btn.dataset.wired){btn.dataset.wired='1';btn.addEventListener('click',askAIQuestion);}
+  document.querySelectorAll('.ai-quick-btn').forEach(b=>{if(b.dataset.wired)return;b.dataset.wired='1';b.addEventListener('click',()=>{if(input){input.value=b.dataset.aiQ||'';input.focus();}});});
+}
+
+document.addEventListener('DOMContentLoaded',()=>wireAIAsk());
+
 function renderAnalytics(){
  const allRows=visibleTrades();const range=analyticsGetRange();const rows=filterAnalyticsRows(allRows,range);
  const wins=rows.filter(t=>Number(t.result_r)>0),losses=rows.filter(t=>Number(t.result_r)<0),R=rows.reduce((a,t)=>a+Number(t.result_r||0),0);
