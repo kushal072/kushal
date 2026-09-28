@@ -668,7 +668,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Bluebird tests the first 1, 2, 3 and 4 recorded trades per day, plus all recorded trades, before Gemini interprets the differences.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
-    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Uses your selected journal period and the historical analysis engine. Missing trade results are never invented.</span></div><div id="aiEngineInfo" class="ai-engine-info" hidden></div>
+    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button></div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
   </div>
 </div>
@@ -2004,11 +2004,6 @@ async function prepareAIReview(){
    const days=Array.isArray(ctx.days)?ctx.days:[];
    const scenarios=Array.isArray(data?.scenarios)?data.scenarios:(Array.isArray(ctx.scenarios)?ctx.scenarios:[]);
    const review=sanitizeAI(String(data?.review||'').trim());
-   const engineInfo=$('aiEngineInfo');
-   if(engineInfo){
-     engineInfo.hidden=false;
-     engineInfo.innerHTML='<strong>Historical analysis included.</strong> Bluebird calculated the journal history first; AI only interprets those measured results.';
-   }
 
    const seqForDay=d=>String(d.manual_sequence||d.observed_sequence||'—').replace(/\s+/g,'');
    const clsForSeq=s=>s==='—'?'':(/W/.test(s)&&!/L|BE/.test(s)?'w':(/L/.test(s)&&!/W|BE/.test(s)?'l':'be'));
@@ -2072,11 +2067,9 @@ async function prepareAIReview(){
    }
    box.className='ai-context-result ai-context-ok';
    box.innerHTML=html;
-   if(note)note.textContent='AI review generated from your selected journal period. Historical calculations come from your journal; missing trade results are never invented.';
  }catch(err){
    console.error('AI review error',err);
    friendlyError();
-   const engineInfo=$('aiEngineInfo'); if(engineInfo)engineInfo.hidden=true;
  }finally{
    btn.disabled=false; btn.textContent='Run AI Review';
  }
