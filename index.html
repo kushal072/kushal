@@ -667,7 +667,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>What changes if you trade less</b><p>Bluebird will calculate historical trade-cap scenarios first, then the AI can explain the differences.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
-    <div class="ai-review-actions"><button class="btn primary" data-nav="pro" type="button">Open Pro</button><span class="ai-review-note">No AI request is being made yet. This is the product mock-up for the final review experience.</span></div>
+    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Prepare AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Loads your selected journal period into the secure AI analysis pipeline. No AI model is called yet.</span></div>
+    <div id="aiContextResult" class="ai-context-result" hidden></div>
   </div>
 </div>
 <div class="grid2" style="margin-top:10px"><div class="card locked"><div class="veil"><div><h3>Monte Carlo — Pro</h3><p>Run thousands of possible future paths from your actual results.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div><div class="card locked"><div class="veil"><div><h3>Prop Firm Simulator — Pro</h3><p>Test your actual journal statistics against your prop-firm rules.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div></div>
@@ -675,6 +676,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 
 <section id="page-pro" class="page">
 <style>
+ .ai-context-result{margin-top:10px;border:1px solid #16384d;background:#06131d;border-radius:8px;padding:11px;color:#9bb1c0;font-size:11px;line-height:1.55}.ai-context-result strong{color:#e7f7ff}.ai-context-ok{border-color:#155f49;background:linear-gradient(145deg,#061a16,#06131d)}.ai-context-error{border-color:#6b2630;background:#190a0d}.ai-context-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-top:8px}.ai-context-day{border:1px solid #17384c;border-radius:7px;padding:8px;background:#07141d}.ai-context-day b{color:#e7f7ff;display:block;margin-bottom:3px}.ai-context-seq{font-weight:800;letter-spacing:1px}.ai-context-seq.w{color:#78d7a7}.ai-context-seq.l{color:#ff9aa3}.ai-context-seq.be{color:#eac779}@media(max-width:760px){.ai-context-days{grid-template-columns:1fr}.ai-review-actions{flex-wrap:wrap}.ai-review-note{width:100%}}
 .ai-review-card{margin-top:10px;border:1px solid #154968;background:linear-gradient(145deg,#061521,#050d14);border-radius:10px;padding:15px;box-shadow:0 16px 36px rgba(0,0,0,.18)}
 .ai-review-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
 .ai-kicker{font-size:8px;letter-spacing:2px;color:#49b8ff}
@@ -948,6 +950,7 @@ function durationText(ms){
   parts.push(secs+"s");
   return parts.join(" ");
 }
+document.addEventListener('click',e=>{ const b=e.target.closest('#aiPrepareReview'); if(b){ e.preventDefault(); prepareAIReview(); } });
 async function initCloud(){
  if(!CFG.SUPABASE_URL||!CFG.SUPABASE_KEY){toast("Offline mode: add your Supabase public key to config.js when you are ready.");return}
  const tag=document.createElement("script");tag.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
@@ -1912,6 +1915,33 @@ function renderAIMockSnapshot(rows){
  for(const [d,arr] of dayMap){arr.sort((a,b)=>journalTradeSortKey(a,0)-journalTradeSortKey(b,0)||String(a.id||'').localeCompare(String(b.id||'')));const s=arr.map(t=>Number(t.result_r)>0?'W':Number(t.result_r)<0?'L':'BE').join('');if(s)seqs[s]=(seqs[s]||0)+1}
  const topSeq=Object.entries(seqs).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
  host.innerHTML=`<div class="ai-mock-stat"><span>TRADES</span><b>${list.length}</b></div><div class="ai-mock-stat"><span>TRADING DAYS</span><b>${days}</b></div><div class="ai-mock-stat"><span>TOTAL R</span><b class="${R>=0?'pos':'neg'}">${R>=0?'+':''}${fmt(R)}R</b></div><div class="ai-mock-stat"><span>AVG / DAY</span><b>${avgPerDay.toFixed(1)}</b></div><div class="ai-mock-stat"><span>WINS</span><b>${wins}</b></div><div class="ai-mock-stat"><span>LOSSES</span><b>${losses}</b></div><div class="ai-mock-stat"><span>COMMON SEQ</span><b>${topSeq}</b></div><div class="ai-mock-stat"><span>WINDOW</span><b style="font-size:11px">${days?analyticsFmtDate([...dayMap.keys()].sort()[0],'short')+' → '+analyticsFmtDate([...dayMap.keys()].sort().slice(-1)[0],'short'):'—'}</b></div>`;
+}
+
+async function prepareAIReview(){
+ const btn=$('aiPrepareReview'),note=$('aiReviewNote'),box=$('aiContextResult');
+ if(!btn||!box)return;
+ if(!sb||!session){toast('Sign in first to prepare your private AI review.');return;}
+ const range=analyticsGetRange();
+ btn.disabled=true; btn.textContent='Loading journal…';
+ box.hidden=false; box.className='ai-context-result'; box.innerHTML='Preparing your selected journal data securely…';
+ try{
+   const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
+   if(error)throw error;
+   const ctx=data?.context||{}; const summary=ctx.summary||{}; const days=Array.isArray(ctx.days)?ctx.days:[];
+   const seqForDay=d=>String(d.manual_sequence||d.observed_sequence||'—').replace(/\s+/g,'');
+   const clsForSeq=s=>s==='—'?'':(/W/.test(s)&&!/L|BE/.test(s)?'w':(/L/.test(s)&&!/W|BE/.test(s)?'l':'be'));
+   const dayHtml=days.slice(0,8).map(d=>`<div class="ai-context-day"><b>${d.date||'—'}</b><div>${Number(d.trade_count||0)} trade${Number(d.trade_count||0)===1?'':'s'} · <span class="ai-context-seq ${clsForSeq(seqForDay(d))}">${seqForDay(d)}</span> · ${Number(d.total_r||0)>=0?'+':''}${fmt(Number(d.total_r||0))}R</div></div>`).join('');
+   box.className='ai-context-result ai-context-ok';
+   box.innerHTML=`<strong>AI data pipeline connected.</strong> Bluebird returned <b>${Number(summary.total_trades||0)}</b> trade${Number(summary.total_trades||0)===1?'':'s'} across <b>${Number(summary.trading_days||0)}</b> trading day${Number(summary.trading_days||0)===1?'':'s'} for <b>${range.label}</b>.<div class="ai-context-days">${dayHtml||'<div class="ai-context-day">No trades in this period.</div>'}</div>${days.length>8?'<div style="margin-top:7px">Showing the first 8 days here; the full structured dataset was returned to the app.</div>':''}`;
+   if(note)note.textContent='Journal context loaded successfully. The next step is to pass this structured context to the AI model.';
+ }catch(err){
+   console.error('AI review context error',err);
+   box.className='ai-context-result ai-context-error';
+   box.innerHTML=`<strong>Could not load AI context.</strong> ${String(err?.message||err||'Unknown error')}`;
+   if(note)note.textContent='No AI model request was made.';
+ }finally{
+   btn.disabled=false; btn.textContent='Prepare AI Review';
+ }
 }
 
 function renderAnalytics(){
