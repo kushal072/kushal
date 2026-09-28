@@ -1008,8 +1008,8 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       <div id="mcResultBody" hidden>
         <div class="pro-tool-metrics">
           <div class="pro-tool-metric"><span>Median final R</span><b id="mcMedianR">—</b></div>
-          <div class="pro-tool-metric good"><span title="A result near the stronger end of the simulated outcomes">Higher-end result</span><b id="mcP95R">—</b></div>
-          <div class="pro-tool-metric bad"><span title="A result near the weaker end of the simulated outcomes">Lower-end result</span><b id="mcP5R">—</b></div>
+          <div class="pro-tool-metric"><span title="The result near the stronger end of the simulated outcomes">Higher-end result</span><b id="mcP95R">—</b></div>
+          <div class="pro-tool-metric"><span title="The result near the weaker end of the simulated outcomes">Lower-end result</span><b id="mcP5R">—</b></div>
           <div class="pro-tool-metric"><span>Chance positive</span><b id="mcPositive">—</b></div>
           <div class="pro-tool-metric warn"><span>Median max DD</span><b id="mcDD">—</b></div>
           <div class="pro-tool-metric"><span>Samples</span><b id="mcSamples">—</b></div>
@@ -1274,7 +1274,14 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       finals.push(eq);dds.push(dd);if(eq>0)positive++;if(r<80)paths.push(path);
     }
     $id('mcPlaceholder').hidden=true;$id('mcResultBody').hidden=false;
-    $id('mcMedianR').textContent=fmtR(percentile(finals,.5));$id('mcP95R').textContent=fmtR(percentile(finals,.95));$id('mcP5R').textContent=fmtR(percentile(finals,.05));$id('mcPositive').textContent=(positive/runs*100).toFixed(1)+'%';$id('mcDD').textContent=fmtR(percentile(dds,.5));
+    const medianR=percentile(finals,.5), highR=percentile(finals,.95), lowR=percentile(finals,.05);
+    $id('mcMedianR').textContent=fmtR(medianR);
+    $id('mcP95R').textContent=fmtR(highR);
+    $id('mcP5R').textContent=fmtR(lowR);
+    const toneByValue=(id,value)=>{const el=$id(id);const card=el?.closest('.pro-tool-metric');if(!el||!card)return;card.classList.remove('good','bad');if(Number(value)>0)card.classList.add('good');else if(Number(value)<0)card.classList.add('bad');};
+    toneByValue('mcP95R',highR);
+    toneByValue('mcP5R',lowR);
+    $id('mcPositive').textContent=(positive/runs*100).toFixed(1)+'%';$id('mcDD').textContent=fmtR(percentile(dds,.5));
     $id('mcSamples').textContent=mode==='journal'?String(outcomes.length)+' R results':`${Math.round(outcomes[0].wr*1000)/10}% / ${outcomes[0].rr}:1 model`;
     $id('mcSourceNote').textContent=`${sourceText} · ${runs.toLocaleString()} paths · ${tradesPerPath} trades/path · ${fmtUSD(risk)} per 1R · start ${fmtUSD(start)}.`;
     drawMC(paths);
@@ -3360,6 +3367,96 @@ async function exportAI(){
 .pf-results-section{margin-top:12px;padding-top:10px;border-top:1px solid #15394d}
 .pf-results-section-title{font-size:8px;letter-spacing:1.2px;font-weight:950;color:#75bde1;margin-bottom:8px}
 @media(max-width:700px){.pf-inline-help{width:100%}.pf-results-summary{font-size:11px}.pf-inline-select{height:38px;font-size:12px}}
+</style>
+
+<style id="pro-tools-v87-polish">
+/* Bluebird Pro v87 polish */
+.pro-tool-switcher{gap:12px;margin-bottom:14px}
+.pro-tool-switch{min-height:82px;padding:16px 18px;border-radius:12px;border:1px solid #1a4d68;background:linear-gradient(145deg,#071a28,#040c12);box-shadow:0 10px 26px rgba(0,0,0,.16);position:relative;overflow:hidden}
+.pro-tool-switch::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:transparent;transition:background .18s ease}
+.pro-tool-switch:hover{transform:none;border-color:#2a82ae;background:linear-gradient(145deg,#092033,#05101a)}
+.pro-tool-switch.active{border-color:#1aa2ef;background:linear-gradient(145deg,#0a2b43,#061824);box-shadow:0 0 0 1px rgba(26,162,239,.12) inset,0 12px 28px rgba(0,31,52,.2)}
+.pro-tool-switch.active::after{background:#1aa2ef}
+.pro-tool-switch-title{font-size:15px;line-height:1.2;letter-spacing:.1px}
+.pro-tool-switch-sub{font-size:10px;line-height:1.5;margin-top:6px;color:#9cb6c4}
+.pro-tool-switch.active .pro-tool-switch-sub{color:#b9d8e8}
+
+/* Journey / payout section: distinct, readable, static — no flashing animation. */
+.pf-results-section:has(.pf-cycle){
+  padding:16px 0 0;
+  margin-top:16px;
+  border-top:1px solid #1a4258;
+}
+.pf-results-section:has(.pf-cycle) .pf-results-section-title{
+  font-size:10px;
+  letter-spacing:1.35px;
+  color:#a9dbf3;
+  margin-bottom:11px;
+}
+.pf-cycle{
+  position:relative;
+  gap:11px;
+  margin-top:10px;
+  padding:12px;
+  border:1px solid #18465e;
+  border-radius:12px;
+  background:linear-gradient(180deg,#061823,#040d14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 10px 24px rgba(0,0,0,.12);
+}
+.pf-cycle-step{
+  position:relative;
+  min-height:154px;
+  padding:14px 14px 13px;
+  border-radius:10px;
+  background:linear-gradient(180deg,#081d2a,#06131c);
+  border:1px solid #17445b;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+}
+.pf-cycle-step:nth-child(1){border-top:3px solid #2b91c2}
+.pf-cycle-step:nth-child(2){border-top:3px solid #15a8de}
+.pf-cycle-step:nth-child(3){border-top:3px solid #16d39b}
+.pf-cycle-step .n{font-size:8px;letter-spacing:1.25px;font-weight:950;color:#79c8ed}
+.pf-cycle-step:nth-child(3) .n{color:#73e4bd}
+.pf-cycle-step .t{margin-top:9px;font-size:15px;line-height:1.45;font-weight:950;color:#f0f8fc;letter-spacing:-.1px}
+.pf-cycle-step .d{margin-top:8px;font-size:10px;line-height:1.6;color:#91a9b7}
+.pf-cycle-step:not(:last-child)::after{
+  content:"→";
+  position:absolute;
+  right:-10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:20px;
+  height:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #245a73;
+  border-radius:50%;
+  background:#06131d;
+  color:#78c9eb;
+  font-size:11px;
+  font-weight:950;
+  z-index:3;
+}
+.pf-cycle-step:nth-child(2)::after{color:#70dfb9;border-color:#286b62}
+.pf-note{margin-top:12px;background:linear-gradient(180deg,#071823,#05111a);border-color:#19465d;color:#a4bdca;padding:11px 13px}
+
+/* Positive = green, negative = red. JS toggles these classes dynamically. */
+#mcP95R,#mcP5R{color:#edf8ff}
+.pro-tool-metric.good #mcP95R,.pro-tool-metric.good #mcP5R{color:#58e1b0}
+.pro-tool-metric.bad #mcP95R,.pro-tool-metric.bad #mcP5R{color:#ff8590}
+
+@media(max-width:900px){
+  .pf-cycle{grid-template-columns:1fr}
+  .pf-cycle-step{min-height:unset}
+  .pf-cycle-step:not(:last-child)::after{right:auto;left:50%;top:auto;bottom:-11px;transform:translateX(-50%) rotate(90deg)}
+}
+@media(max-width:700px){
+  .pro-tool-switch{min-height:74px;padding:14px 15px}
+  .pro-tool-switch-title{font-size:14px}
+  .pro-tool-switch-sub{font-size:10px}
+  .pf-cycle{padding:10px}
+}
 </style>
 </body></html>`;
     zip.file('bluebird-journal-report.html',reportHtml);
