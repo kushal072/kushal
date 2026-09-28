@@ -926,7 +926,12 @@ async function syncCloudNow(){
       if(!map[x.trade_id]) map[x.trade_id]=new Set();
       map[x.trade_id].add(x.storage_path);
     });
-    const trades=r.data||[]; trades.forEach(t=>t.images=map[t.id]?[...map[t.id]]:[]);
+    let trades=await pruneMissingCloudImageRows(r.data||[]);
+    trades.forEach(t=>{
+      const validSet=new Set(Array.isArray(t.images)?t.images:[]);
+      const mapped=map[t.id]?[...map[t.id]]:[];
+      t.images=mapped.filter(path=>validSet.size ? validSet.has(path) : false);
+    });
     const jd=await sb.from("journal_days").select("trade_date,trade_count,manual_sequence").eq("user_id",session.user.id);
     if(!jd.error){
       state.daySummaries={};
@@ -1026,7 +1031,11 @@ async function loadCloud(){
       if(!map[x.trade_id]) map[x.trade_id]=new Set();
       map[x.trade_id].add(x.storage_path);
     });
-  state.trades.forEach(t=>t.images=map[t.id]?[...map[t.id]]:[]);
+  state.trades.forEach(t=>{
+    const validSet=new Set(Array.isArray(t.images)?t.images:[]);
+    const mapped=map[t.id]?[...map[t.id]]:[];
+    t.images=mapped.filter(path=>validSet.size ? validSet.has(path) : false);
+  });
   saveLocal();renderAll();
   if(profile && profile.name_setup_complete===false) setTimeout(openNameSetup,160);
   toast("Bluebird cloud journal loaded.");
