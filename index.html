@@ -510,6 +510,22 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
   #page-journal #trades .mobile-view-image{display:inline-flex!important}
 }
 </style>
+
+<style>
+.trade-cap-card{margin-top:10px;padding:14px 16px;border:1px solid #123a55;background:linear-gradient(180deg,#071725,#06111a);border-radius:10px}
+.trade-cap-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+.trade-cap-title{font-size:12px;font-weight:950;letter-spacing:.2px;color:#e4f4ff;margin:0}
+.trade-cap-sub{font-size:9px;color:#7890a2;margin-top:3px;line-height:1.45}
+.trade-cap-table{width:100%;border-collapse:separate;border-spacing:0 5px;font-size:9px}
+.trade-cap-table th{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#6f8798;text-align:left;padding:0 8px 4px;font-weight:900}
+.trade-cap-table td{padding:9px 8px;background:#07131d;border-top:1px solid #102f46;border-bottom:1px solid #102f46;color:#cfe0ec}
+.trade-cap-table td:first-child{border-left:1px solid #102f46;border-radius:8px 0 0 8px;font-weight:950;color:#f0f7fb}
+.trade-cap-table td:last-child{border-right:1px solid #102f46;border-radius:0 8px 8px 0}
+.trade-cap-r.pos{color:#18eaa0;font-weight:950}.trade-cap-r.neg{color:#ff6670;font-weight:950}
+.trade-cap-note{margin-top:8px;font-size:8.5px;color:#627889;line-height:1.45}
+.trade-cap-badge{display:inline-flex;align-items:center;padding:3px 6px;border-radius:999px;border:1px solid #244b63;background:#0a1823;color:#a7c3d4;font-size:8px;font-weight:900}
+@media(max-width:680px){.trade-cap-head{align-items:flex-start;flex-direction:column}.trade-cap-table{font-size:8px}.trade-cap-table th,.trade-cap-table td{padding:8px 6px}.trade-cap-table th:nth-child(5),.trade-cap-table td:nth-child(5),.trade-cap-table th:nth-child(6),.trade-cap-table td:nth-child(6){display:none}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -629,6 +645,14 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 </div>
 <div class="card analytics-summary-card" style="margin-top:10px"><div id="analytics" class="metrics analytics-metrics"></div></div>
 <div class="card analytics-chart-card" style="margin-top:10px"><div class="analytics-chart-head"><div><div class="smallbrand" style="font-size:8px;letter-spacing:2px">EQUITY CURVE</div><h3 style="font-size:11px;color:#d9efff;margin:3px 0 0">Cumulative journal performance</h3><div id="analyticsChartMeta" class="analytics-chart-meta">Cumulative R for the selected period</div></div><div id="analyticsChartResult" class="analytics-chart-result pos">+0R</div></div><div class="analytics-chart-wrap"><div id="journalCurve" class="chart analytics-chart"></div></div></div>
+<div class="trade-cap-card" id="tradeCapScenarios">
+  <div class="trade-cap-head">
+    <div><div class="smallbrand" style="font-size:8px;letter-spacing:1.8px">HISTORICAL TRADE-CAP SCENARIOS</div><h3 class="trade-cap-title">What your actual journal would have produced with fewer trades</h3><div class="trade-cap-sub">Uses the first N chronological trades on each day. R and $ stay tied to the real trade records; nothing is invented.</div></div>
+    <span class="trade-cap-badge">AI-ready foundation</span>
+  </div>
+  <div id="tradeCapScenarioTable"></div>
+  <div id="tradeCapScenarioNote" class="trade-cap-note"></div>
+</div>
 <div class="grid2" style="margin-top:10px"><div class="card locked"><div class="veil"><div><h3>Monte Carlo — Pro</h3><p>Run thousands of possible future paths from your actual results.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div><div class="card locked"><div class="veil"><div><h3>AI Trading Review — Pro</h3><p>Analyze your own journal for recurring strengths, weaknesses and patterns.</p><button class="btn primary" data-nav="pro">View Pro</button></div></div><div class="big" style="color:#2aaaff">PRO</div></div></div>
 </section>
 
@@ -1831,6 +1855,46 @@ function smoothPath(points){
   }
   return d;
 }
+
+function renderTradeCapScenarios(rows){
+  const host=$('tradeCapScenarioTable'), note=$('tradeCapScenarioNote');
+  if(!host)return;
+  const dayMap=new Map();
+  for(const t of rows||[]){
+    if(!t?.trade_date)return;
+    const date=String(t.trade_date).slice(0,10);
+    if(!dayMap.has(date))dayMap.set(date,[]);
+    dayMap.get(date).push(t);
+  }
+  const days=[...dayMap.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,list])=>{
+    list.sort((a,b)=>{const ka=journalTradeSortKey(a,0),kb=journalTradeSortKey(b,0);if(ka!==kb)return ka-kb;return String(a.id||'').localeCompare(String(b.id||''));});
+    return {date,list};
+  });
+  if(!days.length){host.innerHTML='<div class="analytics-empty">No trades in this period.</div>';note.textContent='';return;}
+  const caps=[1,2,3,4];
+  const results=caps.map(cap=>{
+    const picked=[]; let completeDays=0;
+    for(const d of days){
+      if(!d.list.length)continue;
+      const take=d.list.slice(0,cap);
+      if(d.list.length>=cap)completeDays++;
+      picked.push(...take);
+    }
+    const totalR=picked.reduce((a,t)=>a+Number(t.result_r||0),0);
+    const hasUsd=picked.some(t=>t.result_usd!==null&&t.result_usd!==undefined&&t.result_usd!=='');
+    const totalUsd=picked.reduce((a,t)=>a+Number(t.result_usd||0),0);
+    const wins=picked.filter(t=>Number(t.result_r)>0).length;
+    let peak=0,eq=0,maxDD=0;
+    const ordered=[...picked].sort((a,b)=>{const d=String(a.trade_date).localeCompare(String(b.trade_date)); if(d!==0)return d; const ta=journalTradeSortKey(a,0), tb=journalTradeSortKey(b,0); if(ta!==tb)return ta-tb; return String(a.id||'').localeCompare(String(b.id||''));});
+    for(const t of ordered){eq+=Number(t.result_r||0);peak=Math.max(peak,eq);maxDD=Math.max(maxDD,peak-eq);}
+    const wr=picked.length?wins/picked.length*100:0;
+    return {cap,trades:picked.length,totalR,totalUsd,hasUsd,wr,maxDD,completeDays,days:days.length};
+  });
+  host.innerHTML=`<div class="table-scroll"><table class="trade-cap-table"><thead><tr><th>TRADE CAP</th><th>TRADES</th><th>WIN RATE</th><th>TOTAL R</th><th>TOTAL $</th><th>MAX DD</th></tr></thead><tbody>${results.map(r=>`<tr><td>First ${r.cap} / day</td><td>${r.trades}</td><td>${r.trades?r.wr.toFixed(1)+'%':'—'}</td><td class="trade-cap-r ${r.totalR>=0?'pos':'neg'}">${r.totalR>=0?'+':''}${fmt(r.totalR)}R</td><td class="trade-cap-r ${r.totalUsd>=0?'pos':'neg'}">${r.hasUsd?money(r.totalUsd):'—'}</td><td>${fmt(r.maxDD)}R</td></tr>`).join('')}</tbody></table></div>`;
+  const incomplete=results.filter(r=>r.completeDays<r.days).map(r=>`${r.cap}/day`).join(', ');
+  note.textContent=incomplete?`Scenario rule: “first N trades per day” using the real chronological journal. Some days had fewer recorded trades than the selected cap, so those days contribute only the trades that actually exist. Days below a cap: ${incomplete}.`:`Scenario rule: “first N trades per day” using the real chronological journal. All selected days had enough recorded trades for every displayed cap.`;
+}
+
 function renderAnalytics(){
  const allRows=visibleTrades();const range=analyticsGetRange();const rows=filterAnalyticsRows(allRows,range);
  const wins=rows.filter(t=>Number(t.result_r)>0),losses=rows.filter(t=>Number(t.result_r)<0),R=rows.reduce((a,t)=>a+Number(t.result_r||0),0);
@@ -1886,6 +1950,7 @@ function renderAnalytics(){
  const showTip=(evt)=>{const idx=Number(evt.currentTarget.dataset.idx),d=pointsData[idx],p=pts[idx],r=d.dailyR>=0?'+':'';const cr=d.cumulativeR>=0?'+':'';const rect=chartEl.getBoundingClientRect();const px=evt.clientX-rect.left,py=evt.clientY-rect.top;hoverDot.setAttribute('cx',p[0]);hoverDot.setAttribute('cy',p[1]);hoverDot.setAttribute('stroke',d.dailyR<0?'#ff5360':'#18eaa0');hoverDot.setAttribute('opacity','1');tooltip.innerHTML=`<div class="tt-date">${analyticsFmtDate(d.date,'long')}</div><div class="tt-line">Daily R: <span class="tt-r ${d.dailyR<0?'neg':''}">${r}${fmt(d.dailyR)}R</span></div><div class="tt-line">Cumulative R: <span class="tt-r ${d.cumulativeR<0?'neg':''}">${cr}${fmt(d.cumulativeR)}R</span></div><div class="tt-line">Trades: ${d.trades}</div>`;tooltip.style.display='block';tooltip.style.left=Math.min(Math.max(8,px+12),chartEl.clientWidth-tooltip.offsetWidth-8)+'px';tooltip.style.top=Math.max(8,py-92)+'px';};
  const hideTip=()=>{tooltip.style.display='none';hoverDot.setAttribute('opacity','0')};
  chartEl.querySelectorAll('.analytics-hit').forEach(el=>{el.addEventListener('mouseenter',showTip);el.addEventListener('mousemove',showTip);el.addEventListener('mouseleave',hideTip);});
+ renderTradeCapScenarios(rows);
 }
 
 function longest(rows,win){let best=0,cur=0;for(const t of [...rows].sort((a,b)=>a.trade_date.localeCompare(b.trade_date)||a.created_at.localeCompare(b.created_at))){if((t.result_r>0)===win){cur++;best=Math.max(best,cur)}else cur=0}return best}
