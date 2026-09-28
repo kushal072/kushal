@@ -638,7 +638,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div>
       <div class="smallbrand ai-kicker">AI TRADING REVIEW</div>
       <h3 class="ai-review-title">A structured review of your own journal</h3>
-      <p class="ai-review-sub">Bluebird analyzes your journal, trade order, daily sequences, notes and selected period. Historical comparisons are calculated from your actual journal before AI interprets the results.</p>
+      <p class="ai-review-sub">Bluebird analyzes your journal, trade order, daily sequences, notes, chart screenshots and selected period. Historical comparisons are calculated from your actual journal before AI interprets the results.</p>
     </div>
     <div class="ai-review-status">PRO · AI ENGINE CONNECTED</div>
   </div>
@@ -656,7 +656,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
         <span class="ai-chip">R & $ performance</span>
         <span class="ai-chip">Drawdown & streaks</span>
         <span class="ai-chip">Session / setup patterns</span>
-        <span class="ai-chip">Screenshots & notes</span>
+        <span class="ai-chip">Chart screenshots & notes</span>
       </div>
     </div>
   </div>
@@ -664,7 +664,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div class="ai-panel-label">REPORT PREVIEW</div>
     <div class="ai-preview-body">
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Performance summary</b><p>AI will summarize what actually happened during the selected period.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Trade behavior</b><p>AI will identify recurring trade-order and sequence patterns without inventing missing results.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Trade behavior & charts</b><p>AI will combine recorded trade behavior with available chart screenshots and notes without inventing missing details.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Bluebird tests the first 1, 2, 3 and 4 recorded trades per day, plus all recorded trades, before Gemini interprets the differences.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
@@ -1927,7 +1927,7 @@ function renderAIMockSnapshot(rows){
    <div class="ai-mock-stat"><span>RECORDED TRADES</span><b>${list.length}</b></div>
    <div class="ai-mock-stat"><span>TRADING DAYS</span><b>${dayKeys.length}</b></div>
    <div class="ai-mock-stat"><span>TOTAL R</span><b class="${R>=0?'pos':'neg'}">${R>=0?'+':''}${fmt(R)}R</b></div>
-   <div class="ai-mock-stat"><span>AVG RECORDED / DAY</span><b>${avgPerDay.toFixed(1)}</b></div>
+   <div class="ai-mock-stat"><span>SCREENSHOTS</span><b>${list.reduce((n,t)=>n+(Array.isArray(t.images)?t.images.length:0),0)}</b></div>
    <div class="ai-mock-stat"><span>WINS</span><b>${wins}</b></div>
    <div class="ai-mock-stat"><span>LOSSES</span><b>${losses}</b></div>
    <div class="ai-mock-stat"><span>COMMON DAY SEQ</span><b>${topSeq}</b></div>`;
@@ -2018,6 +2018,12 @@ async function prepareAIReview(){
    let html=`<strong>AI review ready.</strong> <b>${Number(summary.declared_total_trades||0)}</b> declared trade${Number(summary.declared_total_trades||0)===1?'':'s'} across <b>${Number(summary.trading_days||0)}</b> trading day${Number(summary.trading_days||0)===1?'':'s'}, with <b>${Number(summary.recorded_total_trades||0)}</b> recorded result${Number(summary.recorded_total_trades||0)===1?'':'s'}, for <b>${range.label}</b>.`;
    html+=`<div class="ai-context-days">${dayHtml||'<div class="ai-context-day">No trades in this period.</div>'}</div>`;
    if(days.length>8) html+=`<div style="margin-top:7px">Showing a small preview here; the AI received the full selected period.</div>`;
+   const imageStats=data?.image_stats||null;
+   if(imageStats){
+     const analyzed=Number(imageStats.analyzed||0);
+     const omitted=Number(imageStats.omitted||0);
+     html+=`<div style="margin-top:7px"><strong>Visual context:</strong> ${analyzed} screenshot${analyzed===1?'':'s'} analyzed${omitted?` · ${omitted} additional image${omitted===1?'':'s'} left out to keep the AI request lightweight`:''}.</div>`;
+   }
 
    if(review){
      const escText=(value)=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
