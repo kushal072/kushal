@@ -514,7 +514,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 <style>
 </style>
 </head>
-<body>
+<body data-bluebird-build="v72">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -887,7 +887,6 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 
 <div class="pro-callout"><b style="color:#eaf8ff">Product tools are ready.</b> Payment is the remaining storefront connection. The Monte Carlo and Prop Firm tools above are available to Pro-entitled accounts while we build the billing layer.</div>
 
-
 <script>
 // v68 Pro tools: Monte Carlo + historical Prop Firm replay
 (function(){
@@ -899,7 +898,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     const x=Number(n||0);
     return (x>=0?'+':'-')+'$'+Math.abs(Math.round(x)).toLocaleString();
   };
-  const actualRecordedR = () => (typeof visibleTrades==='function'?visibleTrades():state.trades||[])
+  const actualRecordedR = () => (typeof window.bluebirdVisibleTrades==='function'?window.bluebirdVisibleTrades():[])
     .map(t=>Number(t?.result_r))
     .filter(Number.isFinite);
   const pathDD = path => {
@@ -923,8 +922,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     ctx.fillStyle='#7e98a9';ctx.font='10px Arial';ctx.fillText(fmtR(max),8,12);ctx.fillText(fmtR(min),8,h-2);
   }
   function runMonteCarlo(){
-    if(typeof proAccessActive==='function'&&!proAccessActive()){ $('mcLock').hidden=false; toast('Monte Carlo is a Pro feature.'); return; }
-    const samples=actualRecordedR(); if(samples.length<1){ $('mcResults').hidden=false; $('mcSourceNote').textContent='Monte Carlo needs at least 1 recorded R result. Add a journaled trade before running it.'; $('mcSamples').textContent='0 R results'; return; }
+    if(typeof window.bluebirdProAccessActive==='function'&&!window.bluebirdProAccessActive()){ $('mcLock').hidden=false; toast('Monte Carlo is a Pro feature.'); return; }
+    const samples=actualRecordedR(); if(samples.length<1){ $('mcResults').hidden=false; $('mcSourceNote').textContent='Monte Carlo needs at least 1 recorded R result. Add a journaled trade before running it.'; $('mcSamples').textContent=String(samples.length); return; }
     const runs=Math.min(10000,Math.max(100,+$('mcRuns').value||2000)), trades=Math.min(500,Math.max(10,+$('mcTrades').value||100)), risk=Math.max(1,+$('mcRisk').value||250), start=Math.max(0,+$('mcStart').value||50000);
     const finals=[],dds=[],paths=[]; let positive=0;
     for(let r=0;r<runs;r++){
@@ -937,8 +936,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     drawMC(paths);
   }
   function runPropSim(){
-    if(typeof proAccessActive==='function'&&!proAccessActive()){ $('pfLock').hidden=false; toast('Prop Firm Simulator is a Pro feature.'); return; }
-    const rows=(typeof visibleTrades==='function'?visibleTrades():state.trades||[]).filter(t=>Number.isFinite(Number(t?.result_r))).sort((a,b)=>{const da=String(a?.trade_date||''),db=String(b?.trade_date||''); if(da!==db)return da.localeCompare(db); return Number(a?.created_at||0)-Number(b?.created_at||0);});
+    if(typeof window.bluebirdProAccessActive==='function'&&!window.bluebirdProAccessActive()){ $('pfLock').hidden=false; toast('Prop Firm Simulator is a Pro feature.'); return; }
+    const rows=(typeof window.bluebirdVisibleTrades==='function'?window.bluebirdVisibleTrades():[]).filter(t=>Number.isFinite(Number(t?.result_r))).sort((a,b)=>{const da=String(a?.trade_date||''),db=String(b?.trade_date||''); if(da!==db)return da.localeCompare(db); return Number(a?.created_at||0)-Number(b?.created_at||0);});
     const start=Math.max(1,+$('pfStart').value||50000), target=Math.max(0,+$('pfTarget').value||3000), maxdd=Math.max(0,+$('pfDD').value||2000), dailyLimit=Math.max(0,+$('pfDaily').value||0), risk=Math.max(1,+$('pfRisk').value||250), trailing=$('pfDDType').value==='trailing';
     let bal=start,peak=start,maxUsed=0,failReason='',currentDay=''; let dayPnl=0,hitTarget=false;
     const dayMap={}; rows.forEach(t=>{const d=String(t?.trade_date||'').slice(0,10); (dayMap[d]||(dayMap[d]=[])).push(Number(t.result_r)*risk);});
@@ -1102,6 +1101,10 @@ function visibleTrades(){
   const cutoffKey=localDateKey(cutoff);
   return state.trades.filter(t=>String(t.trade_date||"").slice(0,10)>=cutoffKey);
 }
+// Public bridges for standalone Pro tools.
+window.bluebirdProAccessActive=proAccessActive;
+window.bluebirdVisibleTrades=visibleTrades;
+window.bluebirdState=state;
 function journalWeekRange(date, offsetWeeks=0){
   const d=new Date(date);d.setHours(0,0,0,0);
   const day=(d.getDay()+6)%7;
@@ -2179,6 +2182,12 @@ async function prepareAIReview(){
  const runOnce=async()=>{
    const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
    if(error)throw error;
+   if(typeof data==='string'){
+     try{return JSON.parse(data);}catch{return {review:data};}
+   }
+   if(data?.error && !data?.review && !data?.answer){
+     throw new Error(String(data.message||data.error));
+   }
    return data;
  };
 
@@ -2227,20 +2236,12 @@ async function prepareAIReview(){
    }
 
    if(review){
-     let renderedReview='';
-     try{
-       renderedReview=renderAIReviewText(review);
-     }catch(renderErr){
-       console.error('AI review formatting error',renderErr);
-       const safe=String(review).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-       renderedReview=`<div class="ai-review-section ai-review-section-single"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${safe.replace(/\n/g,'<br>')}</p></div>`;
-     }
-     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderedReview}</div></div>`;
+     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReviewText(review)}</div></div>`;
    }
    box.className='ai-context-result';
    box.innerHTML=html;
-   try{ showAIAskPanel(); }catch(e){ console.warn('AI ask panel setup skipped',e); }
-   try{ wireAIAsk(); }catch(e){ console.warn('AI ask wiring skipped',e); }
+   showAIAskPanel();
+   wireAIAsk();
  }catch(err){
    console.error('AI review error',err);
    friendlyError();
@@ -2255,9 +2256,7 @@ function normalizeAIReviewText(text){
     .replace(/\\n/g,'\n')
     .replace(/\\t/g,'\t')
     .trim();
-
   s=s.replace(/^```(?:markdown|md|text)?\s*/i,'').replace(/\s*```$/,'');
-
   const headings=[
     'PERFORMANCE SUMMARY',
     'TRADE BEHAVIOR & CHARTS',
@@ -2268,24 +2267,14 @@ function normalizeAIReviewText(text){
     'POSSIBLE EXPERIMENTS',
     'DATA LIMITATIONS'
   ];
-
-  // Put recognized section headings on their own line even when Gemini
-  // returns the whole answer as one continuous paragraph.
-  for(const heading of headings){
-    const escaped=heading.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    const re=new RegExp('\\s*(?:#{1,6}\\s*)?(?:\\*{1,2}\\s*)?'+escaped+'(?:\\s*\\*{1,2})?\\s*:?', 'gi');
-    s=s.replace(re,'\n'+heading+'\n');
-  }
-
-  s=s.replace(/^\s*#{1,6}\s*/gm,'');
-  s=s.replace(/^\s*[-_=]{3,}\s*$/gm,'');
-  s=s.replace(/[ ]{2,}/g,' ');
-  s=s.replace(/\n[ \t]+/g,'\n');
-  s=s.replace(/\n{3,}/g,'\n\n');
-
+  const alt=headings.map(h=>h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
+  const headingRe=new RegExp('\\s*\\*{0,2}(' + alt + ')\\*{0,2}\\s*:?(?=\\s|$)','gi');
+  s=s.replace(headingRe,'\\n$1\\n');
+  s=s.replace(/^\\s*#{1,6}\\s*/gm,'');
+  s=s.replace(/^\\s*[-_=]{3,}\\s*$/gm,'');
+  s=s.replace(/\\n{3,}/g,'\\n\\n');
   return s.trim();
 }
-
 function sanitizeAIText(txt){
   return String(txt??'')
     .replace(/\btrade_count\b/gi,'number of trades')
@@ -2311,8 +2300,8 @@ function sanitizeAIText(txt){
     .replace(/\bempty field\b/gi,'not entered')
     .replace(/\bfield is blank\b/gi,'was not entered')
     .replace(/\bfield\b/gi,'entry')
-    .replace(/[ \t]{2,}/g,' ')
-   .trim();
+    .replace(/\s{2,}/g,' ')
+    .trim();
 }
 
 function renderAIReviewText(text){
