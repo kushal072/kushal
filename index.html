@@ -52,6 +52,52 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 .status{position:fixed;right:18px;bottom:18px;max-width:min(460px,calc(100vw - 36px));background:#061521;border:1px solid #17608b;color:#e7f7ff;padding:14px 17px;border-radius:10px;font-size:12px;line-height:1.45;display:none;z-index:60;box-shadow:0 12px 35px #0008}
 .access-title{font-size:11px!important;color:#a9d8ff!important;letter-spacing:1px;margin:0 0 2px}.setup{margin-top:9px;padding:10px 11px;background:#071b29;border:1px solid #1b4f70;color:#a8cfe7;border-radius:6px;font-size:10px;line-height:1.55}
 
+
+/* AI-ready journal sequence UI */
+.journal-ai-hint{margin-top:10px;padding:10px 11px;border:1px solid #164a6b;background:#061722;color:#9fc4d9;border-radius:7px;font-size:10px;line-height:1.5}
+.journal-ai-hint b{color:#dff4ff}
+.trade-seq{display:inline-flex;align-items:center;gap:3px;flex-wrap:wrap}
+.seq-order{font-size:9px;font-weight:950;color:#bfe5ff;background:#062238;border:1px solid #14537a;border-radius:4px;padding:3px 5px;white-space:nowrap}
+.seq-token{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 4px;border-radius:4px;font-size:8px;font-weight:950;line-height:1}
+.seq-token.w{background:#06392a;border:1px solid #08714b;color:#42f0b0}
+.seq-token.l{background:#350b10;border:1px solid #6a1a24;color:#ff6b78}
+.seq-token.be{background:#1a2a35;border:1px solid #31566d;color:#b7cddd}
+.seq-token.q{background:#1b1f23;border:1px solid #36404a;color:#8898a3}
+.seq-token.current{box-shadow:0 0 0 1px #9ed9ff inset,0 0 0 1px #0c6a9b;transform:translateY(-1px)}
+.journal-sequence-card{margin-top:10px;padding:12px 13px;border:1px solid #123c58;background:linear-gradient(180deg,#071722,#040b12);border-radius:8px}
+.journal-sequence-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}
+.journal-sequence-head .label{font-size:9px;letter-spacing:1px;font-weight:950;color:#8fa7b7}
+.journal-sequence-note{font-size:8px;color:#698193}
+.journal-sequence-list{display:flex;gap:7px;overflow:auto;padding-bottom:2px}
+.journal-sequence-day{flex:0 0 auto;min-width:142px;border:1px solid #14384f;background:#06111a;border-radius:7px;padding:8px}
+.journal-sequence-date{font-size:9px;font-weight:950;color:#d9edf9}
+.journal-sequence-meta{font-size:8px;color:#71889a;margin-top:3px}
+.journal-sequence-tokens{display:flex;gap:3px;margin-top:7px;align-items:center;flex-wrap:wrap}
+#trades .sequence-col{min-width:90px}
+#trades .order-col{min-width:58px}
+@media(max-width:700px){
+  .journal-ai-hint{font-size:12px;line-height:1.55}
+  .journal-sequence-card{padding:11px}
+  .journal-sequence-note{font-size:9px}
+  .journal-sequence-day{min-width:135px}
+  #trades{overflow-x:auto}
+  #trades table{min-width:980px;table-layout:auto}
+  #trades th,#trades td{font-size:10px}
+  #trades th:nth-child(6),#trades td:nth-child(6),
+  #trades th:nth-child(9),#trades td:nth-child(9),
+  #trades th:nth-child(10),#trades td:nth-child(10),
+  #trades th:nth-child(12),#trades td:nth-child(12){display:none}
+  #trades th:nth-child(1),#trades td:nth-child(1){width:30px}
+  #trades th:nth-child(2),#trades td:nth-child(2){width:82px}
+  #trades th:nth-child(3),#trades td:nth-child(3){width:58px}
+  #trades th:nth-child(4),#trades td:nth-child(4){width:98px}
+  #trades th:nth-child(5),#trades td:nth-child(5){width:90px}
+  #trades th:nth-child(7),#trades td:nth-child(7){width:55px}
+  #trades th:nth-child(8),#trades td:nth-child(8){width:78px}
+  #trades th:nth-child(11),#trades td:nth-child(11){width:76px}
+  #trades th:nth-child(13),#trades td:nth-child(13){width:96px}
+}
+
 /* Journal readability improvements */
 .journal-form-title{font-size:12px;color:#b9dff5;margin:0 0 10px;font-weight:900;letter-spacing:.3px}
 #tradeForm .field label{font-size:10px;color:#a9c2d2;letter-spacing:.25px;margin-bottom:6px}
@@ -302,6 +348,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
  </div>
  <div class="card"><h3 class="access-title">ACCESS</h3><div id="access"></div><div id="accessRule" class="setup"></div></div>
 </div>
+<div class="journal-ai-hint"><b>AI-ready journal tracking:</b> Bluebird automatically records the chronological trade order for each date, the number of trades taken that day, and the exact W / L / BE sequence. You do not need to enter this manually.</div>
+<div class="journal-sequence-card"><div class="journal-sequence-head"><span class="label">DAILY TRADE SEQUENCES</span><span class="journal-sequence-note">Chronological order · most recent first</span></div><div id="journalDayPatterns" class="journal-sequence-list"></div></div>
 <div class="card" style="margin-top:10px"><h3 style="font-size:10px;color:#899eae">SAVED TRADES</h3><div id="trades"></div></div>
 </section>
 
@@ -1057,12 +1105,67 @@ function renderImagePreview(files){
     box.appendChild(holder);
   });
 }
+
+function journalOutcomeToken(trade){
+  const hasR=trade?.result_r!==null&&trade?.result_r!==undefined&&trade?.result_r!==''&&Number.isFinite(Number(trade.result_r));
+  const hasUsd=trade?.result_usd!==null&&trade?.result_usd!==undefined&&trade?.result_usd!==''&&Number.isFinite(Number(trade.result_usd));
+  const v=hasR?Number(trade.result_r):(hasUsd?Number(trade.result_usd):null);
+  if(v===null)return '?';
+  if(v>0)return 'W';
+  if(v<0)return 'L';
+  return 'BE';
+}
+function journalTradeSortKey(trade,fallbackIndex=0){
+  const created=Date.parse(String(trade?.created_at||''));
+  return Number.isFinite(created)?created:(Date.parse(String(trade?.updated_at||''))||fallbackIndex);
+}
+function journalSequenceInfo(allTrades,trade){
+  const date=String(trade?.trade_date||'').slice(0,10);
+  const same=allTrades.map((t,i)=>({t,i})).filter(({t})=>String(t?.trade_date||'').slice(0,10)===date);
+  same.sort((a,b)=>{
+    const ka=journalTradeSortKey(a.t,a.i), kb=journalTradeSortKey(b.t,b.i);
+    if(ka!==kb)return ka-kb;
+    return String(a.t?.id||'').localeCompare(String(b.t?.id||''));
+  });
+  const order=same.findIndex(x=>String(x.t?.id)===String(trade?.id));
+  const tokens=same.map(x=>journalOutcomeToken(x.t));
+  return {date,count:same.length,order:order<0?null:order+1,tokens,sequence:tokens.join('-')};
+}
+function sequenceTokenHtml(token,current=false){
+  const cls=token==='W'?'w':token==='L'?'l':token==='BE'?'be':'q';
+  return `<span class="seq-token ${cls}${current?' current':''}">${token}</span>`;
+}
+function renderJournalDayPatterns(rows){
+  const box=$('journalDayPatterns'); if(!box)return;
+  const groups=new Map();
+  for(const t of rows){
+    const key=String(t.trade_date||'').slice(0,10)||'undated';
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(t);
+  }
+  const days=[...groups.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  if(!days.length){box.innerHTML='<div style="padding:10px;color:#718799;font-size:9px">Daily sequences will appear here after you save trades.</div>';return;}
+  box.innerHTML=days.slice(0,14).map(([date,dayTrades])=>{
+    const ordered=[...dayTrades].sort((a,b)=>{
+      const ka=journalTradeSortKey(a,0),kb=journalTradeSortKey(b,0);
+      if(ka!==kb)return ka-kb;
+      return String(a.id||'').localeCompare(String(b.id||''));
+    });
+    const tokens=ordered.map(journalOutcomeToken);
+    const label=tokens.join(' · ');
+    const totalR=ordered.reduce((s,t)=>s+(Number.isFinite(Number(t.result_r))?Number(t.result_r):0),0);
+    const rrText=(totalR>0?'+':'')+fmt(totalR)+'R';
+    return `<div class="journal-sequence-day"><div class="journal-sequence-date">${date==='undated'?'Undated':escHtml(date)}</div><div class="journal-sequence-meta">${ordered.length} trade${ordered.length===1?'':'s'} · ${escHtml(rrText)}</div><div class="journal-sequence-tokens">${tokens.map(tok=>sequenceTokenHtml(tok)).join('')}</div><div style="font-size:8px;color:#60798a;margin-top:5px;letter-spacing:.2px">${escHtml(label)}</div></div>`;
+  }).join('');
+}
+
 async function renderTrades(){
  const rows=visibleTrades();
  const b=$("trades");
  if(!rows.length){
    b.innerHTML='<div class="trade-manage-bar"><div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox" disabled> Select all</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div><button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button></div><div style="padding:20px;text-align:center;color:#718799;font-size:10px">No saved trades yet.</div>';
    const sel=$("selectAllTrades"); if(sel)sel.onchange=toggleAllTradeSelection;
+   renderJournalDayPatterns(rows);
    return;
  }
 
@@ -1071,11 +1174,13 @@ async function renderTrades(){
      '<div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox"> Select all</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div>'+
      '<button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button>'+
    '</div>'+
+   '<div style="font-size:8px;color:#678091;margin:8px 2px 6px">ORDER shows the trade position within that date. DAY SEQ shows the full chronological outcome sequence for that day.</div>'+
    '<table><thead><tr>'+ 
-   '<th style="width:30px"></th><th>DATE</th><th>INSTR.</th><th>DIR</th><th>R</th><th>RESULT $</th>'+ 
+   '<th style="width:30px"></th><th>DATE</th><th class="order-col">ORDER</th><th class="sequence-col">DAY SEQ</th><th>INSTR.</th><th>DIR</th><th>R</th><th>RESULT $</th>'+ 
    '<th>SETUP</th><th>SESSION</th><th>SCREENSHOT</th><th>NOTES</th><th>ACTIONS</th>'+ 
    '</tr></thead><tbody>'+ 
    rows.slice(0,100).map(t=>{
+     const meta=journalSequenceInfo(rows,t);
      const moneyValue = t.result_usd ?? t.usd ?? null;
      const moneyText = moneyValue===null || moneyValue==="" ? "—" :
        (Number(moneyValue)>=0?"+$":"-$")+Math.abs(Number(moneyValue)).toLocaleString();
@@ -1090,9 +1195,12 @@ async function renderTrades(){
        }
      }
 
+     const seqHtml=`<div class="trade-seq">${meta.tokens.map((tok,i)=>sequenceTokenHtml(tok,i===meta.order-1)).join('')}</div>`;
      return `<tr>
        <td><input class="trade-select" type="checkbox" data-select-trade="${t.id}" aria-label="Select journal entry"></td>
        <td>${t.trade_date||"—"}</td>
+       <td class="order-col"><span class="seq-order">${meta.order?`${meta.order} / ${meta.count}`:`—`}</span></td>
+       <td class="sequence-col">${seqHtml}</td>
        <td>${t.instrument||"—"}</td>
        <td>${t.direction||"—"}</td>
        <td class="${t.result_r>0?"pos":t.result_r<0?"neg":""}">${t.result_r===null||t.result_r===undefined?"—":((t.result_r>=0?"+":"")+fmt(t.result_r)+"R")}</td>
@@ -1106,6 +1214,7 @@ async function renderTrades(){
    }).join("")+ 
    "</tbody></table>";
 
+ renderJournalDayPatterns(rows);
  const selectAll=$("selectAllTrades");
  if(selectAll)selectAll.addEventListener("change",toggleAllTradeSelection);
  const delSelected=$("deleteSelectedTrades");
@@ -1472,7 +1581,8 @@ async function prepareExportData(rows){
   const baseCols=[['Date','trade_date'],['Instrument','instrument'],['Direction','direction'],['Result R','result_r'],['Result $','result_usd']];
   const optionalCols=[['Setup','setup'],['Session','session'],['Tag','tag'],['Notes','notes']].filter(([_,key])=>rows.some(t=>String(t[key]??'').trim()!==''));
   const includeImages=rows.some(t=>Array.isArray(t.images)&&t.images.length);
-  const cols=[...baseCols,...optionalCols];
+  const sequenceCols=[['Daily Trade Count','daily_trade_count'],['Trade Order','trade_order'],['Daily Sequence','daily_sequence']];
+  const cols=[...baseCols,...sequenceCols,...optionalCols];
   if(includeImages)cols.push(['Image Files','image_files']);
   const imageFiles=[];
   for(let ri=0;ri<rows.length;ri++){
@@ -1495,15 +1605,24 @@ async function prepareExportData(rows){
       imageFiles.push({fileName,blob});
       imageCount++;
     }
+    const meta=journalSequenceInfo(rows,t);
     const rec={};
     for(const [,key] of baseCols.concat(optionalCols))rec[key]=t[key]??'';
+    rec.daily_trade_count=meta.count;
+    rec.trade_order=meta.order||'';
+    rec.daily_sequence=meta.sequence;
     rec.image_files=imagePaths.join(' | ');
     exportedRows.push(cols.map(([_,key])=>rec[key]??''));
-    reportRows.push({t,images:reportImages,tradeIndex:ri+1});
+    reportRows.push({t,images:reportImages,tradeIndex:ri+1,sequenceMeta:meta});
     manifest.push({
       trade_index:ri+1,
       trade_id:t.id||null,
       date:t.trade_date||null,
+      daily_trade_count:meta.count,
+      trade_order:meta.order||null,
+      daily_sequence:meta.sequence,
+      outcome_sequence:meta.tokens,
+      
       instrument:t.instrument||null,
       direction:t.direction||null,
       result_r:t.result_r??null,
@@ -1559,10 +1678,14 @@ async function buildAiPdf(rows, reportRows){
     doc.text(`Trade ${tradeIndex}`,M,82);
     const rr=trade.result_r===null||trade.result_r===undefined||trade.result_r===''?'—':(Number(trade.result_r)>=0?'+':'')+fmt(Number(trade.result_r))+'R';
     const usd=trade.result_usd===null||trade.result_usd===undefined||trade.result_usd===''?'—':(Number(trade.result_usd)>=0?'+$':'-$')+Math.abs(Number(trade.result_usd)).toLocaleString();
+    const seq=(reportRows.find(x=>String(x.t?.id||'')===String(trade?.id))?.sequenceMeta)||journalSequenceInfo(rows,trade);
     const pairs=[
       ['Date',trade.trade_date||'—'],
       ['Instrument',trade.instrument||'—'],
       ['Direction',trade.direction||'—'],
+      ['Day trades',seq.count],
+      ['Trade order',`${seq.order||'—'} / ${seq.count}`],
+      ['Day sequence',seq.sequence],
       ['Result R',rr],
       ['Result $',usd]
     ];
@@ -1648,7 +1771,7 @@ async function exportAI(){
     const csv=[prepared.cols.map(([label])=>csvCell(label)).join(','),...prepared.exportedRows.map(r=>r.map(csvCell).join(','))].join('\n');
     zip.file('bluebird-journal.csv',csv);
     const reportRows=prepared.reportRows;
-    const reportHtml=`<!doctype html><html><head><meta charset="utf-8"><title>Bluebird Journal Export</title><style>body{font-family:Arial,sans-serif;background:#08131d;color:#eaf6ff;margin:0;padding:28px}.wrap{max-width:1100px;margin:auto}.title{font-size:28px;font-weight:800;margin-bottom:6px}.sub{color:#92a9ba;margin-bottom:22px}.trade{background:#0d1d29;border:1px solid #234057;border-radius:12px;padding:16px;margin:0 0 16px}.meta{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cell{background:#0a1722;border-radius:8px;padding:9px}.k{font-size:11px;color:#7690a3;text-transform:uppercase}.v{font-size:15px;font-weight:700;margin-top:3px}.notes{margin-top:12px;color:#bfd3df;white-space:pre-wrap}.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:14px}.shot{background:#07111a;border-radius:8px;padding:8px}.shot img{display:block;width:100%;height:auto;border-radius:5px}.cap{font-size:11px;color:#8da5b6;margin-top:6px}.empty{color:#6f8696}@media(max-width:700px){.meta{grid-template-columns:1fr 1fr}}</style></head><body><div class="wrap"><div class="title">Bluebird Journal Export</div><div class="sub">${escHtml(new Date().toLocaleString())} · ${rows.length} trades · ${prepared.imageCount} images</div>${reportRows.map((item)=>{const t=item.t;const rr=t.result_r===null||t.result_r===undefined||t.result_r===''?'—':(Number(t.result_r)>=0?'+':'')+fmt(Number(t.result_r))+'R';const amount=t.result_usd===null||t.result_usd===undefined||t.result_usd===''?'—':(Number(t.result_usd)>=0?'+$':'-$')+Math.abs(Number(t.result_usd)).toLocaleString();const optional=prepared.optionalCols.length?`<div class="meta" style="margin-top:8px">${prepared.optionalCols.map(([label,key])=>`<div class="cell"><div class="k">${escHtml(label)}</div><div class="v">${escHtml(t[key]||'—')}</div></div>`).join('')}</div>`:'';const imgs=item.images.length?`<div class="imgs">${item.images.map(im=>`<div class="shot"><img src="${im.dataUrl}" alt=""><div class="cap">${escHtml(im.path)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:12px">No images attached.</div>';return `<section class="trade"><div class="meta"><div class="cell"><div class="k">Trade</div><div class="v">${item.tradeIndex}</div></div><div class="cell"><div class="k">Date</div><div class="v">${escHtml(t.trade_date||'—')}</div></div><div class="cell"><div class="k">Instrument</div><div class="v">${escHtml(t.instrument||'—')}</div></div><div class="cell"><div class="k">Result R</div><div class="v">${escHtml(rr)}</div></div><div class="cell"><div class="k">Result $</div><div class="v">${escHtml(amount)}</div></div></div>${optional}${t.notes?`<div class="notes">${escHtml(t.notes)}</div>`:''}${imgs}</section>`;}).join('')}</div></body></html>`;
+    const reportHtml=`<!doctype html><html><head><meta charset="utf-8"><title>Bluebird Journal Export</title><style>body{font-family:Arial,sans-serif;background:#08131d;color:#eaf6ff;margin:0;padding:28px}.wrap{max-width:1100px;margin:auto}.title{font-size:28px;font-weight:800;margin-bottom:6px}.sub{color:#92a9ba;margin-bottom:22px}.trade{background:#0d1d29;border:1px solid #234057;border-radius:12px;padding:16px;margin:0 0 16px}.meta{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cell{background:#0a1722;border-radius:8px;padding:9px}.k{font-size:11px;color:#7690a3;text-transform:uppercase}.v{font-size:15px;font-weight:700;margin-top:3px}.notes{margin-top:12px;color:#bfd3df;white-space:pre-wrap}.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:14px}.shot{background:#07111a;border-radius:8px;padding:8px}.shot img{display:block;width:100%;height:auto;border-radius:5px}.cap{font-size:11px;color:#8da5b6;margin-top:6px}.empty{color:#6f8696}@media(max-width:700px){.meta{grid-template-columns:1fr 1fr}}</style></head><body><div class="wrap"><div class="title">Bluebird Journal Export</div><div class="sub">${escHtml(new Date().toLocaleString())} · ${rows.length} trades · ${prepared.imageCount} images</div>${reportRows.map((item)=>{const t=item.t;const rr=t.result_r===null||t.result_r===undefined||t.result_r===''?'—':(Number(t.result_r)>=0?'+':'')+fmt(Number(t.result_r))+'R';const amount=t.result_usd===null||t.result_usd===undefined||t.result_usd===''?'—':(Number(t.result_usd)>=0?'+$':'-$')+Math.abs(Number(t.result_usd)).toLocaleString();const seq=item.sequenceMeta||journalSequenceInfo(rows,t);const optional=prepared.optionalCols.length?`<div class="meta" style="margin-top:8px">${prepared.optionalCols.map(([label,key])=>`<div class="cell"><div class="k">${escHtml(label)}</div><div class="v">${escHtml(t[key]||'—')}</div></div>`).join('')}</div>`:'';const imgs=item.images.length?`<div class="imgs">${item.images.map(im=>`<div class="shot"><img src="${im.dataUrl}" alt=""><div class="cap">${escHtml(im.path)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:12px">No images attached.</div>';return `<section class="trade"><div class="meta"><div class="cell"><div class="k">Trade</div><div class="v">${item.tradeIndex}</div></div><div class="cell"><div class="k">Date</div><div class="v">${escHtml(t.trade_date||'—')}</div></div><div class="cell"><div class="k">Instrument</div><div class="v">${escHtml(t.instrument||'—')}</div></div><div class="cell"><div class="k">Result R</div><div class="v">${escHtml(rr)}</div></div><div class="cell"><div class="k">Result $</div><div class="v">${escHtml(amount)}</div></div></div><div class="meta" style="margin-top:8px"><div class="cell"><div class="k">Day trades</div><div class="v">${seq.count}</div></div><div class="cell"><div class="k">Trade order</div><div class="v">${seq.order||'—'} / ${seq.count}</div></div><div class="cell"><div class="k">Day sequence</div><div class="v">${escHtml(seq.sequence)}</div></div></div>${optional}${t.notes?`<div class="notes">${escHtml(t.notes)}</div>`:''}${imgs}</section>`;}).join('')}</div></body></html>`;
     zip.file('bluebird-journal-report.html',reportHtml);
     zip.file('bluebird-journal-manifest.json',JSON.stringify({
       format_version:'bluebird-ai-journal-v1',
@@ -1660,7 +1783,7 @@ async function exportAI(){
       'BLUEBIRD JOURNAL AI EXPORT',
       '',
       'Use bluebird-journal-manifest.json as the authoritative mapping between trade records and screenshots.',
-      'Each trade contains trade_index, trade_id, date, result fields, and an images array.',
+      'Each trade contains trade_index, trade_id, date, daily_trade_count, trade_order, daily_sequence, result fields, and an images array.',
       'Each images[].file points to the exact screenshot file inside the images/ folder.',
       'The PDF repeats the trade metadata on every screenshot page so an AI can identify which image belongs to which trade and date.',
       'The CSV preserves chronological trade order and removes optional columns that are completely empty.'
