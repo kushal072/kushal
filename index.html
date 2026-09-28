@@ -53,6 +53,16 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 .access-title{font-size:11px!important;color:#a9d8ff!important;letter-spacing:1px;margin:0 0 2px}.setup{margin-top:9px;padding:10px 11px;background:#071b29;border:1px solid #1b4f70;color:#a8cfe7;border-radius:6px;font-size:10px;line-height:1.55}
 
 
+/* Journal history filter UI */
+.journal-history-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0 10px}
+.journal-history-left{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.journal-history-field{min-width:170px}
+.journal-history-field.small{min-width:145px}
+.journal-history-summary{font-size:9px;color:#71889a;margin:0 2px 8px auto}
+.journal-custom-range{display:flex;align-items:flex-end;gap:7px;flex-wrap:wrap}
+.journal-custom-range.hidden{display:none}
+@media(max-width:760px){.journal-history-toolbar{align-items:stretch}.journal-history-summary{width:100%;margin:0 0 3px}.journal-history-field,.journal-history-field.small{min-width:140px;flex:1}}
+
 /* AI-ready journal sequence UI */
 .journal-ai-hint{margin-top:10px;padding:10px 11px;border:1px solid #164a6b;background:#061722;color:#9fc4d9;border-radius:7px;font-size:10px;line-height:1.5}
 .journal-ai-hint b{color:#dff4ff}
@@ -64,7 +74,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 .seq-token.be{background:#1a2a35;border:1px solid #31566d;color:#b7cddd}
 .seq-token.q{background:#1b1f23;border:1px solid #36404a;color:#8898a3}
 .seq-token.current{box-shadow:0 0 0 1px #9ed9ff inset,0 0 0 1px #0c6a9b;transform:translateY(-1px)}
-.journal-sequence-card{margin-top:10px;padding:12px 13px;border:1px solid #123c58;background:linear-gradient(180deg,#071722,#040b12);border-radius:8px}
+.journal-sequence-card{display:none !important;margin-top:10px;padding:12px 13px;border:1px solid #123c58;background:linear-gradient(180deg,#071722,#040b12);border-radius:8px}
 .journal-sequence-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}
 .journal-sequence-head .label{font-size:9px;letter-spacing:1px;font-weight:950;color:#8fa7b7}
 .journal-sequence-note{font-size:8px;color:#698193}
@@ -348,9 +358,27 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
  </div>
  <div class="card"><h3 class="access-title">ACCESS</h3><div id="access"></div><div id="accessRule" class="setup"></div></div>
 </div>
-<div class="journal-ai-hint"><b>AI-ready journal tracking:</b> Bluebird automatically records the chronological trade order for each date, the number of trades taken that day, and the exact W / L / BE sequence. You do not need to enter this manually.</div>
-<div class="journal-sequence-card"><div class="journal-sequence-head"><span class="label">DAILY TRADE SEQUENCES</span><span class="journal-sequence-note">Chronological order · most recent first</span></div><div id="journalDayPatterns" class="journal-sequence-list"></div></div>
-<div class="card" style="margin-top:10px"><h3 style="font-size:10px;color:#899eae">SAVED TRADES</h3><div id="trades"></div></div>
+<div class="journal-ai-hint"><b>AI-ready journal tracking:</b> Bluebird automatically records the chronological trade order for each date, the number of trades taken that day, and the exact W / L / BE sequence. The DAY SEQ column below is visible on each journal entry; the detailed daily-sequence view is kept for analytics and AI use.</div>
+<div class="card" style="margin-top:10px"><div class="journal-history-toolbar">
+  <div class="journal-history-left">
+    <div class="field journal-history-field"><label>JOURNAL PERIOD</label><select id="journalPeriod" class="select">
+      <option value="past_30" selected>Past 30 days</option>
+      <option value="this_week">This week</option>
+      <option value="last_week">Last week</option>
+      <option value="past_7">Past 7 days</option>
+      <option value="past_90">Past 3 months</option>
+      <option value="past_180">Past 6 months</option>
+      <option value="past_365">Past year</option>
+      <option value="all">All available history</option>
+      <option value="custom">Custom range</option>
+    </select></div>
+    <div id="journalCustomRange" class="journal-custom-range hidden">
+      <div class="field journal-history-field small"><label>FROM</label><input id="journalFrom" class="input" type="date"></div>
+      <div class="field journal-history-field small"><label>TO</label><input id="journalTo" class="input" type="date"></div>
+    </div>
+  </div>
+  <div id="journalFilterSummary" class="journal-history-summary"></div>
+</div><h3 style="font-size:10px;color:#899eae">SAVED TRADES</h3><div id="trades"></div></div>
 </section>
 
 <section id="page-calendar" class="page">
@@ -540,6 +568,41 @@ function visibleTrades(){
   cutoff.setDate(cutoff.getDate()-29);
   const cutoffKey=localDateKey(cutoff);
   return state.trades.filter(t=>String(t.trade_date||"").slice(0,10)>=cutoffKey);
+}
+function journalWeekRange(date, offsetWeeks=0){
+  const d=new Date(date);d.setHours(0,0,0,0);
+  const day=(d.getDay()+6)%7;
+  d.setDate(d.getDate()-day+(offsetWeeks*7));
+  const from=new Date(d);
+  const to=new Date(d);to.setDate(to.getDate()+6);
+  return {from:localDateKey(from),to:localDateKey(to),label:offsetWeeks===-1?'Last week':'This week'};
+}
+function journalAddDays(base,days){const d=new Date(base);d.setHours(0,0,0,0);d.setDate(d.getDate()+days);return d;}
+function journalGetRange(){
+  const period=$('journalPeriod')?.value||'past_30';
+  const today=new Date();today.setHours(0,0,0,0);
+  if(period==='this_week')return journalWeekRange(today,0);
+  if(period==='last_week')return journalWeekRange(today,-1);
+  if(period==='past_7'){const from=journalAddDays(today,-6);return {from:localDateKey(from),to:localDateKey(today),label:'Past 7 days'};}
+  if(period==='past_30'){const from=journalAddDays(today,-29);return {from:localDateKey(from),to:localDateKey(today),label:'Past 30 days'};}
+  if(period==='past_90'){const from=journalAddDays(today,-89);return {from:localDateKey(from),to:localDateKey(today),label:'Past 3 months'};}
+  if(period==='past_180'){const from=journalAddDays(today,-179);return {from:localDateKey(from),to:localDateKey(today),label:'Past 6 months'};}
+  if(period==='past_365'){const from=journalAddDays(today,-364);return {from:localDateKey(from),to:localDateKey(today),label:'Past year'};}
+  if(period==='custom'){
+    const from=$('journalFrom')?.value||'';const to=$('journalTo')?.value||'';
+    return {from:from||null,to:to||null,label:(from||to)?`Custom${from?` · ${from}`:''}${to?` → ${to}`:''}`:'Custom range'};
+  }
+  return {from:null,to:null,label:'All available history'};
+}
+function journalFilterRows(rows){
+  const r=journalGetRange();
+  return rows.filter(t=>{
+    const d=String(t.trade_date||'').slice(0,10);
+    if(!d)return r.from===null && r.to===null;
+    if(r.from && d<r.from)return false;
+    if(r.to && d>r.to)return false;
+    return true;
+  });
 }
 function durationText(ms){
   if(ms<=0)return "0m 0s";
@@ -1160,12 +1223,14 @@ function renderJournalDayPatterns(rows){
 }
 
 async function renderTrades(){
- const rows=visibleTrades();
+ const accessibleRows=visibleTrades();
+ const rows=journalFilterRows(accessibleRows);
+ const summary=$("journalFilterSummary");
+ if(summary){summary.textContent=`Showing ${rows.length} of ${accessibleRows.length} available trade${accessibleRows.length===1?'':'s'} · ${journalGetRange().label}`;}
  const b=$("trades");
  if(!rows.length){
    b.innerHTML='<div class="trade-manage-bar"><div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox" disabled> Select all</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div><button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button></div><div style="padding:20px;text-align:center;color:#718799;font-size:10px">No saved trades yet.</div>';
    const sel=$("selectAllTrades"); if(sel)sel.onchange=toggleAllTradeSelection;
-   renderJournalDayPatterns(rows);
    return;
  }
 
@@ -1180,7 +1245,7 @@ async function renderTrades(){
    '<th>SETUP</th><th>SESSION</th><th>SCREENSHOT</th><th>NOTES</th><th>ACTIONS</th>'+ 
    '</tr></thead><tbody>'+ 
    rows.slice(0,100).map(t=>{
-     const meta=journalSequenceInfo(rows,t);
+     const meta=journalSequenceInfo(accessibleRows,t);
      const moneyValue = t.result_usd ?? t.usd ?? null;
      const moneyText = moneyValue===null || moneyValue==="" ? "—" :
        (Number(moneyValue)>=0?"+$":"-$")+Math.abs(Number(moneyValue)).toLocaleString();
@@ -1214,7 +1279,6 @@ async function renderTrades(){
    }).join("")+ 
    "</tbody></table>";
 
- renderJournalDayPatterns(rows);
  const selectAll=$("selectAllTrades");
  if(selectAll)selectAll.addEventListener("change",toggleAllTradeSelection);
  const delSelected=$("deleteSelectedTrades");
@@ -1918,6 +1982,15 @@ window.addEventListener("mousemove",e=>{if(!imageViewer.dragging)return;imageVie
 window.addEventListener("mouseup",()=>{imageViewer.dragging=false;viewerStage.classList.remove("dragging")});
 viewerStage.addEventListener("dblclick",()=>{setViewerZoom(imageViewer.zoom>imageViewer.fitScale*1.5?imageViewer.fitScale:Math.min(2.5,imageViewer.fitScale*2))});
 document.addEventListener("keydown",e=>{if(!$("imageViewer").classList.contains("show"))return;if(e.key==="Escape")closeImageViewer();if(e.key==="ArrowLeft"&&imageViewer.index>0){imageViewer.index--;renderViewerImage()}if(e.key==="ArrowRight"&&imageViewer.index<imageViewer.items.length-1){imageViewer.index++;renderViewerImage()}if(e.key==="+"||e.key==="="){setViewerZoom(imageViewer.zoom*1.25)}if(e.key==="-"){setViewerZoom(imageViewer.zoom/1.25)}if(e.key==="0"){fitViewerImage()}});
+
+const journalPeriod=$('journalPeriod');
+if(journalPeriod)journalPeriod.addEventListener('change',()=>{
+  const custom=$('journalCustomRange');
+  if(custom)custom.classList.toggle('hidden',journalPeriod.value!=='custom');
+  renderTrades();
+});
+if($('journalFrom'))$('journalFrom').addEventListener('change',()=>{if($('journalPeriod')?.value==='custom')renderTrades()});
+if($('journalTo'))$('journalTo').addEventListener('change',()=>{if($('journalPeriod')?.value==='custom')renderTrades()});
 
 const analyticsPeriod=$('analyticsPeriod');
 if(analyticsPeriod)analyticsPeriod.addEventListener('change',()=>{const custom=$('analyticsCustomRange');if(custom)custom.classList.toggle('hidden',analyticsPeriod.value!=='custom');renderAnalytics();});
