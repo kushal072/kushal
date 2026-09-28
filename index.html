@@ -638,7 +638,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div>
       <div class="smallbrand ai-kicker">AI TRADING REVIEW</div>
       <h3 class="ai-review-title">A structured review of your own journal</h3>
-      <p class="ai-review-sub">Bluebird AI uses your actual journal, chronological trade order, daily sequences, statistics, notes and selected period. Historical trade-limit comparisons are calculated from the recorded trades before Gemini interprets them.</p>
+      <p class="ai-review-sub">Bluebird analyzes your journal, trade order, daily sequences, notes and selected period. Historical comparisons are calculated from your actual journal before AI interprets the results.</p>
     </div>
     <div class="ai-review-status">PRO · AI ENGINE CONNECTED</div>
   </div>
@@ -668,7 +668,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Bluebird tests the first 1, 2, 3 and 4 recorded trades per day, plus all recorded trades, before Gemini interprets the differences.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
-    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Uses your selected journal period plus the private historical comparison engine. Missing trades are never invented.</span></div><div id="aiEngineInfo" class="ai-engine-info" hidden></div>
+    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Uses your selected journal period and the historical analysis engine. Missing trade results are never invented.</span></div><div id="aiEngineInfo" class="ai-engine-info" hidden></div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
   </div>
 </div>
@@ -677,7 +677,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 
 <section id="page-pro" class="page">
 <style>
- .ai-context-result{margin-top:10px;border:1px solid #16384d;background:#06131d;border-radius:8px;padding:11px;color:#9bb1c0;font-size:11px;line-height:1.55}.ai-context-result strong{color:#e7f7ff}.ai-context-ok{border-color:#155f49;background:linear-gradient(145deg,#061a16,#06131d)}.ai-context-error{border-color:#6b2630;background:#190a0d}.ai-context-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-top:8px}.ai-context-day{border:1px solid #17384c;border-radius:7px;padding:8px;background:#07141d}.ai-context-day b{color:#e7f7ff;display:block;margin-bottom:3px}.ai-context-seq{font-weight:800;letter-spacing:1px}.ai-context-seq.w{color:#78d7a7}.ai-context-seq.l{color:#ff9aa3}.ai-context-seq.be{color:#eac779}@media(max-width:760px){.ai-context-days{grid-template-columns:1fr}.ai-review-actions{flex-wrap:wrap}.ai-review-note{width:100%}}
+ .ai-context-result{margin-top:10px;border:1px solid #16384d;background:#06131d;border-radius:8px;padding:11px;color:#9bb1c0;font-size:11px;line-height:1.55}.ai-context-warn{border-color:#6b5930;background:#171308}.ai-context-result strong{color:#e7f7ff}.ai-context-ok{border-color:#155f49;background:linear-gradient(145deg,#061a16,#06131d)}.ai-context-error{border-color:#6b2630;background:#190a0d}.ai-context-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-top:8px}.ai-context-day{border:1px solid #17384c;border-radius:7px;padding:8px;background:#07141d}.ai-context-day b{color:#e7f7ff;display:block;margin-bottom:3px}.ai-context-seq{font-weight:800;letter-spacing:1px}.ai-context-seq.w{color:#78d7a7}.ai-context-seq.l{color:#ff9aa3}.ai-context-seq.be{color:#eac779}@media(max-width:760px){.ai-context-days{grid-template-columns:1fr}.ai-review-actions{flex-wrap:wrap}.ai-review-note{width:100%}}
 .ai-review-card{margin-top:10px;border:1px solid #154968;background:linear-gradient(145deg,#061521,#050d14);border-radius:10px;padding:15px;box-shadow:0 16px 36px rgba(0,0,0,.18)}
 .ai-review-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
 .ai-kicker{font-size:8px;letter-spacing:2px;color:#49b8ff}
@@ -1941,18 +1941,73 @@ async function prepareAIReview(){
  btn.disabled=true; btn.textContent='Analyzing…';
  box.hidden=false; box.className='ai-context-result';
  box.innerHTML='Running your private journal analysis securely…';
- try{
+
+ const friendlyError=()=>{
+   box.className='ai-context-result ai-context-warn';
+   box.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:5px">Your journal is safe. Please wait a moment and try the review again.</div>';
+   if(note)note.textContent='Your journal data was not changed.';
+ };
+
+ const sanitizeAI=txt=>String(txt??'')
+   .replace(/\btrade_count\b/gi,'number of trades')
+   .replace(/\brecorded_trade_count\b/gi,'recorded trades')
+   .replace(/\bdeclared_trade_count\b/gi,'declared trades')
+   .replace(/\bresult_r\b/gi,'R result')
+   .replace(/\bresult_usd\b/gi,'dollar result')
+   .replace(/\btrade_id\b/gi,'trade')
+   .replace(/\bmanual_sequence\b/gi,'day sequence')
+   .replace(/\br_derived_sequence\b/gi,'actual recorded sequence')
+   .replace(/\brecorded_total_trades\b/gi,'recorded trades')
+   .replace(/\bdeclared_total_trades\b/gi,'declared trades')
+   .replace(/\bavg_r_per_trade\b/gi,'average R per trade')
+   .replace(/\bavg_r_per_day\b/gi,'average R per day')
+   .replace(/\bmax_drawdown_r\b/gi,'maximum drawdown in R')
+   .replace(/\blongest_loss_streak\b/gi,'longest losing streak')
+   .replace(/\s*\(Trade ID:\s*[0-9a-f-]{20,}\)\s*/gi,' ')
+   .replace(/\bTrade ID:\s*[0-9a-f-]{20,}\b/gi,'')
+   .replace(/\bUUID\b/gi,'')
+   .replace(/\bJSON\b/gi,'')
+   .replace(/\bdatabase record\b/gi,'journaled trade')
+   .replace(/\bdata record\b/gi,'journaled trade')
+   .replace(/\bempty field\b/gi,'not entered')
+   .replace(/\bfield is blank\b/gi,'was not entered')
+   .replace(/\bfield\b/gi,'entry')
+   .replace(/\s{2,}/g,' ')
+   .trim();
+
+ const runOnce=async()=>{
    const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
    if(error)throw error;
+   return data;
+ };
+
+ try{
+   let data=null;
+   let lastErr=null;
+   for(let attempt=0;attempt<2;attempt++){
+     try{
+       data=await runOnce();
+       break;
+     }catch(err){
+       lastErr=err;
+       if(attempt===0){
+         box.className='ai-context-result ai-context-warn';
+         box.innerHTML='<strong>AI is busy right now.</strong><div style="margin-top:5px">Retrying securely…</div>';
+         await new Promise(r=>setTimeout(r,2200));
+       }
+     }
+   }
+   if(!data)throw lastErr||new Error('AI review unavailable');
+
    const ctx=data?.context||{};
    const summary=ctx.summary||{};
    const days=Array.isArray(ctx.days)?ctx.days:[];
    const scenarios=Array.isArray(data?.scenarios)?data.scenarios:(Array.isArray(ctx.scenarios)?ctx.scenarios:[]);
-   const review=String(data?.review||'').trim();
+   const review=sanitizeAI(String(data?.review||'').trim());
    const engineInfo=$('aiEngineInfo');
    if(engineInfo){
      engineInfo.hidden=false;
-     engineInfo.innerHTML=`<strong>Historical engine included.</strong> Gemini received chronological comparisons for first 1, 2, 3 and 4 recorded trades/day, plus all recorded trades, using the selected period.`;
+     engineInfo.innerHTML='<strong>Historical analysis included.</strong> Bluebird calculated the journal history first; AI only interprets those measured results.';
    }
 
    const seqForDay=d=>String(d.manual_sequence||d.observed_sequence||'—').replace(/\s+/g,'');
@@ -1967,10 +2022,11 @@ async function prepareAIReview(){
 
    let html=`<strong>AI review ready.</strong> <b>${Number(summary.declared_total_trades||0)}</b> declared trade${Number(summary.declared_total_trades||0)===1?'':'s'} across <b>${Number(summary.trading_days||0)}</b> trading day${Number(summary.trading_days||0)===1?'':'s'}, with <b>${Number(summary.recorded_total_trades||0)}</b> recorded result${Number(summary.recorded_total_trades||0)===1?'':'s'}, for <b>${range.label}</b>.`;
    html+=`<div class="ai-context-days">${dayHtml||'<div class="ai-context-day">No trades in this period.</div>'}</div>`;
-   if(days.length>8) html+=`<div style="margin-top:7px">Showing the first 8 days here; the AI received the full structured dataset for the selected period.</div>`;
+   if(days.length>8) html+=`<div style="margin-top:7px">Showing a small preview here; the AI received the full selected period.</div>`;
+
    if(review){
      const escText=(value)=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-     const inline=(value)=>escText(value).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
+     const inline=(value)=>escText(sanitizeAI(value)).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
      const renderAIReview=(text)=>{
        const sections=[];
        let current=null;
@@ -2009,26 +2065,22 @@ async function prepareAIReview(){
            }
          }
          flush();
-         return `<div class="ai-review-section"><div class="ai-review-section-title">${escText(sec.title)}</div>${paras.map(x=>`<p class="ai-review-paragraph">${inline(x)}</p>`).join('')}${bullets.length?`<ul class="ai-review-bullets">${bullets.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`:''}</div>`;
+         return `<div class="ai-review-section"><div class="ai-review-section-title">${escText(sanitizeAI(sec.title))}</div>${paras.map(x=>`<p class="ai-review-paragraph">${inline(x)}</p>`).join('')}${bullets.length?`<ul class="ai-review-bullets">${bullets.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`:''}</div>`;
        }).join('');
      };
      html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReview(review)}</div></div>`;
    }
    box.className='ai-context-result ai-context-ok';
    box.innerHTML=html;
-   if(note)note.textContent='AI review generated from your selected journal period. The journal remains the source of truth; the AI does not invent missing trade results.';
+   if(note)note.textContent='AI review generated from your selected journal period. Historical calculations come from your journal; missing trade results are never invented.';
  }catch(err){
    console.error('AI review error',err);
-   box.className='ai-context-result ai-context-error';
-   const engineInfo=$('aiEngineInfo'); if(engineInfo) engineInfo.hidden=true;
-   const msg=String(err?.message||err||'Unknown error');
-   box.innerHTML=`<strong>AI review could not be completed.</strong><div style="margin-top:5px">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
-   if(note)note.textContent='The journal context is secure, but the AI request returned an error. No journal data was deleted.';
+   friendlyError();
+   const engineInfo=$('aiEngineInfo'); if(engineInfo)engineInfo.hidden=true;
  }finally{
    btn.disabled=false; btn.textContent='Run AI Review';
  }
 }
-
 function renderAnalytics(){
  const allRows=visibleTrades();const range=analyticsGetRange();const rows=filterAnalyticsRows(allRows,range);
  const wins=rows.filter(t=>Number(t.result_r)>0),losses=rows.filter(t=>Number(t.result_r)<0),R=rows.reduce((a,t)=>a+Number(t.result_r||0),0);
