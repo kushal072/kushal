@@ -620,6 +620,106 @@ select option{background-color:#061522!important;color:#eef8ff!important}
   .pro-tool-metrics,.pf-result-grid{grid-template-columns:1fr}
 }
 </style>
+
+<style id="pro-tools-v88-ui">
+/* Bluebird Pro v88 — strong hierarchy, readable controls, premium dark UI */
+.pro-tools{margin-top:16px}
+.pro-tool-switcher{display:grid!important;grid-template-columns:1fr 1fr;gap:14px!important;margin:0 0 16px!important}
+.pro-tool-switch{min-height:112px!important;display:flex!important;align-items:center!important;gap:14px!important;padding:18px 20px!important;border-radius:14px!important;border:1px solid #1a4b67!important;background:linear-gradient(135deg,#081a28 0%,#050f16 100%)!important;color:#dbeaf2!important;box-shadow:0 12px 30px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.025)!important;position:relative!important;overflow:hidden!important;text-align:left!important;transform:none!important}
+.pro-tool-switch::after{display:none!important}
+.pro-tool-switch:hover{border-color:#2c89b7!important;background:linear-gradient(135deg,#0b2234 0%,#06131d 100%)!important}
+.pro-tool-switch.active{border-color:#24a5ef!important;background:linear-gradient(135deg,#0d2b42 0%,#071923 100%)!important;box-shadow:0 0 0 1px rgba(36,165,239,.15) inset,0 14px 32px rgba(0,33,54,.24)!important}
+.pro-tool-switch-icon{flex:0 0 54px;width:54px;height:54px;display:flex;align-items:center;justify-content:center;border:1px solid #236a8f;border-radius:13px;background:linear-gradient(145deg,#0a2d43,#06131d);color:#93d8fa;font-size:12px;font-weight:950;letter-spacing:1px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+.pro-tool-switch-icon-pf{color:#7be0bd;border-color:#277566;background:linear-gradient(145deg,#0b2e2b,#061719)}
+.pro-tool-switch-copy{display:block;min-width:0;flex:1}
+.pro-tool-switch-title{font-size:16px!important;line-height:1.25!important;color:#f0f8fc!important;letter-spacing:-.15px!important}
+.pro-tool-switch-sub{display:block!important;margin-top:7px!important;font-size:10.5px!important;line-height:1.5!important;color:#8fa9b8!important;max-width:420px}
+.pro-tool-switch.active .pro-tool-switch-sub{color:#b8d6e5!important}
+.pro-tool-switch-arrow{flex:0 0 auto;width:30px;height:30px;border:1px solid #215571;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#8bbfd9;font-size:14px;font-weight:900;background:#071a26}
+.pro-tool-switch.active .pro-tool-switch-arrow{border-color:#2b8dc0;color:#d5f1ff}
+
+/* Give the active Pro workspace breathing room. */
+.pro-tool-card{padding:20px!important;border-radius:14px!important}
+.pro-tool-title{font-size:24px!important}
+.pro-tool-sub{font-size:11.5px!important;line-height:1.65!important;color:#a8bbc6!important}
+.pro-tool-source{padding:14px 15px!important;border-radius:10px!important}
+.pro-tool-source>label{font-size:10px!important;color:#aac0cc!important}
+.pro-tool-source-select,.pf-inline-select,.pro-tool-field select{height:42px!important;font-size:12px!important}
+.pro-tool-controls{gap:11px!important}
+.pro-tool-field label,.pf-field label{font-size:9.5px!important;color:#9eb4c0!important}
+.pro-tool-field input,.pro-tool-field select,.pf-field input,.pf-field select{height:42px!important;font-size:12.5px!important;border-radius:9px!important;background:#040f17!important}
+
+/* Monte Carlo scenario cards: readable hierarchy and enough visual weight. */
+.pro-tool-result-title{font-size:10px!important;letter-spacing:1.4px!important;color:#86b9d1!important;margin-bottom:10px!important}
+.pro-tool-metrics{gap:10px!important}
+.pro-tool-metric{min-height:90px!important;padding:13px 14px!important;border-radius:10px!important;background:linear-gradient(180deg,#071824,#041019)!important;border-color:#17445d!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
+.pro-tool-metric span{font-size:8.5px!important;letter-spacing:.8px!important;color:#84a0ae!important}
+.pro-tool-metric b{font-size:21px!important;margin-top:7px!important;letter-spacing:-.25px!important;color:#edf8fd!important}
+.pro-tool-metric.good b{color:#59e2b0!important}
+.pro-tool-metric.bad b{color:#ff6876!important}
+.pro-tool-metric.warn b{color:#f3cc67!important}
+#mcP95R,#mcP5R{color:#edf8fd!important}
+#mcP95R{font-weight:950!important}
+#mcP5R{font-weight:950!important}
+.pro-tool-chart{margin-top:12px!important;border-radius:10px!important}
+.pro-tool-chart canvas{height:340px!important}
+.pro-tool-note{font-size:9px!important;line-height:1.6!important;color:#8ea8b5!important}
+
+/* Full journey hero */
+.pf-journey-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:2px 0 12px;padding:16px 18px;border:1px solid #21516a;border-radius:12px;background:linear-gradient(135deg,#092333 0%,#06141e 60%,#061017 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 10px 26px rgba(0,0,0,.14)}
+.pf-journey-kicker{font-size:9px;letter-spacing:1.55px;color:#72c9f1;font-weight:950}
+.pf-journey-title{margin-top:5px;font-size:18px;line-height:1.25;color:#f0f8fc;font-weight:950;letter-spacing:-.15px}
+.pf-journey-title span{color:#43bbf0;padding:0 3px}
+.pf-journey-sub{margin-top:5px;color:#8ea8b7;font-size:10px;line-height:1.5}
+.pf-journey-badge{flex:0 0 auto;padding:7px 10px;border-radius:999px;border:1px solid #27708f;background:#071d2a;color:#9edcfa;font-size:8px;font-weight:950;letter-spacing:1px}
+.pf-results-summary{margin:0 0 14px!important;padding:16px 18px!important;border:1px solid #24617b!important;border-radius:11px!important;background:linear-gradient(135deg,#082433,#06141e)!important;color:#d3e9f3!important;font-size:12px!important;line-height:1.7!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important}
+.pf-results-section{margin-top:16px!important;padding-top:15px!important;border-top:1px solid #1a4054!important}
+.pf-results-section-title{font-size:10px!important;letter-spacing:1.45px!important;color:#8fd0eb!important;margin-bottom:10px!important}
+.pf-result-grid{gap:10px!important}
+.pf-result-card{min-height:86px!important;padding:13px 14px!important;border-radius:10px!important;background:linear-gradient(180deg,#071a26,#041019)!important;border-color:#17445a!important}
+.pf-result-card .k{font-size:8px!important;letter-spacing:.7px!important;color:#7f9aa8!important}
+.pf-result-card .v{margin-top:7px!important;font-size:19px!important;line-height:1.15!important;font-weight:950!important;color:#edf8fc!important}
+.pf-result-card.good .v{color:#59e2b0!important}
+.pf-result-card.bad .v{color:#ff6876!important}
+.pf-result-card.warn .v{color:#f3cc67!important}
+
+/* Journey stage cards — stronger but not flashy */
+.pf-cycle{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px!important;margin-top:12px!important;padding:12px!important;border:1px solid #1a465b!important;border-radius:13px!important;background:linear-gradient(180deg,#071824,#040e15)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important}
+.pf-cycle-step{min-height:176px!important;padding:16px!important;border-radius:11px!important;background:linear-gradient(180deg,#091e2b,#05131b)!important;border:1px solid #19465a!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important}
+.pf-cycle-step:nth-child(1){border-top:4px solid #3298c8!important}
+.pf-cycle-step:nth-child(2){border-top:4px solid #1fa9df!important}
+.pf-cycle-step:nth-child(3){border-top:4px solid #20d49c!important}
+.pf-cycle-step .n{font-size:8.5px!important;letter-spacing:1.25px!important;color:#83cbed!important}
+.pf-cycle-step:nth-child(3) .n{color:#73e5c0!important}
+.pf-cycle-step .t{margin-top:11px!important;font-size:16px!important;line-height:1.42!important;color:#f0f8fc!important}
+.pf-cycle-step .d{margin-top:10px!important;font-size:10px!important;line-height:1.65!important;color:#93aab7!important}
+.pf-cycle-step:not(:last-child)::after{right:-13px!important;width:24px!important;height:24px!important;border-color:#28627a!important;background:#06151f!important;color:#8bcce9!important;font-size:12px!important}
+.pf-cycle-step:nth-child(2)::after{color:#71dfbc!important;border-color:#2b7063!important}
+.pf-note{margin-top:12px!important;padding:12px 14px!important;border-radius:9px!important;background:#06141e!important;color:#9eb6c3!important;font-size:9.5px!important;line-height:1.65!important}
+
+/* Recent path stays secondary to the journey results. */
+.pf-journey-table{margin-top:10px!important}
+.pf-journey-row{padding:10px 11px!important;font-size:9.5px!important}
+.pf-results-label{font-size:10px!important;letter-spacing:1.4px!important;color:#8cc5df!important;font-weight:950!important}
+
+@media(max-width:900px){
+  .pf-cycle{grid-template-columns:1fr!important}
+  .pf-cycle-step{min-height:unset!important}
+  .pf-cycle-step:not(:last-child)::after{right:auto!important;left:50%!important;top:auto!important;bottom:-13px!important;transform:translateX(-50%) rotate(90deg)!important}
+}
+@media(max-width:700px){
+  .pro-tool-switcher{grid-template-columns:1fr!important}
+  .pro-tool-switch{min-height:94px!important}
+  .pro-tool-switch-icon{flex-basis:48px;width:48px;height:48px}
+  .pro-tool-switch-title{font-size:14px!important}
+  .pro-tool-card{padding:14px!important}
+  .pro-tool-metric{min-height:82px!important}
+  .pro-tool-metric b{font-size:18px!important}
+  .pro-tool-chart canvas{height:280px!important}
+  .pf-journey-header{align-items:flex-start;flex-direction:column}
+  .pf-journey-badge{align-self:flex-start}
+}
+</style>
 </head>
 <body data-bluebird-build="v78">
 <div class="app">
@@ -951,12 +1051,14 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <div class="pro-tools" id="proTools">
   <div class="pro-tool-switcher" role="tablist" aria-label="Pro analysis tools">
     <button class="pro-tool-switch active" type="button" role="tab" aria-selected="true" data-pro-tool="monteCarloTool">
-      <span class="pro-tool-switch-title">Monte Carlo</span>
-      <span class="pro-tool-switch-sub">Explore a range of possible equity paths</span>
+      <span class="pro-tool-switch-icon" aria-hidden="true">MC</span>
+      <span class="pro-tool-switch-copy"><span class="pro-tool-switch-title">Monte Carlo</span><span class="pro-tool-switch-sub">Explore a range of possible equity paths</span></span>
+      <span class="pro-tool-switch-arrow" aria-hidden="true">→</span>
     </button>
     <button class="pro-tool-switch" type="button" role="tab" aria-selected="false" data-pro-tool="propSimTool">
-      <span class="pro-tool-switch-title">Prop Firm Simulator</span>
-      <span class="pro-tool-switch-sub">Replay or model a path against account rules</span>
+      <span class="pro-tool-switch-icon pro-tool-switch-icon-pf" aria-hidden="true">PF</span>
+      <span class="pro-tool-switch-copy"><span class="pro-tool-switch-title">Prop Firm Simulator</span><span class="pro-tool-switch-sub">Model the journey from evaluation to payout-ready</span></span>
+      <span class="pro-tool-switch-arrow" aria-hidden="true">→</span>
     </button>
   </div>
   <div class="pro-tool-card" id="monteCarloTool">
@@ -1008,8 +1110,8 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       <div id="mcResultBody" hidden>
         <div class="pro-tool-metrics">
           <div class="pro-tool-metric"><span>Median final R</span><b id="mcMedianR">—</b></div>
-          <div class="pro-tool-metric"><span title="The result near the stronger end of the simulated outcomes">Higher-end result</span><b id="mcP95R">—</b></div>
-          <div class="pro-tool-metric"><span title="The result near the weaker end of the simulated outcomes">Lower-end result</span><b id="mcP5R">—</b></div>
+          <div class="pro-tool-metric" data-dynamic-tone="true"><span title="The result near the stronger end of the simulated outcomes">Higher-end result</span><b id="mcP95R">—</b></div>
+          <div class="pro-tool-metric" data-dynamic-tone="true"><span title="The result near the weaker end of the simulated outcomes">Lower-end result</span><b id="mcP5R">—</b></div>
           <div class="pro-tool-metric"><span>Chance positive</span><b id="mcPositive">—</b></div>
           <div class="pro-tool-metric warn"><span>Median max DD</span><b id="mcDD">—</b></div>
           <div class="pro-tool-metric"><span>Samples</span><b id="mcSamples">—</b></div>
@@ -1120,7 +1222,10 @@ select option{background-color:#061522!important;color:#eef8ff!important}
           <div class="pf-result-card warn" id="pfStatusMetric"><div class="k">Status</div><div class="v" id="pfStatus">—</div></div>
         </div>
         <div id="pfCycleResults" hidden>
-          <div class="pf-results-label" style="margin-top:16px">FULL JOURNEY · EVALUATION → FUNDED → PAYOUT-READY</div>
+          <div class="pf-journey-header">
+            <div><div class="pf-journey-kicker">FULL JOURNEY</div><div class="pf-journey-title">Evaluation <span>→</span> Funded <span>→</span> Payout-ready</div><div class="pf-journey-sub">See how many cycles clear each stage and how long the completed journey takes.</div></div>
+            <div class="pf-journey-badge">CYCLE FLOW</div>
+          </div>
           <div class="pf-results-summary" id="pfResultsSummary">—</div>
 
           <div class="pf-results-section">
