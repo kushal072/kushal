@@ -962,6 +962,50 @@ async function stopCloudLiveSync(){
   cloudRealtimeSubscribed=false;
   if(cloudChannel&&sb){try{await sb.removeChannel(cloudChannel);}catch(_e){} cloudChannel=null;}
 }
+
+async function pruneMissingCloudImageRows(trades){
+  if(!sb||!session)return trades;
+  const cleaned=[];
+  for(const trade of (trades||[])){
+    const images=[...new Set((Array.isArray(trade.images)?trade.images:[])
+      .map(x=>String(x||'').trim())
+      .filter(x=>x&&!x.startsWith('data:')) || [])];
+    if(!images.length){
+      cleaned.push({...trade,images:[]});
+      continue;
+    }
+    // Check the actual Storage folder before trusting trade_images rows.
+    // This removes old/stale DB rows that point to screenshots that no longer exist.
+    try{
+      const folder=`${session.user.id}/${trade.id}`;
+      const listed=await sb.storage.from('trade-images').list(folder,{limit:100,offset:0});
+      if(listed.error){
+        cleaned.push({...trade,images});
+        continue;
+      }
+      const actualNames=new Set((listed.data||[]).map(x=>String(x?.name||'')).filter(Boolean));
+      const valid=images.filter(path=>actualNames.has(path.split('/').pop()||''));
+      const missing=images.filter(path=>!actualNames.has(path.split('/').pop()||''));
+      if(missing.length){
+        try{
+          await sb.from('trade_images')
+            .delete()
+            .eq('trade_id',trade.id)
+            .eq('user_id',session.user.id)
+            .in('storage_path',missing);
+        }catch(e){
+          console.warn('Could not remove stale trade_images rows',trade.id,e);
+        }
+      }
+      cleaned.push({...trade,images:valid});
+    }catch(e){
+      console.warn('Could not verify screenshot files for trade',trade.id,e);
+      cleaned.push({...trade,images});
+    }
+  }
+  return cleaned;
+}
+
 async function loadCloud(){
  try{
   const p=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
@@ -969,7 +1013,7 @@ async function loadCloud(){
   if(!profile){profile={id:session.user.id,plan:"trial",trial_started_at:new Date().toISOString(),name_setup_complete:false};await sb.from("profiles").upsert(profile)}
   const r=await sb.from("trades").select("*").order("trade_date",{ascending:false}).order("created_at",{ascending:false});
   if(r.error)throw r.error;
-  state.trades=r.data||[];
+  state.trades=await pruneMissingCloudImageRows(r.data||[]);
   const jd=await sb.from("journal_days").select("trade_date,trade_count,manual_sequence").eq("user_id",session.user.id);
   if(!jd.error){
     state.daySummaries={};
@@ -1215,7 +1259,7 @@ async function appendImagesToTrade(tradeId,files){
     }
     saveLocal();renderAll();
     const refreshed=state.trades.find(t=>t.id===tradeId);
-    if(refreshed&&refreshed.images.length)openImageViewer(refreshed.images,Math.max(0,refreshed.images.length-selected.length),tradeId);
+    if(refreshed&&refreshed.images.length)openTradeImageViewer(refreshed,Math.max(0,refreshed.images.length-selected.length));
     toast("Image(s) added to the saved journal entry.");
   }catch(e){toast("Could not add image(s): "+e.message)}
 }
@@ -1233,7 +1277,7 @@ async function replaceCurrentImage(tradeId,index,file){
       trade.images[index]=await fileData(file);
     }
     saveLocal();renderAll();
-    openImageViewer(trade.images,index,tradeId);
+    openTradeImageViewer(trade,index);
     toast("Image replaced.");
   }catch(e){toast("Could not replace image: "+e.message)}
 }
@@ -1441,6 +1485,20 @@ async function renderViewerImage(){
     title.textContent=`Trade screenshot ${idx+1} — unavailable`;
   }
 }
+async function openTradeImageViewer(trade,index=0){
+  const current=state.trades.find(x=>String(x.id)===String(trade?.id));
+  if(!current||!Array.isArray(current.images)||!current.images.length){toast("No screenshots are available for this trade.");return}
+  if(sb&&session){
+    const cleaned=await pruneMissingCloudImageRows([current]);
+    const fresh=cleaned[0];
+    current.images=fresh?.images||[];
+    if(!current.images.length){
+      saveLocal();renderTrades();toast("No screenshots are available for this trade.");return;
+    }
+  }
+  openImageViewer(current.images,Math.min(index,current.images.length-1),current.id);
+}
+
 function openImageViewer(items,index=0,tradeId=null){
   imageViewer.items=Array.from(new Set(Array.isArray(items)?items.filter(Boolean):[]));
   imageViewer.tradeId=tradeId;
@@ -1620,7 +1678,7 @@ async function renderTrades(){
  }
  b.querySelectorAll('[data-view-trade]').forEach(el=>el.addEventListener('click',()=>{
    const trade=state.trades.find(x=>String(x.id)===String(el.dataset.viewTrade));
-   if(trade&&trade.images?.length)openImageViewer(trade.images,0,trade.id);
+   if(trade&&trade.images?.length)openTradeImageViewer(trade,0);
  }));
  b.querySelectorAll('[data-edit-trade]').forEach(el=>el.addEventListener('click',()=>startEditTrade(el.dataset.editTrade)));
  b.querySelectorAll('[data-add-image]').forEach(el=>el.addEventListener('click',()=>{
@@ -2311,7 +2369,7 @@ window.addEventListener("hashchange",()=>{const page=(location.hash||"#home").sl
 window.addEventListener("popstate",()=>{const page=(location.hash||"#home").slice(1)||"home";nav(page,false)});
 $("tradeForm").addEventListener("submit",saveTrade);$("exportBtn").onclick=exportAI;$("aiPdfBtn").onclick=downloadAiPdf;
 $("cancelEditBtn").onclick=cancelEdit;
-$("editManageImages").onclick=()=>{if(editTradeId){const trade=state.trades.find(x=>x.id===editTradeId);if(trade&&trade.images?.length)openImageViewer(trade.images,0,editTradeId);else openAddImagePicker(editTradeId)}};
+$("editManageImages").onclick=()=>{if(editTradeId){const trade=state.trades.find(x=>x.id===editTradeId);if(trade&&trade.images?.length)openTradeImageViewer(trade,0);else openAddImagePicker(editTradeId)}};
 const imageInput=document.querySelector('#tradeForm input[name="images"]');
 if(imageInput) imageInput.addEventListener("change",()=>renderImagePreview(imageInput.files));
 $("imageViewerClose").onclick=closeImageViewer;
