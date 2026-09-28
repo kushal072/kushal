@@ -351,6 +351,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 #page-journal table th:last-child,#page-journal table td:last-child{border-top-right-radius:7px}
 #page-journal .trade-actions .btn{border-radius:7px;padding:6px 8px;font-size:8px;background:#0b1114;border-color:rgba(160,180,195,.15)}
 #page-journal .trade-actions .btn:hover{border-color:rgba(42,170,255,.45);background:#101a20}
+#page-journal .trade-actions .btn.danger{color:#d98a8f;border-color:rgba(255,105,115,.18)}
+#page-journal .trade-actions .btn.danger:hover{border-color:rgba(255,105,115,.45);background:#1b0e12;color:#ff9ba1}
 #page-journal .seq-order{background:#11171b;border:1px solid rgba(160,180,195,.17);color:#c9d3d8;border-radius:6px;padding:4px 6px;font-size:8px}
 #page-journal .seq-token{min-width:22px;height:21px;border-radius:6px;font-size:8px;border-width:1px;box-shadow:none;font-weight:900;letter-spacing:.1px}
 #page-journal .seq-token.w{background:#dff6e8;border-color:#b7e7c9;color:#176b3a}
@@ -439,7 +441,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div class="field"><label>SETUP</label><input class="input" name="setup"></div>
     <div class="field"><label>SESSION</label><input class="input" name="session"></div>
     <div class="field"><label>TAG</label><input class="input" name="tag"></div>
-    <div class="field day-sequence-field"><label>DAY SEQUENCE</label><input class="input" name="day_sequence" type="text" maxlength="60" placeholder="e.g. LLW"><div id="daySequenceMeta" class="day-seq-meta">Enter the full order for the day once. Example: LLW</div></div>
+    <div class="field day-sequence-field"><label>DAY SEQUENCE</label><input class="input" name="day_sequence" type="text" maxlength="60" placeholder="e.g. LLW"><div id="daySequenceMeta" class="day-seq-meta">Enter the full trade order for the day once. Example: LLW</div></div>
     <div class="field"><label>SCREENSHOTS</label><input class="input" name="images" type="file" accept="image/*" multiple><div id="imagePreview" class="image-preview-wrap"></div></div>
    </div>
    <div class="field" style="margin-top:8px"><label>NOTES</label><textarea name="notes"></textarea></div>
@@ -655,14 +657,9 @@ function getDaySummary(date,rows=state.trades){
   const actualRows=rows.filter(t=>String(t?.trade_date||'').slice(0,10)===key);
   const autoSeq=derivedDaySequence(key,rows);
   const savedSeq=validDaySequence(saved.sequence||'')&&saved.sequence ? normalizeDaySequence(saved.sequence) : '';
-  const savedTokens=daySequenceTokens(savedSeq)||[];
-  // When there are actual trades and a stored sequence has a different length, trust the real trade order.
-  // When only a day summary exists, the manual sequence is the source of truth.
-  const useAuto=actualRows.length>0 && savedSeq && savedTokens.length!==actualRows.length;
-  const seq=useAuto ? autoSeq : (savedSeq || autoSeq);
-  const tokens=daySequenceTokens(seq)||[];
+  const tokens=daySequenceTokens(savedSeq||autoSeq)||[];
   const count=tokens.length || Number(saved.trade_count) || actualRows.length;
-  return {date:key,trade_count:count,sequence:seq,tokens,manual:!useAuto && !!(saved.sequence||saved.trade_count)};
+  return {date:key,trade_count:count,sequence:savedSeq||autoSeq,tokens,manual:!!(saved.sequence||saved.trade_count)};
 }
 function setDaySummary(date,summary){
   const key=String(date||'').slice(0,10); if(!key)return;
@@ -1229,9 +1226,8 @@ async function saveTrade(e){
      if(jr.error && !/journal_days/i.test(jr.error.message||'')) toast("Trade saved, but day summary sync failed: "+jr.error.message);
    }
  } else if(trade.trade_date){
-   // Clearing the day sequence removes only the manual day summary; the actual trade order remains intact.
-   setDaySummary(trade.trade_date,{sequence:'',trade_count:null});
-   if(sb&&session) await sb.from("journal_days").delete().eq("user_id",session.user.id).eq("trade_date",trade.trade_date);
+   // A blank DAY SEQ on a subsequent trade keeps the existing day sequence.
+   // The full day order is entered once and shared by all trade rows for that date.
  }
  if(existing && String(existing.trade_date||'').slice(0,10)!==String(trade.trade_date||'').slice(0,10)){
    const oldDate=String(existing.trade_date||'').slice(0,10);
@@ -1384,8 +1380,10 @@ function journalSequenceInfo(allTrades,trade){
     return String(a.t?.id||'').localeCompare(String(b.t?.id||''));
   });
   const order=same.findIndex(x=>String(x.t?.id)===String(trade?.id));
-  const tokens=same.map(x=>journalOutcomeToken(x.t));
-  return {date,count:same.length,order:order<0?null:order+1,tokens,sequence:tokens.join('-')};
+  const summary=getDaySummary(date,allTrades);
+  const tokens=summary.tokens.length ? summary.tokens : same.map(x=>journalOutcomeToken(x.t));
+  const count=summary.trade_count||tokens.length||same.length;
+  return {date,count,order:order<0?null:order+1,tokens,sequence:tokens.join('-')};
 }
 function sequenceTokenHtml(token,current=false){
   const cls=token==='W'?'w':token==='L'?'l':token==='BE'?'be':'q';
@@ -1416,69 +1414,94 @@ function renderJournalDayPatterns(rows){
 }
 
 async function renderTrades(){
- const accessibleRows=visibleTrades();
+ const b=$("trades");
+ const accessibleRows=[...visibleTrades()];
  const rows=journalFilterRows(accessibleRows);
  const summary=$("journalFilterSummary");
  if(summary){summary.textContent=`Showing ${rows.length} of ${accessibleRows.length} available trade${accessibleRows.length===1?'':'s'} · ${journalGetRange().label}`;}
- const b=$("trades"); if(!b)return;
- const baseManage='<div class="trade-manage-bar"><div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox"'+(rows.length?'':' disabled')+'> Select all individual trades</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div><button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button></div>';
  if(!rows.length){
-   b.innerHTML=baseManage+'<div style="padding:20px;text-align:center;color:#718799;font-size:10px">No saved trades for this period.</div>';
-   const sel=$("selectAllTrades");if(sel)sel.onchange=toggleAllTradeSelection;return;
+   b.innerHTML='<div class="trade-manage-bar"><div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox" disabled> Select all</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div><button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button></div><div style="padding:20px;text-align:center;color:#718799;font-size:10px">No saved trades yet.</div>';
+   const sel=$("selectAllTrades"); if(sel)sel.onchange=toggleAllTradeSelection;
+   return;
  }
- const groups=new Map();
- for(const t of rows){const key=String(t.trade_date||'').slice(0,10)||'undated';if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t);}
- const days=[...groups.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
- let html=baseManage+'<div class="journal-day-table-wrap"><table class="journal-day-table"><thead><tr><th>DATE</th><th>TRADES</th><th>DAY SEQ</th><th>R</th><th>RESULT $</th><th>SETUP</th><th>SESSION</th><th>FILES</th><th>NOTES</th><th></th></tr></thead><tbody>';
- for(const [date,dayTrades] of days){
-   const ordered=[...dayTrades].sort((a,b)=>{const ka=journalTradeSortKey(a,0),kb=journalTradeSortKey(b,0);if(ka!==kb)return ka-kb;return String(a.id||'').localeCompare(String(b.id||''));});
-   const meta=getDaySummary(date,rows);
-   const totalR=ordered.reduce((s,t)=>s+(Number.isFinite(Number(t.result_r))?Number(t.result_r):0),0);
-   const totalUsd=ordered.reduce((s,t)=>s+(Number.isFinite(Number(t.result_usd))?Number(t.result_usd):0),0);
-   const moneyText=(ordered.some(t=>t.result_usd!==null&&t.result_usd!==undefined&&t.result_usd!=="")?(totalUsd>=0?'+$':'-$')+Math.abs(Math.round(totalUsd)).toLocaleString():'—');
-   const setupValues=[...new Set(ordered.map(t=>t.setup).filter(Boolean))];
-   const sessionValues=[...new Set(ordered.map(t=>t.session).filter(Boolean))];
-   const shots=ordered.reduce((n,t)=>n+(Array.isArray(t.images)?t.images.length:0),0);
-   const notes=ordered.map(t=>t.notes||'').filter(Boolean)[0]||'';
-   const gid=`day-${date.replace(/[^0-9]/g,'')}`;
-   const displayCount=meta.trade_count||ordered.length;
-   html+=`<tr class="day-summary-row" data-day-toggle="${escHtml(gid)}"><td><span class="day-caret">▸</span><strong>${date==='undated'?'Undated':escHtml(date)}</strong></td><td><span class="day-count-pill">${displayCount}</span></td><td><div class="trade-seq">${meta.tokens.map(tok=>sequenceTokenHtml(tok)).join('')||'<span class="muted-dash">—</span>'}</div></td><td class="${totalR>0?'pos':totalR<0?'neg':''}">${totalR>=0?'+':''}${fmt(totalR)}R</td><td class="journal-money">${moneyText}</td><td>${setupValues.length===1?escHtml(setupValues[0]):setupValues.length?'Multiple':'—'}</td><td>${sessionValues.length===1?escHtml(sessionValues[0]):sessionValues.length?'Multiple':'—'}</td><td>${shots?shots+' image'+(shots===1?'':'s'):'—'}</td><td class="day-notes">${escHtml(notes.slice(0,70))||'—'}</td><td><button class="btn day-expand-btn" type="button" data-day-toggle="${escHtml(gid)}">View ${ordered.length>1? 'trades':'trade'}</button></td></tr>`;
-   html+=`<tr class="day-detail-row hidden" id="${escHtml(gid)}"><td colspan="10"><div class="day-detail-panel"><div class="day-detail-head"><div><b>${escHtml(date==='undated'?'Undated':date)}</b><span class="muted-dash"> · ${ordered.length} trades · ${escHtml(meta.sequence||'No sequence yet')}</span></div><button class="btn" type="button" data-edit-day="${escHtml(date)}">Edit day sequence</button></div><table class="day-trade-subtable"><thead><tr><th></th><th>ORDER</th><th>TRADE</th><th>R</th><th>RESULT $</th><th>SETUP</th><th>SESSION</th><th>SCREENSHOT</th><th>NOTES</th><th>ACTIONS</th></tr></thead><tbody>`;
-   ordered.forEach((t,i)=>{
-     const moneyValue=t.result_usd??t.usd??null;const mText=moneyValue===null||moneyValue===''?'—':(Number(moneyValue)>=0?'+$':'-$')+Math.abs(Number(moneyValue)).toLocaleString();
+
+ const orderedRows=[...rows].sort((a,b)=>{
+   const da=String(a.trade_date||'').slice(0,10), db=String(b.trade_date||'').slice(0,10);
+   if(da!==db)return db.localeCompare(da);
+   const ka=journalTradeSortKey(a,0), kb=journalTradeSortKey(b,0);
+   if(ka!==kb)return kb-ka;
+   return String(b.id||'').localeCompare(String(a.id||''));
+ });
+
+ b.innerHTML =
+   '<div class="trade-manage-bar">'+
+     '<div class="trade-manage-left"><label><input class="trade-select" id="selectAllTrades" type="checkbox"> Select all</label><span class="trade-selected-count" id="selectedTradeCount">0 selected</span></div>'+
+     '<button class="btn danger" id="deleteSelectedTrades" type="button" disabled>Delete selected</button>'+
+   '</div>'+
+   '<div style="font-size:8px;color:#71838d;margin:8px 2px 6px">DAY SEQ is the full trade order for that date. Enter it once in the journal entry (for example, LLW); Bluebird counts the trades automatically.</div>'+
+   '<table><thead><tr>'+
+   '<th style="width:30px"></th><th>DATE</th><th>ORDER</th><th>DAY TRADES</th><th class="sequence-col">DAY SEQ</th><th>INSTR.</th><th>DIR</th><th>R</th><th>RESULT $</th>'+
+   '<th>SETUP</th><th>SESSION</th><th>SCREENSHOT</th><th>NOTES</th><th>ACTIONS</th>'+
+   '</tr></thead><tbody>'+
+   orderedRows.slice(0,100).map(t=>{
+     const meta=journalSequenceInfo(accessibleRows,t);
+     const moneyValue=t.result_usd ?? t.usd ?? null;
+     const moneyText=moneyValue===null||moneyValue===''?'—':(Number(moneyValue)>=0?'+$':'-$')+Math.abs(Number(moneyValue)).toLocaleString();
      let shotHtml='—';
      if(Array.isArray(t.images)&&t.images.length){
-       if(!sb||String(t.images[0]).startsWith('data:'))shotHtml=`<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${t.images[0]}" alt=""><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span>`;
-       else shotHtml=`<span id="img-${t.id}" class="journal-shot" data-view-trade="${t.id}">Loading…</span>`;
+       if(!sb||String(t.images[0]).startsWith('data:')){
+         shotHtml=`<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${t.images[0]}" alt=""><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span>`;
+       }else{
+         shotHtml=`<span id="img-${t.id}" class="journal-shot" data-view-trade="${t.id}">Loading…</span>`;
+       }
      }
-     const token=journalOutcomeToken(t);
-     html+=`<tr><td><input class="trade-select" type="checkbox" data-select-trade="${t.id}" aria-label="Select journal trade"></td><td><span class="seq-order">${i+1} / ${ordered.length}</span></td><td>${escHtml(t.instrument||'Trade')}</td><td class="${t.result_r>0?'pos':t.result_r<0?'neg':''}">${t.result_r===null||t.result_r===undefined?'—':(t.result_r>=0?'+':'')+fmt(t.result_r)+'R'}</td><td class="journal-money">${mText}</td><td>${escHtml(t.setup||'—')}</td><td>${escHtml(t.session||'—')}</td><td>${shotHtml}</td><td>${escHtml((t.notes||'').slice(0,90))||'—'}</td><td><div class="trade-actions"><button class="btn" data-edit-trade="${t.id}" type="button">Edit</button><button class="btn" data-add-image="${t.id}" type="button">Add image</button></div></td></tr>`;
-   });
-   html+='</tbody></table></div></td></tr>';
- }
- html+='</tbody></table></div>';
- b.innerHTML=html;
- const selectAll=$("selectAllTrades");if(selectAll)selectAll.addEventListener('change',toggleAllTradeSelection);
- const delSelected=$("deleteSelectedTrades");if(delSelected)delSelected.addEventListener('click',deleteSelectedTrades);
+     const seqHtml=`<div class="trade-seq">${meta.tokens.map((tok,i)=>sequenceTokenHtml(tok,i===meta.order-1)).join('')}</div>`;
+     return `<tr>`+
+       `<td><input class="trade-select" type="checkbox" data-select-trade="${t.id}" aria-label="Select journal entry"></td>`+
+       `<td>${escHtml(t.trade_date||'—')}</td>`+
+       `<td><span class="seq-order">${meta.order?`${meta.order} / ${meta.count}`:'—'}</span></td>`+
+       `<td><span class="day-count-pill">${meta.count||'—'}</span></td>`+
+       `<td class="sequence-col">${seqHtml||'<span class="muted-dash">—</span>'}</td>`+
+       `<td>${escHtml(t.instrument||'—')}</td>`+
+       `<td>${escHtml(t.direction||'—')}</td>`+
+       `<td class="${t.result_r>0?'pos':t.result_r<0?'neg':''}">${t.result_r===null||t.result_r===undefined?'—':((t.result_r>=0?'+':'')+fmt(t.result_r)+'R')}</td>`+
+       `<td class="journal-money">${moneyText}</td>`+
+       `<td>${escHtml(t.setup||'—')}</td>`+
+       `<td>${escHtml(t.session||'—')}</td>`+
+       `<td>${shotHtml}</td>`+
+       `<td>${escHtml((t.notes||'').slice(0,70))||'—'}</td>`+
+       `<td><div class="trade-actions"><button class="btn" data-edit-trade="${t.id}" type="button">Edit</button><button class="btn" data-add-image="${t.id}" type="button">Add image</button><button class="btn danger" data-delete-trade="${t.id}" type="button">Delete</button></div></td>`+
+       `</tr>`;
+   }).join('')+
+   '</tbody></table>';
+
+ const selectAll=$("selectAllTrades"); if(selectAll)selectAll.addEventListener('change',toggleAllTradeSelection);
+ const delSelected=$("deleteSelectedTrades"); if(delSelected)delSelected.addEventListener('click',deleteSelectedTrades);
  b.querySelectorAll('[data-select-trade]').forEach(el=>el.addEventListener('change',updateTradeSelectionUI));
- b.querySelectorAll('[data-day-toggle]').forEach(el=>el.addEventListener('click',()=>{
-   const id=el.dataset.dayToggle; const row=$(id); if(row)row.classList.toggle('hidden');
-   const sum=document.querySelector(`.day-summary-row[data-day-toggle="${CSS.escape(id)}"]`); if(sum){const open=row&&!row.classList.contains('hidden');sum.classList.toggle('is-open',open);const c=sum.querySelector('.day-caret');if(c)c.textContent=open?'▾':'▸';}
- }));
- b.querySelectorAll('[data-edit-day]').forEach(el=>el.addEventListener('click',()=>{
-   const d=el.dataset.editDay;if(!d||d==='undated')return;const meta=getDaySummary(d);const f=$("tradeForm");f.date.value=d;f.day_sequence.value=meta.sequence||'';updateDaySequenceMeta();window.scrollTo({top:Math.max(0,$("page-journal").offsetTop-20),behavior:'smooth'});f.day_sequence.focus();toast(`Editing day summary for ${d}. Save any trade to store the sequence.`);
- }));
  updateTradeSelectionUI();
+
  if(sb&&session){
-   for(const t of rows.slice(0,100)){
-     if(!Array.isArray(t.images)||!t.images.length)continue; const cell=$("img-"+t.id); if(!cell)continue;
-     try{const src=await signedImage(t.images[0]);if(src)cell.innerHTML=`<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${src}" alt=""><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span>`;}catch{}
+   for(const t of orderedRows.slice(0,100)){
+     if(!Array.isArray(t.images)||!t.images.length)continue;
+     const cell=$("img-"+t.id); if(!cell)continue;
+     try{
+       const src=await signedImage(t.images[0]);
+       if(src)cell.innerHTML=`<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${src}" alt=""><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span>`;
+     }catch{}
    }
  }
- b.querySelectorAll('[data-view-trade]').forEach(el=>el.addEventListener('click',()=>{const trade=state.trades.find(x=>x.id===el.dataset.viewTrade);if(trade&&trade.images?.length)openImageViewer(trade.images,0,trade.id);}));
+ b.querySelectorAll('[data-view-trade]').forEach(el=>el.addEventListener('click',()=>{
+   const trade=state.trades.find(x=>String(x.id)===String(el.dataset.viewTrade));
+   if(trade&&trade.images?.length)openImageViewer(trade.images,0,trade.id);
+ }));
  b.querySelectorAll('[data-edit-trade]').forEach(el=>el.addEventListener('click',()=>startEditTrade(el.dataset.editTrade)));
- b.querySelectorAll('[data-add-image]').forEach(el=>el.addEventListener('click',()=>{const trade=state.trades.find(x=>x.id===el.dataset.addImage);if(trade)openAddImagePicker(trade.id);}));
+ b.querySelectorAll('[data-add-image]').forEach(el=>el.addEventListener('click',()=>{
+   const trade=state.trades.find(x=>String(x.id)===String(el.dataset.addImage));
+   if(trade)openAddImagePicker(trade.id);
+ }));
+ b.querySelectorAll('[data-delete-trade]').forEach(el=>el.addEventListener('click',()=>deleteTradeRecord(el.dataset.deleteTrade)));
 }
+
 function renderCalendar(){
  const box=$("calendar");
  if(!box) return;
@@ -2232,6 +2255,13 @@ const journalDate = document.querySelector('#tradeForm input[name="date"]');
 if (journalDate && !journalDate.value) {
   journalDate.value = todayDateKey();
 }
+if (journalDate) journalDate.addEventListener('change',()=>{
+  if(editTradeId)return;
+  const f=$("tradeForm");
+  const meta=getDaySummary(journalDate.value);
+  if(f?.day_sequence) f.day_sequence.value=meta.sequence||'';
+  updateDaySequenceMeta();
+});
 renderAll();initCloud();
 })();
 
