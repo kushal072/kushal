@@ -439,8 +439,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     <div class="field"><label>SETUP</label><input class="input" name="setup"></div>
     <div class="field"><label>SESSION</label><input class="input" name="session"></div>
     <div class="field"><label>TAG</label><input class="input" name="tag"></div>
-    <div class="field"><label>TRADES TODAY</label><input class="input" name="day_trade_count" type="number" min="1" max="50" step="1" placeholder="e.g. 3"></div>
-    <div class="field"><label>DAY SEQUENCE</label><input class="input" name="day_sequence" type="text" maxlength="60" placeholder="e.g. LWL"><div class="field-help">Optional · W / L / BE in actual order</div></div>
+    <div class="field day-sequence-field"><label>DAY SEQUENCE</label><input class="input" name="day_sequence" type="text" maxlength="60" placeholder="e.g. LLW"><div id="daySequenceMeta" class="day-seq-meta">Enter the full order for the day once. Example: LLW</div></div>
     <div class="field"><label>SCREENSHOTS</label><input class="input" name="images" type="file" accept="image/*" multiple><div id="imagePreview" class="image-preview-wrap"></div></div>
    </div>
    <div class="field" style="margin-top:8px"><label>NOTES</label><textarea name="notes"></textarea></div>
@@ -623,16 +622,27 @@ let sb=null, session=null, profile=null;
 const state={days:[[],[],[],[],[]],trades:[],month:new Date(new Date().getFullYear(),new Date().getMonth(),1),daySummaries:{}};
 const LOCAL_KEY="bluebird_ready_v2";
 
-function normalizeDaySequence(raw){
-  return String(raw||'').toUpperCase().replace(/[,|\/\\._]+/g,' ').replace(/\s+/g,' ').trim().split(' ').filter(Boolean).map(tok=>tok==='BREAK-EVEN'||tok==='BREAKEVEN'?'BE':tok).join(' ');
-}
 function daySequenceTokens(raw){
-  const seq=normalizeDaySequence(raw);
-  if(!seq)return [];
-  return seq.split(' ').filter(Boolean);
+  let s=String(raw||'').toUpperCase().trim();
+  if(!s)return [];
+  s=s.replace(/BREAK[- ]?EVEN|BREAKEVEN/g,'BE');
+  const tokens=[];
+  let i=0;
+  while(i<s.length){
+    const ch=s[i];
+    if(/[\s,|\/._-]/.test(ch)){i++;continue;}
+    if(s.slice(i,i+2)==='BE'){tokens.push('BE');i+=2;continue;}
+    if(ch==='W'||ch==='L'){tokens.push(ch);i++;continue;}
+    return null;
+  }
+  return tokens;
+}
+function normalizeDaySequence(raw){
+  const tokens=daySequenceTokens(raw);
+  return tokens===null ? String(raw||'').toUpperCase().trim() : tokens.join(' ');
 }
 function validDaySequence(raw){
-  return daySequenceTokens(raw).every(t=>t==='W'||t==='L'||t==='BE');
+  return daySequenceTokens(raw)!==null;
 }
 function derivedDaySequence(date,rows=state.trades){
   const same=rows.filter(t=>String(t?.trade_date||'').slice(0,10)===String(date||'').slice(0,10));
@@ -642,19 +652,25 @@ function derivedDaySequence(date,rows=state.trades){
 function getDaySummary(date,rows=state.trades){
   const key=String(date||'').slice(0,10);
   const saved=state.daySummaries?.[key]||{};
+  const actualRows=rows.filter(t=>String(t?.trade_date||'').slice(0,10)===key);
   const autoSeq=derivedDaySequence(key,rows);
-  const seq=validDaySequence(saved.sequence||'')&&saved.sequence ? normalizeDaySequence(saved.sequence) : autoSeq;
-  const tokens=daySequenceTokens(seq);
-  const count=Number(saved.trade_count)||tokens.length||rows.filter(t=>String(t?.trade_date||'').slice(0,10)===key).length;
-  return {date:key,trade_count:count,sequence:seq,tokens,manual:!!(saved.sequence||saved.trade_count)};
+  const savedSeq=validDaySequence(saved.sequence||'')&&saved.sequence ? normalizeDaySequence(saved.sequence) : '';
+  const savedTokens=daySequenceTokens(savedSeq)||[];
+  // When there are actual trades and a stored sequence has a different length, trust the real trade order.
+  // When only a day summary exists, the manual sequence is the source of truth.
+  const useAuto=actualRows.length>0 && savedSeq && savedTokens.length!==actualRows.length;
+  const seq=useAuto ? autoSeq : (savedSeq || autoSeq);
+  const tokens=daySequenceTokens(seq)||[];
+  const count=tokens.length || Number(saved.trade_count) || actualRows.length;
+  return {date:key,trade_count:count,sequence:seq,tokens,manual:!useAuto && !!(saved.sequence||saved.trade_count)};
 }
 function setDaySummary(date,summary){
   const key=String(date||'').slice(0,10); if(!key)return;
   state.daySummaries=state.daySummaries||{};
   if(!summary || (!summary.sequence && !summary.trade_count)){delete state.daySummaries[key];return;}
-  state.daySummaries[key]={trade_count:summary.trade_count||null,sequence:summary.sequence||''};
+  const tokens=summary.sequence ? (daySequenceTokens(summary.sequence)||[]) : [];
+  state.daySummaries[key]={trade_count:tokens.length || summary.trade_count || null,sequence:tokens.length ? tokens.join(' ') : ''};
 }
-
 
 function $(id){return document.getElementById(id)}
 function toast(msg){const e=$("status");e.textContent=msg;e.style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>e.style.display="none",2600)}
@@ -1038,8 +1054,7 @@ function startEditTrade(tradeId){
   f.session.value=trade.session||"";
   f.tag.value=trade.tag||"";
   const dayMeta=getDaySummary(trade.trade_date);
-  f.day_trade_count.value=dayMeta.trade_count||"";
-  f.day_sequence.value=dayMeta.sequence||"";
+  f.day_sequence.value=dayMeta.sequence||""; updateDaySequenceMeta();
   f.notes.value=trade.notes||"";
   f.images.value="";
   if($("imagePreview"))$("imagePreview").innerHTML="";
@@ -1054,6 +1069,8 @@ function cancelEdit(){
   const f=$("tradeForm");
   f.reset();
   f.date.value=todayDateKey();
+  if(f.day_sequence)f.day_sequence.value="";
+  updateDaySequenceMeta();
   if($("imagePreview"))$("imagePreview").innerHTML="";
   $("saveTradeBtn").textContent="Save trade";
   $("cancelEditBtn").classList.add("hidden");
@@ -1128,13 +1145,11 @@ async function saveTrade(e){
  const existing=editTradeId?state.trades.find(t=>t.id===editTradeId):null;
  if(editTradeId && !existing){toast("That journal entry could not be found.");return}
  const rawDaySeq=f.day_sequence.value||"";
- const daySeq=normalizeDaySequence(rawDaySeq);
- const dayTokens=daySequenceTokens(daySeq);
- const dayCount=f.day_trade_count.value===""?null:Number(f.day_trade_count.value);
- if(daySeq && !validDaySequence(daySeq)){toast("DAY SEQUENCE can only contain W, L, and BE.");f.day_sequence.focus();return}
- if(dayCount!==null && (!Number.isInteger(dayCount)||dayCount<1||dayCount>50)){toast("TRADES TODAY must be a whole number from 1 to 50.");f.day_trade_count.focus();return}
- if(daySeq && dayCount!==null && dayTokens.length!==dayCount){toast(`TRADES TODAY is ${dayCount}, but DAY SEQUENCE contains ${dayTokens.length} outcomes.`);f.day_sequence.focus();return}
- const finalDayCount=dayCount!==null?dayCount:(dayTokens.length||null);
+ const dayTokensRaw=daySequenceTokens(rawDaySeq);
+ if(dayTokensRaw===null){toast("DAY SEQUENCE can only contain W, L, and BE.");f.day_sequence.focus();return}
+ const dayTokens=dayTokensRaw||[];
+ const daySeq=dayTokens.length ? dayTokens.join(' ') : '';
+ const finalDayCount=dayTokens.length||null;
 
  const trade={
    id:editTradeId||crypto.randomUUID(),
@@ -1213,6 +1228,10 @@ async function saveTrade(e){
      const jr=await sb.from("journal_days").upsert({user_id:session.user.id,trade_date:trade.trade_date,trade_count:finalDayCount,manual_sequence:daySeq||null,updated_at:new Date().toISOString()},{onConflict:"user_id,trade_date"});
      if(jr.error && !/journal_days/i.test(jr.error.message||'')) toast("Trade saved, but day summary sync failed: "+jr.error.message);
    }
+ } else if(trade.trade_date){
+   // Clearing the day sequence removes only the manual day summary; the actual trade order remains intact.
+   setDaySummary(trade.trade_date,{sequence:'',trade_count:null});
+   if(sb&&session) await sb.from("journal_days").delete().eq("user_id",session.user.id).eq("trade_date",trade.trade_date);
  }
  if(existing && String(existing.trade_date||'').slice(0,10)!==String(trade.trade_date||'').slice(0,10)){
    const oldDate=String(existing.trade_date||'').slice(0,10);
@@ -1422,7 +1441,8 @@ async function renderTrades(){
    const shots=ordered.reduce((n,t)=>n+(Array.isArray(t.images)?t.images.length:0),0);
    const notes=ordered.map(t=>t.notes||'').filter(Boolean)[0]||'';
    const gid=`day-${date.replace(/[^0-9]/g,'')}`;
-   html+=`<tr class="day-summary-row" data-day-toggle="${escHtml(gid)}"><td><span class="day-caret">▸</span><strong>${date==='undated'?'Undated':escHtml(date)}</strong></td><td><span class="day-count-pill">${ordered.length}</span></td><td><div class="trade-seq">${meta.tokens.map(tok=>sequenceTokenHtml(tok)).join('')||'<span class="muted-dash">—</span>'}</div></td><td class="${totalR>0?'pos':totalR<0?'neg':''}">${totalR>=0?'+':''}${fmt(totalR)}R</td><td class="journal-money">${moneyText}</td><td>${setupValues.length===1?escHtml(setupValues[0]):setupValues.length?'Multiple':'—'}</td><td>${sessionValues.length===1?escHtml(sessionValues[0]):sessionValues.length?'Multiple':'—'}</td><td>${shots?shots+' image'+(shots===1?'':'s'):'—'}</td><td class="day-notes">${escHtml(notes.slice(0,70))||'—'}</td><td><button class="btn day-expand-btn" type="button" data-day-toggle="${escHtml(gid)}">View ${ordered.length>1? 'trades':'trade'}</button></td></tr>`;
+   const displayCount=meta.trade_count||ordered.length;
+   html+=`<tr class="day-summary-row" data-day-toggle="${escHtml(gid)}"><td><span class="day-caret">▸</span><strong>${date==='undated'?'Undated':escHtml(date)}</strong></td><td><span class="day-count-pill">${displayCount}</span></td><td><div class="trade-seq">${meta.tokens.map(tok=>sequenceTokenHtml(tok)).join('')||'<span class="muted-dash">—</span>'}</div></td><td class="${totalR>0?'pos':totalR<0?'neg':''}">${totalR>=0?'+':''}${fmt(totalR)}R</td><td class="journal-money">${moneyText}</td><td>${setupValues.length===1?escHtml(setupValues[0]):setupValues.length?'Multiple':'—'}</td><td>${sessionValues.length===1?escHtml(sessionValues[0]):sessionValues.length?'Multiple':'—'}</td><td>${shots?shots+' image'+(shots===1?'':'s'):'—'}</td><td class="day-notes">${escHtml(notes.slice(0,70))||'—'}</td><td><button class="btn day-expand-btn" type="button" data-day-toggle="${escHtml(gid)}">View ${ordered.length>1? 'trades':'trade'}</button></td></tr>`;
    html+=`<tr class="day-detail-row hidden" id="${escHtml(gid)}"><td colspan="10"><div class="day-detail-panel"><div class="day-detail-head"><div><b>${escHtml(date==='undated'?'Undated':date)}</b><span class="muted-dash"> · ${ordered.length} trades · ${escHtml(meta.sequence||'No sequence yet')}</span></div><button class="btn" type="button" data-edit-day="${escHtml(date)}">Edit day sequence</button></div><table class="day-trade-subtable"><thead><tr><th></th><th>ORDER</th><th>TRADE</th><th>R</th><th>RESULT $</th><th>SETUP</th><th>SESSION</th><th>SCREENSHOT</th><th>NOTES</th><th>ACTIONS</th></tr></thead><tbody>`;
    ordered.forEach((t,i)=>{
      const moneyValue=t.result_usd??t.usd??null;const mText=moneyValue===null||moneyValue===''?'—':(Number(moneyValue)>=0?'+$':'-$')+Math.abs(Number(moneyValue)).toLocaleString();
@@ -1446,7 +1466,7 @@ async function renderTrades(){
    const sum=document.querySelector(`.day-summary-row[data-day-toggle="${CSS.escape(id)}"]`); if(sum){const open=row&&!row.classList.contains('hidden');sum.classList.toggle('is-open',open);const c=sum.querySelector('.day-caret');if(c)c.textContent=open?'▾':'▸';}
  }));
  b.querySelectorAll('[data-edit-day]').forEach(el=>el.addEventListener('click',()=>{
-   const d=el.dataset.editDay;if(!d||d==='undated')return;const meta=getDaySummary(d);const f=$("tradeForm");f.date.value=d;f.day_trade_count.value=meta.trade_count||'';f.day_sequence.value=meta.sequence||'';window.scrollTo({top:Math.max(0,$("page-journal").offsetTop-20),behavior:'smooth'});f.day_sequence.focus();toast(`Editing day summary for ${d}. Save any trade to store the sequence.`);
+   const d=el.dataset.editDay;if(!d||d==='undated')return;const meta=getDaySummary(d);const f=$("tradeForm");f.date.value=d;f.day_sequence.value=meta.sequence||'';updateDaySequenceMeta();window.scrollTo({top:Math.max(0,$("page-journal").offsetTop-20),behavior:'smooth'});f.day_sequence.focus();toast(`Editing day summary for ${d}. Save any trade to store the sequence.`);
  }));
  updateTradeSelectionUI();
  if(sb&&session){
@@ -1987,6 +2007,8 @@ async function exportAI(){
     const reportHtml=`<!doctype html><html><head><meta charset="utf-8"><title>Bluebird Journal Export</title><style>body{font-family:Arial,sans-serif;background:#08131d;color:#eaf6ff;margin:0;padding:28px}.wrap{max-width:1100px;margin:auto}.title{font-size:28px;font-weight:800;margin-bottom:6px}.sub{color:#92a9ba;margin-bottom:22px}.trade{background:#0d1d29;border:1px solid #234057;border-radius:12px;padding:16px;margin:0 0 16px}.meta{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cell{background:#0a1722;border-radius:8px;padding:9px}.k{font-size:11px;color:#7690a3;text-transform:uppercase}.v{font-size:15px;font-weight:700;margin-top:3px}.notes{margin-top:12px;color:#bfd3df;white-space:pre-wrap}.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:14px}.shot{background:#07111a;border-radius:8px;padding:8px}.shot img{display:block;width:100%;height:auto;border-radius:5px}.cap{font-size:11px;color:#8da5b6;margin-top:6px}.empty{color:#6f8696}@media(max-width:700px){.meta{grid-template-columns:1fr 1fr}}
 /* v47 grouped journal + manual day sequence */
 #page-journal .field-help{font-size:8px;color:#71808a;margin-top:4px;letter-spacing:.1px}
+#page-journal .day-seq-meta{font-size:8.5px;color:#7d8b93;margin-top:5px;line-height:1.45;letter-spacing:.05px}
+#page-journal .day-sequence-field .input{font-weight:850;letter-spacing:1.2px;text-transform:uppercase}
 #page-journal .day-count-pill{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;padding:0 7px;border-radius:999px;background:#171b1f;border:1px solid rgba(160,180,195,.14);color:#e2e8ec;font-size:9px;font-weight:850}
 #page-journal .journal-day-table-wrap{overflow:auto;border:1px solid rgba(160,180,195,.10);border-radius:10px;background:#0b0f11}
 #page-journal .journal-day-table{min-width:920px}
@@ -2168,6 +2190,15 @@ if(journalPeriod)journalPeriod.addEventListener('change',()=>{
 });
 if($('journalFrom'))$('journalFrom').addEventListener('change',()=>{if($('journalPeriod')?.value==='custom')renderTrades()});
 if($('journalTo'))$('journalTo').addEventListener('change',()=>{if($('journalPeriod')?.value==='custom')renderTrades()});
+const daySequenceInput=document.querySelector('#tradeForm input[name="day_sequence"]');
+function updateDaySequenceMeta(){
+  const metaEl=$("daySequenceMeta"); if(!metaEl||!daySequenceInput)return;
+  const raw=daySequenceInput.value||""; const tokens=daySequenceTokens(raw);
+  if(tokens===null){metaEl.textContent="Use only W, L, or BE in the actual trade order.";metaEl.style.color="#b75b64";return;}
+  if(!tokens.length){metaEl.textContent="Enter the full order for the day once. Example: LLW";metaEl.style.color="#7d8b93";return;}
+  metaEl.textContent=`${tokens.length} trade${tokens.length===1?'':'s'} detected · ${tokens.join(' · ')}`;metaEl.style.color="#7d8b93";
+}
+if(daySequenceInput)daySequenceInput.addEventListener('input',updateDaySequenceMeta);
 
 const analyticsPeriod=$('analyticsPeriod');
 if(analyticsPeriod)analyticsPeriod.addEventListener('change',()=>{const custom=$('analyticsCustomRange');if(custom)custom.classList.toggle('hidden',analyticsPeriod.value!=='custom');renderAnalytics();});
