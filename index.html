@@ -2046,7 +2046,7 @@ async function prepareAIReview(){
    if(review){
      html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReviewText(review)}</div></div>`;
    }
-   box.className='ai-context-result ai-context-ok';
+   box.className='ai-context-result';
    box.innerHTML=html;
    showAIAskPanel();
    wireAIAsk();
@@ -2058,7 +2058,9 @@ async function prepareAIReview(){
  }
 }
 function normalizeAIReviewText(text){
-  let s=String(text||'').replace(/\r/g,'').trim();
+  let s=String(text||'').replace(/\r\n?/g,'\n').trim();
+  s=s.replace(/^```(?:markdown|text)?\s*/i,'').replace(/\s*```$/,'');
+
   const headings=[
     'PERFORMANCE SUMMARY',
     'TRADE BEHAVIOR & CHARTS',
@@ -2069,10 +2071,16 @@ function normalizeAIReviewText(text){
     'POSSIBLE EXPERIMENTS',
     'DATA LIMITATIONS'
   ];
-  headings.forEach(h=>{
-    const re=new RegExp('\\s*('+h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')\\s*','gi');
-    s=s.replace(re,'\\n## $1\\n');
-  });
+
+  // Gemini sometimes places headings directly after the previous sentence.
+  // Force a clean break before/after recognized headings.
+  const alt=headings.map(h=>h.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')).join('|');
+  const headingRe=new RegExp('\\s*\\*{0,2}(' + alt + ')\\*{0,2}\\s*:?(?=\\s|$)','gi');
+  s=s.replace(headingRe,'\\n## $1\\n');
+
+  // Normalize markdown heading syntax and repeated separators.
+  s=s.replace(/^\\s*#{1,6}\\s*/gm,'');
+  s=s.replace(/^\\s*[-_=]{3,}\\s*$/gm,'');
   s=s.replace(/\\n{3,}/g,'\\n\\n');
   return s.trim();
 }
@@ -2107,24 +2115,74 @@ function sanitizeAIText(txt){
 }
 
 function renderAIReviewText(text){
-  const normalized=normalizeAIReviewText(sanitizeAIText(text));
+  const normalized=normalizeAIReviewText(text);
   const esc=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const inline=value=>esc(sanitizeAIText(value)).replace(/\\*\\*(.+?)\\*\\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
-  const sections=[];let current=null;
-  const push=()=>{if(current){const cleaned=current.lines.filter(x=>x.trim()&&x.trim()!=='---');if(cleaned.length)sections.push({...current,lines:cleaned});}};
-  for(const raw of normalized.split(/\\n/)){
-    const line=raw.trim();
-    if(/^#{2,3}\\s+/.test(line)){push();current={title:line.replace(/^#{2,3}\\s+/,'').trim(),lines:[]};}
-    else if(line==='---'){if(current)current.lines.push('');}
-    else{if(!current)current={title:'AI Trading Review',lines:[]};current.lines.push(raw);}
+  const inline=value=>esc(sanitizeAIText(value))
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
+
+  const sections=[];
+  let current=null;
+  const push=()=>{
+    if(!current)return;
+    const cleaned=current.lines.map(x=>x.trimEnd()).filter(x=>x.trim()&&x.trim()!=='---');
+    if(cleaned.length)sections.push({...current,lines:cleaned});
+  };
+
+  for(const raw of normalized.split(/\n/)){
+    let line=raw.trim();
+    if(!line)continue;
+
+    const heading=line.replace(/^#{1,3}\s+/,'').replace(/^\*{1,2}/,'').replace(/\*{1,2}$/,'').trim();
+
+    if(/^(PERFORMANCE SUMMARY|TRADE BEHAVIOR & CHARTS|TRADE BEHAVIOR|SEQUENCE PATTERNS|TRADE-FREQUENCY ANALYSIS|WHAT STANDS OUT|POSSIBLE EXPERIMENTS|DATA LIMITATIONS)$/i.test(heading)){
+      push();
+      current={title:heading.toUpperCase(),lines:[]};
+      continue;
+    }
+
+    if(!current)current={title:'AI TRADING REVIEW',lines:[]};
+    current.lines.push(line);
   }
   push();
-  if(!sections.length)return `<div class="ai-review-section"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${inline(normalized).replace(/\\n/g,'<br>')}</p></div>`;
+
+  if(!sections.length){
+    return `<div class="ai-review-section ai-review-section-single"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${inline(normalized).replace(/\n/g,'<br>')}</p></div>`;
+  }
+
   return sections.map(sec=>{
-    const bullets=[];const paras=[];let pending=[];const flush=()=>{if(pending.length){paras.push(pending.join(' '));pending=[];}};
-    for(const raw of sec.lines){const line=raw.trim();if(!line){flush();continue;}if(/^[-*]\\s+/.test(line)){flush();bullets.push(line.replace(/^[-*]\\s+/,''));}else if(/^\\d+[.)]\\s+/.test(line)){flush();bullets.push(line.replace(/^\\d+[.)]\\s+/,''));}else{pending.push(line);}}
+    const bullets=[];
+    const paras=[];
+    let pending=[];
+    const flush=()=>{
+      if(pending.length){
+        paras.push(pending.join(' '));
+        pending=[];
+      }
+    };
+
+    for(const raw of sec.lines){
+      const line=raw.trim();
+      if(!line) { flush(); continue; }
+
+      if(/^[-*•]\s+/.test(line)){
+        flush();
+        bullets.push(line.replace(/^[-*•]\s+/,''));
+      }else if(/^\d+[.)]\s+/.test(line)){
+        flush();
+        bullets.push(line.replace(/^\d+[.)]\s+/,''));
+      }else{
+        pending.push(line);
+      }
+    }
     flush();
-    return `<div class="ai-review-section"><div class="ai-review-section-title">${esc(sanitizeAIText(sec.title))}</div>${paras.map(x=>`<p class="ai-review-paragraph">${inline(x)}</p>`).join('')}${bullets.length?`<ul class="ai-review-bullets">${bullets.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`:''}</div>`;
+
+    return `<section class="ai-review-section">
+      <div class="ai-review-section-title">${esc(sec.title)}</div>
+      ${paras.map(x=>`<p class="ai-review-paragraph">${inline(x)}</p>`).join('')}
+      ${bullets.length?`<ul class="ai-review-bullets">${bullets.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`:''}
+    </section>`;
   }).join('');
 }
 
@@ -2818,4 +2876,126 @@ document.addEventListener('click',e=>{
  if(e.target.closest('#proStatusAction')) showPage('pro');
 });
 </script>
+
+<style id="ai-premium-ui-v67">
+/* Bluebird AI visual cleanup — v67 */
+.ai-context-result{
+  margin-top:12px!important;
+  border:1px solid #17394f!important;
+  background:#06131d!important;
+  border-radius:10px!important;
+  padding:12px!important;
+  color:#9cb0bd!important;
+  box-shadow:none!important;
+}
+.ai-context-result.ai-context-ok,
+.ai-context-result.ai-context-error{
+  border-color:#17394f!important;
+  background:#06131d!important;
+}
+.ai-context-result strong{color:#dff1fb!important}
+.ai-context-days{margin-top:9px!important}
+.ai-context-day{background:#071721!important;border-color:#143548!important}
+
+.ai-review-output{
+  margin-top:12px!important;
+  border:1px solid #1a4258!important;
+  background:#07131c!important;
+  border-radius:10px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.16)!important;
+}
+.ai-review-output-head{
+  padding:11px 14px!important;
+  border-bottom:1px solid #16384b!important;
+  background:#071824!important;
+  color:#8fcdf0!important;
+}
+.ai-review-output-head small{color:#718b9a!important}
+.ai-review-output-body{
+  padding:15px 16px!important;
+  color:#d8e7ed!important;
+  font-size:12px!important;
+  line-height:1.78!important;
+}
+.ai-review-section{
+  border:0!important;
+  border-bottom:1px solid #163443!important;
+  background:transparent!important;
+  border-radius:0!important;
+  padding:0 0 15px!important;
+  margin:0 0 15px!important;
+}
+.ai-review-section:last-child{
+  border-bottom:0!important;
+  padding-bottom:0!important;
+  margin-bottom:0!important;
+}
+.ai-review-section-title{
+  color:#65c1f4!important;
+  font-size:9px!important;
+  letter-spacing:1.4px!important;
+  font-weight:950!important;
+  margin:0 0 8px!important;
+}
+.ai-review-paragraph{
+  margin:0 0 9px!important;
+  color:#d7e6ec!important;
+}
+.ai-review-paragraph:last-child{margin-bottom:0!important}
+.ai-review-bullets{
+  margin:5px 0 0!important;
+  padding-left:20px!important;
+  color:#d7e6ec!important;
+}
+.ai-review-bullets li{margin:0 0 7px!important}
+.ai-review-bullets li:last-child{margin-bottom:0!important}
+.ai-inline-code{
+  padding:1px 5px!important;
+  border-radius:4px!important;
+  border:1px solid #1a465d!important;
+  background:#081b26!important;
+  color:#c8ecff!important;
+}
+
+.ai-ask-panel{
+  margin-top:14px!important;
+  border:0!important;
+  border-top:1px solid #17394d!important;
+  background:transparent!important;
+  border-radius:0!important;
+  padding:14px 0 0!important;
+}
+.ai-ask-sub{color:#859baa!important}
+.ai-quick-btn{
+  border-color:#204b63!important;
+  background:#081a25!important;
+  color:#c4e7f8!important;
+}
+.ai-quick-btn:hover{border-color:#2a82b2!important;background:#0a202d!important}
+.ai-ask-input{
+  border-color:#1a4055!important;
+  background:#06131d!important;
+}
+.ai-ask-result{
+  margin-top:12px!important;
+  border:0!important;
+  background:transparent!important;
+  border-radius:0!important;
+  padding:0!important;
+}
+.ai-ask-loading{padding:10px 0!important}
+.ai-ask-error{
+  border:1px solid #5b2830!important;
+  background:#180b0e!important;
+  border-radius:8px!important;
+  padding:10px!important;
+}
+
+@media(max-width:760px){
+  .ai-review-output-body{font-size:12px!important;line-height:1.78!important;padding:14px!important}
+  .ai-review-section{padding-bottom:13px!important;margin-bottom:13px!important}
+}
+</style>
 </body></html>
