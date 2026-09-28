@@ -481,8 +481,13 @@ async function syncCloudNow(){
     if(r.error)throw r.error;
     const im=await sb.from("trade_images").select("trade_id,storage_path");
     if(im.error)throw im.error;
-    const map={};(im.data||[]).forEach(x=>(map[x.trade_id]??=[]).push(x.storage_path));
-    const trades=r.data||[]; trades.forEach(t=>t.images=map[t.id]||[]);
+    const map={};
+    (im.data||[]).forEach(x=>{
+      if(!x?.trade_id || !x?.storage_path) return;
+      if(!map[x.trade_id]) map[x.trade_id]=new Set();
+      map[x.trade_id].add(x.storage_path);
+    });
+    const trades=r.data||[]; trades.forEach(t=>t.images=map[t.id]?[...map[t.id]]:[]);
     const previous=JSON.stringify(state.trades.map(t=>({id:t.id,trade_date:t.trade_date,result_r:t.result_r,result_usd:t.result_usd,created_at:t.created_at,images:t.images||[]})));
     const next=JSON.stringify(trades.map(t=>({id:t.id,trade_date:t.trade_date,result_r:t.result_r,result_usd:t.result_usd,created_at:t.created_at,images:t.images||[]})));
     state.trades=trades;
@@ -521,8 +526,13 @@ async function loadCloud(){
   if(r.error)throw r.error;
   state.trades=r.data||[];
   const im=await sb.from("trade_images").select("trade_id,storage_path");
-  const map={};(im.data||[]).forEach(x=>(map[x.trade_id]??=[]).push(x.storage_path));
-  state.trades.forEach(t=>t.images=map[t.id]||[]);
+  const map={};
+    (im.data||[]).forEach(x=>{
+      if(!x?.trade_id || !x?.storage_path) return;
+      if(!map[x.trade_id]) map[x.trade_id]=new Set();
+      map[x.trade_id].add(x.storage_path);
+    });
+  state.trades.forEach(t=>t.images=map[t.id]?[...map[t.id]]:[]);
   saveLocal();renderAll();
   if(profile && profile.name_setup_complete===false) setTimeout(openNameSetup,160);
   toast("Bluebird cloud journal loaded.");
@@ -732,7 +742,7 @@ async function appendImagesToTrade(tradeId,files){
   try{
     if(sb&&session){
       const paths=await uploadScreenshots(tradeId,selected);
-      trade.images=[...(trade.images||[]),...paths];
+      trade.images=[...new Set([...(trade.images||[]),...paths])];
     }else{
       const local=[];
       for(const file of selected){ if(file.size<=6*1024*1024)local.push(await fileData(file)); }
@@ -856,7 +866,7 @@ async function saveTrade(e){
    if(dbCall.error){toast(dbCall.error.message);return}
    try{
      const added=await uploadScreenshots(trade.id,files);
-     trade.images=[...(existing?.images||[]),...added];
+     trade.images=[...new Set([...(existing?.images||[]),...added])];
    }catch(err){
      trade.images=[...(existing?.images||[])];
      toast("Trade saved, but one or more screenshots failed: "+err.message);
@@ -872,7 +882,7 @@ async function saveTrade(e){
 function fileData(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
 function signedImage(path){return sb?sb.storage.from("trade-images").createSignedUrl(path,3600).then(x=>x.data?.signedUrl||""):Promise.resolve(path)}
 
-const imageViewer={items:[],index:0,urls:[],loading:false,zoom:1,fitScale:1,x:0,y:0,dragging:false,startX:0,startY:0,originX:0,originY:0,tradeId:null};
+const imageViewer={items:[],index:0,urls:[],loading:false,zoom:1,fitScale:1,x:0,y:0,dragging:false,startX:0,startY:0,originX:0,originY:0,tradeId:null,renderToken:0};
 let editTradeId=null;
 function updateViewerTransform(){
   const img=$("imageViewerImg"), label=$("imageViewerZoomLabel");
@@ -909,6 +919,7 @@ function closeImageViewer(){
   v.classList.remove("show");
   v.setAttribute("aria-hidden","true");
   $("imageViewerImg").src="";
+  imageViewer.renderToken++;
   imageViewer.items=[];imageViewer.urls=[];imageViewer.index=0;imageViewer.zoom=1;imageViewer.fitScale=1;imageViewer.x=0;imageViewer.y=0;imageViewer.tradeId=null;
 }
 async function resolveViewerUrl(item){
@@ -919,24 +930,28 @@ async function renderViewerImage(){
   const img=$("imageViewerImg"), title=$("imageViewerTitle"), prev=$("imageViewerPrev"), next=$("imageViewerNext"), dl=$("imageViewerDownload");
   if(!img||!imageViewer.items.length)return;
   const total=imageViewer.items.length, idx=imageViewer.index;
+  const token=++imageViewer.renderToken;
+  const item=imageViewer.items[idx];
   title.textContent=`Trade screenshot ${idx+1} of ${total}`;
   prev.disabled=idx<=0; next.disabled=idx>=total-1;
   dl.disabled=true; imageViewer.zoom=1; imageViewer.fitScale=1; imageViewer.x=0; imageViewer.y=0;
   img.alt=`Trade screenshot ${idx+1}`;
-  img.onload=()=>{fitViewerImage()};
+  img.onload=()=>{ if(token===imageViewer.renderToken) fitViewerImage(); };
   try{
-    const src=await resolveViewerUrl(imageViewer.items[idx]);
+    const src=await resolveViewerUrl(item);
+    if(token!==imageViewer.renderToken || imageViewer.items[imageViewer.index]!==item) return;
     if(!src)throw new Error("Image URL unavailable");
     imageViewer.urls[idx]=src;
     img.src=src;
     dl.disabled=false;
   }catch(e){
+    if(token!==imageViewer.renderToken) return;
     img.removeAttribute("src");
     title.textContent=`Trade screenshot ${idx+1} — unavailable`;
   }
 }
 function openImageViewer(items,index=0,tradeId=null){
-  imageViewer.items=Array.isArray(items)?items.filter(Boolean):[];
+  imageViewer.items=Array.from(new Set(Array.isArray(items)?items.filter(Boolean):[]));
   imageViewer.tradeId=tradeId;
   imageViewer.index=Math.max(0,Math.min(index,imageViewer.items.length-1));
   imageViewer.urls=[];
