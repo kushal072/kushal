@@ -870,7 +870,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 .pro-tool-placeholder{border:1px dashed #173c52;background:#06111a;border-radius:8px;color:#708796;font-size:9px;line-height:1.5;padding:12px}
 .pro-tool-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .pro-tool-metric{border:1px solid #11384f;background:#06131d;border-radius:8px;padding:10px}
-.pro-tool-metric span{display:block;font-size:7px;color:#718999;letter-spacing:.7px;text-transform:uppercase}
+.pro-tool-metric span{display:block;font-size:8px;color:#8fa9b9;letter-spacing:.55px;text-transform:uppercase}
 .pro-tool-metric b{display:block;margin-top:5px;font-size:15px;color:#eaf7ff}
 .pro-tool-metric.good b{color:#58e1b0}.pro-tool-metric.warn b{color:#ffd36b}.pro-tool-metric.bad b{color:#ff8590}
 .pro-tool-chart{margin-top:11px;border:1px solid #11384f;background:#041019;border-radius:8px;overflow:hidden}
@@ -1008,8 +1008,8 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       <div id="mcResultBody" hidden>
         <div class="pro-tool-metrics">
           <div class="pro-tool-metric"><span>Median final R</span><b id="mcMedianR">—</b></div>
-          <div class="pro-tool-metric good"><span>95th percentile</span><b id="mcP95R">—</b></div>
-          <div class="pro-tool-metric bad"><span>5th percentile</span><b id="mcP5R">—</b></div>
+          <div class="pro-tool-metric good"><span title="A result near the stronger end of the simulated outcomes">Higher-end result</span><b id="mcP95R">—</b></div>
+          <div class="pro-tool-metric bad"><span title="A result near the weaker end of the simulated outcomes">Lower-end result</span><b id="mcP5R">—</b></div>
           <div class="pro-tool-metric"><span>Chance positive</span><b id="mcPositive">—</b></div>
           <div class="pro-tool-metric warn"><span>Median max DD</span><b id="mcDD">—</b></div>
           <div class="pro-tool-metric"><span>Samples</span><b id="mcSamples">—</b></div>
