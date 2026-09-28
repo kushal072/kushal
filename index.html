@@ -513,6 +513,113 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 
 <style>
 </style>
+
+<style id="pro-tools-v84-ui">
+/* Bluebird Pro workspace — v84 visual system */
+.pro-tools{margin-top:14px;display:block}
+.pro-tool-switcher{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.pro-tool-switch{appearance:none;border:1px solid #16435d;background:linear-gradient(145deg,#071824,#040c12);color:#b5cad7;border-radius:10px;padding:12px 14px;text-align:left;cursor:pointer;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.pro-tool-switch:hover{border-color:#2484b2;color:#eaf8ff;transform:translateY(-1px)}
+.pro-tool-switch.active{border-color:#1598e7;background:linear-gradient(145deg,#0a2a42,#061722);color:#effaff;box-shadow:0 0 0 1px rgba(21,152,231,.18) inset,0 10px 28px rgba(0,35,58,.2)}
+.pro-tool-switch-title{display:block;font-size:12px;font-weight:950;letter-spacing:.15px;color:#eaf7ff}
+.pro-tool-switch-sub{display:block;margin-top:4px;font-size:10px;line-height:1.45;color:#91a8b6}
+.pro-tool-switch.active .pro-tool-switch-sub{color:#b5d4e5}
+.pro-tool-card{border:1px solid #15435f;background:linear-gradient(145deg,#061722,#030a10);border-radius:11px;padding:18px;box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.pro-tool-card[hidden]{display:none!important}
+.pro-tool-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.pro-tool-kicker{font-size:9px;letter-spacing:1.7px;font-weight:950;color:#54bfff}
+.pro-tool-title{margin:5px 0 5px;font-size:22px;line-height:1.12;color:#f0f9ff;letter-spacing:-.25px}
+.pro-tool-sub{margin:0;max-width:820px;color:#9fb4c1;font-size:11px;line-height:1.6}
+.pro-tool-badge{font-size:8px;font-weight:950;letter-spacing:1px;color:#a5defa;border:1px solid #1d668d;background:#071d2b;padding:6px 8px;border-radius:999px;white-space:nowrap}
+.pro-tool-source{margin-top:16px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:12px 13px;border:1px solid #143b53;background:#05121b;border-radius:9px}
+.pro-tool-source>label{font-size:9px;letter-spacing:1.1px;color:#9fb6c4;font-weight:950}
+.pro-tool-source-select,.pf-inline-select,.pro-tool-field select{min-width:210px;border:1px solid #1a4d68;background:#061522;color:#eef8ff;border-radius:8px;padding:9px 10px;font:inherit;font-size:11px;font-weight:800;outline:none;color-scheme:dark}
+.pro-tool-source-select:focus,.pf-inline-select:focus,.pro-tool-field select:focus{border-color:#2b99cf;box-shadow:0 0 0 2px rgba(43,153,207,.12)}
+.pro-tool-source-select option,.pf-inline-select option,.pro-tool-field select option{background:#061522;color:#eef8ff}
+.pro-tool-source-help{font-size:10px;color:#89a3b3;line-height:1.45}
+.pro-tool-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
+.pro-tool-field label,.pf-field label{display:block;font-size:9px;letter-spacing:.9px;color:#93acbb;font-weight:950;margin-bottom:6px}
+.pro-tool-field input,.pro-tool-field select,.pf-field input,.pf-field select{width:100%;box-sizing:border-box;border:1px solid #19455d;background:#040f17;color:#eef8ff;border-radius:8px;padding:10px;font:inherit;font-size:12px;font-weight:800;outline:none;color-scheme:dark}
+.pro-tool-field input::placeholder,.pf-field input::placeholder{color:#5f7786}
+.pro-tool-field input:focus,.pf-field input:focus,.pro-tool-field select:focus,.pf-field select:focus{border-color:#2b99cf;box-shadow:0 0 0 2px rgba(43,153,207,.12)}
+.pro-tool-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pro-tool-actions .btn{min-height:38px;font-size:11px;padding:9px 13px}
+.pro-tool-note{margin-top:10px;color:#8ca6b5;font-size:10px;line-height:1.55}
+.pro-tool-results{margin-top:16px;border-top:1px solid #12384e;padding-top:15px}
+.pro-tool-result-title,.pf-results-label{font-size:9px;letter-spacing:1.25px;font-weight:950;color:#8fcdf0;margin-bottom:9px}
+.pro-tool-placeholder{border:1px dashed #23506a;background:#06131d;border-radius:9px;color:#8ca5b4;font-size:10px;line-height:1.55;padding:13px}
+.pro-tool-metrics,.pf-result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.pro-tool-metric,.pf-result-card{border:1px solid #123d54;background:linear-gradient(180deg,#061722,#051019);border-radius:9px;padding:11px 12px;min-height:68px}
+.pro-tool-metric span,.pf-result-card .k{display:block;font-size:9px;color:#8da7b6;letter-spacing:.6px;text-transform:uppercase;font-weight:850;line-height:1.3}
+.pro-tool-metric b,.pf-result-card .v{display:block;margin-top:6px;font-size:17px;line-height:1.15;color:#f1f9ff;font-weight:950}
+.pro-tool-metric.good b,.pf-result-card.good .v{color:#58e1b0}.pro-tool-metric.warn b,.pf-result-card.warn .v{color:#ffd36b}.pro-tool-metric.bad b,.pf-result-card.bad .v{color:#ff8791}
+.pro-tool-chart{margin-top:12px;border:1px solid #143f57;background:#031019;border-radius:9px;overflow:hidden;min-height:330px}
+.pro-tool-chart canvas{display:block;width:100%;height:330px}
+.pro-tool-table{margin-top:11px;display:grid;gap:6px}
+.pro-tool-row{display:grid;grid-template-columns:1.2fr .8fr .9fr 1fr;gap:8px;align-items:center;border:1px solid #12394e;background:#06131d;border-radius:7px;padding:9px 10px;font-size:10px;color:#b1c4d0}
+.pro-tool-row b{color:#eef8ff}.pro-tool-row.head{background:#081d2b;color:#86a2b3;letter-spacing:.7px;text-transform:uppercase;font-weight:950}
+.pro-lock{padding:11px;border:1px dashed #2a556d;background:#06131d;border-radius:8px;color:#8ba5b4;font-size:10px;line-height:1.55;margin-top:11px}
+
+/* Prop-firm specific layout: same dark visual language, no native white blocks */
+.pf-section{margin-top:12px;padding:15px;border:1px solid #123d55;background:linear-gradient(180deg,#061722,#040d14);border-radius:10px}
+.pf-section:first-child{margin-top:14px}
+.pf-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.pf-section-title{font-size:10px;letter-spacing:1.2px;font-weight:950;color:#9fd9f5}
+.pf-section-note{font-size:10px;color:#7893a3;line-height:1.45}
+.pf-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pf-grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.pf-field input,.pf-field select{height:40px}
+.pf-check-inline{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:11px;padding-top:11px;border-top:1px solid #123447}
+.pf-check-inline>label{margin:0;font-size:10px;color:#b7cad5;letter-spacing:.2px}
+.pf-inline-select{min-width:100px;height:38px;background:#061522!important;color:#eef8ff!important}
+.pf-inline-help{font-size:10px;color:#88a1b0;line-height:1.45}
+.pf-blank-note{margin-top:10px;padding:9px 10px;border:1px solid #1b4a64;background:#071722;border-radius:8px;color:#8ba8b8;font-size:10px;line-height:1.5}
+.pf-checks{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px}
+.pf-check{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #153e54;background:#05121b;border-radius:9px;color:#d9e8ef;cursor:pointer}
+.pf-check input{margin-top:2px;accent-color:#1598e7}
+.pf-check b{display:block;font-size:10px;color:#edf8ff;line-height:1.35}
+.pf-check span span{display:block;margin-top:3px;font-size:9px;color:#8da6b5;line-height:1.45}
+.pf-actions{padding-top:2px}
+.pf-results-wrap{margin-top:16px;padding-top:15px;border-top:1px solid #12384e}
+.pf-results-summary{margin:8px 0 13px;padding:12px 13px;border:1px solid #164b64;background:linear-gradient(135deg,#071c28,#05131c);border-radius:9px;color:#c5dfeb;font-size:11px;line-height:1.6}
+.pf-results-section{margin-top:14px;padding-top:13px;border-top:1px solid #12384a}
+.pf-results-section-title{font-size:9px;letter-spacing:1.15px;font-weight:950;color:#8fcdf0;margin-bottom:9px}
+.pf-cycle{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.pf-cycle-step{border:1px solid #163f55;background:linear-gradient(180deg,#071b28,#051019);border-radius:9px;padding:12px}
+.pf-cycle-step .n{font-size:8px;letter-spacing:1px;font-weight:950;color:#67c5f4}
+.pf-cycle-step .t{margin-top:7px;font-size:13px;line-height:1.4;font-weight:950;color:#edf8ff}
+.pf-cycle-step .d{margin-top:6px;font-size:9px;line-height:1.5;color:#89a3b2}
+.pf-note{margin-top:11px;padding:10px 12px;border:1px solid #163c52;background:#06131d;border-radius:8px;color:#95adbb;font-size:10px;line-height:1.55}
+.pf-journey-table{margin-top:9px;display:grid;gap:6px}
+.pf-journey-row{display:grid;grid-template-columns:1.2fr .7fr 1fr 1.1fr;gap:9px;align-items:center;border:1px solid #12394e;background:#06131d;border-radius:7px;padding:9px 10px;color:#b7c9d4;font-size:10px}
+.pf-journey-row b{color:#eff8ff}.pf-journey-row.head{background:#081d2b;color:#86a3b3;font-weight:950;letter-spacing:.65px;text-transform:uppercase}
+
+/* Keep every native select dark and readable on Chromium/Windows */
+select,.pro-tool-source-select,.pf-inline-select{color-scheme:dark!important;background-color:#061522!important;color:#eef8ff!important}
+select option{background-color:#061522!important;color:#eef8ff!important}
+
+@media(max-width:900px){
+  .pf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pro-tool-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pf-cycle,.pf-checks{grid-template-columns:1fr}
+  .pro-tool-metrics,.pf-result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .pro-tool-switcher{grid-template-columns:1fr}
+  .pro-tool-head{flex-direction:column}
+  .pro-tool-source{align-items:stretch}
+  .pro-tool-source-select,.pf-inline-select{width:100%;min-width:0}
+  .pro-tool-controls,.pf-grid,.pf-grid-2{grid-template-columns:1fr}
+  .pro-tool-metrics,.pf-result-grid{grid-template-columns:1fr 1fr}
+  .pro-tool-chart{min-height:270px}.pro-tool-chart canvas{height:270px}
+}
+@media(max-width:480px){
+  .pro-tool-card{padding:13px}
+  .pro-tool-title{font-size:19px}
+  .pro-tool-sub{font-size:10px}
+  .pro-tool-metrics,.pf-result-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body data-bluebird-build="v78">
 <div class="app">
@@ -990,8 +1097,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       </div>
       <div class="pf-blank-note">Example: enter 4000 if the firm requires a $4,000 buffer before the first payout request.</div>
       <div class="pf-checks">
-        <label class="pf-check"><input id="pfEvalAnalysisOn" type="checkbox"><span><b>Analyze evaluation outcomes</b><span>Run the selected number of complete cycles and measure passes, failures and time to pass.</span></span></label>
-        <label class="pf-check"><input id="pfPayoutAnalysisOn" type="checkbox"><span><b>Continue into first-payout analysis</b><span>After an evaluation pass, continue the funded phase until the buffer and funded consistency rules are satisfied or the account fails.</span></span></label>
+        <label class="pf-check"><input id="pfEvalAnalysisOn" type="checkbox" checked><span><b>Analyze evaluation outcomes</b><span>Run the selected number of complete cycles and measure passes, failures and time to pass.</span></span></label>
+        <label class="pf-check"><input id="pfPayoutAnalysisOn" type="checkbox" checked><span><b>Continue into first-payout analysis</b><span>After an evaluation pass, continue the funded phase until the buffer and funded consistency rules are satisfied or the account fails.</span></span></label>
       </div>
       <div id="pfCycleInputs" class="pf-grid-2" style="margin-top:9px">
         <div class="pf-field"><label>COMPLETE CYCLES TO SIMULATE</label><input id="pfSimRuns" type="number" min="100" max="20000" step="100" value="5000"></div>
@@ -1024,7 +1131,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
               <div class="pf-result-card bad"><div class="k">Evaluation failed</div><div class="v" id="pfFailCount">—</div></div>
               <div class="pf-result-card good"><div class="k">Evaluation pass rate</div><div class="v" id="pfPassRate">—</div></div>
               <div class="pf-result-card"><div class="k">Avg days to pass</div><div class="v" id="pfAvgEvalDays">—</div></div>
-              <div class="pf-result-card"><div class="k">Shortest / longest</div><div class="v" id="pfEvalRange">—</div></div>
+              <div class="pf-result-card"><div class="k">Time range</div><div class="v" id="pfEvalRange">—</div></div>
             </div>
           </div>
 
@@ -1032,9 +1139,10 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
             <div class="pf-results-section-title">FUNDED BUFFER</div>
             <div class="pf-result-grid">
               <div class="pf-result-card"><div class="k">Reached buffer</div><div class="v" id="pfBufferCount">—</div></div>
+              <div class="pf-result-card"><div class="k">Passed, buffer not reached</div><div class="v" id="pfBufferMissCount">—</div></div>
               <div class="pf-result-card good"><div class="k">Buffer rate of passes</div><div class="v" id="pfBufferRate">—</div></div>
               <div class="pf-result-card"><div class="k">Avg days to buffer</div><div class="v" id="pfAvgBufferDays">—</div></div>
-              <div class="pf-result-card"><div class="k">Shortest / longest</div><div class="v" id="pfBufferRange">—</div></div>
+              <div class="pf-result-card"><div class="k">Time range</div><div class="v" id="pfBufferRange">—</div></div>
               <div class="pf-result-card"><div class="k">Funded consistency</div><div class="v" id="pfFundedConsistencyResult">—</div></div>
               <div class="pf-result-card"><div class="k">Funded drawdown rule</div><div class="v" id="pfFundedRuleResult">—</div></div>
             </div>
@@ -1046,7 +1154,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
               <div class="pf-result-card good"><div class="k">Payout-ready cycles</div><div class="v" id="pfPayoutCount">—</div></div>
               <div class="pf-result-card good"><div class="k">Full cycle completion</div><div class="v" id="pfFullCycleRate">—</div></div>
               <div class="pf-result-card"><div class="k">Avg total days</div><div class="v" id="pfAvgCycleDays">—</div></div>
-              <div class="pf-result-card"><div class="k">Shortest / longest</div><div class="v" id="pfCycleRange">—</div></div>
+              <div class="pf-result-card"><div class="k">Time range</div><div class="v" id="pfCycleRange">—</div></div>
               <div class="pf-result-card"><div class="k">Approx calendar time</div><div class="v" id="pfCalendarTime">—</div></div>
               <div class="pf-result-card"><div class="k">Payout buffer target</div><div class="v" id="pfBufferTargetResult">—</div></div>
             </div>
@@ -1115,15 +1223,23 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
   };
   const percentile=(arr,p)=>{if(!arr.length)return 0;const a=[...arr].sort((x,y)=>x-y);const i=(a.length-1)*p;const lo=Math.floor(i),hi=Math.ceil(i);return lo===hi?a[lo]:a[lo]+(a[hi]-a[lo])*(i-lo);};
   function drawMC(paths){
-    const c=$id('mcCanvas');if(!c)return;const ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);if(!paths.length)return;
+    const c=$id('mcCanvas');if(!c||!paths.length)return;
+    const cssW=Math.max(680,c.clientWidth||900),cssH=Math.max(280,c.clientHeight||330),dpr=Math.min(2,window.devicePixelRatio||1);
+    c.width=Math.round(cssW*dpr);c.height=Math.round(cssH*dpr);
+    const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssW,cssH);
     let min=Infinity,max=-Infinity;for(const p of paths)for(const v of p){min=Math.min(min,v);max=Math.max(max,v);}if(min===max){min-=1;max+=1;}
-    ctx.strokeStyle='#0f3348';ctx.lineWidth=1;for(let y=20;y<h;y+=35){ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(w,y+.5);ctx.stroke();}
-    const sx=i=>i*(w-20)/(paths[0].length-1)+10;const sy=v=>h-10-(v-min)*(h-20)/(max-min);
-    ctx.globalAlpha=.18;ctx.strokeStyle='#2aaaff';ctx.lineWidth=1;
+    const padL=48,padR=14,padT=22,padB=24,w=cssW,h=cssH,plotW=w-padL-padR,plotH=h-padT-padB;
+    ctx.strokeStyle='#12364d';ctx.lineWidth=1;ctx.globalAlpha=1;
+    for(let i=0;i<=5;i++){const y=padT+i*plotH/5;ctx.beginPath();ctx.moveTo(padL,y+.5);ctx.lineTo(w-padR,y+.5);ctx.stroke();}
+    const sx=i=>padL+i*(plotW/(paths[0].length-1));const sy=v=>padT+(max-v)*(plotH/(max-min));
+    ctx.save();ctx.beginPath();ctx.rect(padL,padT,plotW,plotH);ctx.clip();
+    ctx.globalAlpha=.17;ctx.strokeStyle='#2aaaff';ctx.lineWidth=1.2;
     for(const p of paths){ctx.beginPath();p.forEach((v,i)=>{const x=sx(i),y=sy(v);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();}
     const med=[];for(let i=0;i<paths[0].length;i++)med.push(percentile(paths.map(p=>p[i]),.5));
-    ctx.globalAlpha=1;ctx.strokeStyle='#33d6a4';ctx.lineWidth=2.5;ctx.beginPath();med.forEach((v,i)=>{const x=sx(i),y=sy(v);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
-    ctx.fillStyle='#7e98a9';ctx.font='10px Arial';ctx.fillText(fmtR(max),8,12);ctx.fillText(fmtR(min),8,h-2);
+    ctx.globalAlpha=1;ctx.strokeStyle='#36e2ad';ctx.lineWidth=2.8;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();med.forEach((v,i)=>{const x=sx(i),y=sy(v);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle='#9eb7c5';ctx.font='600 11px Arial';ctx.textAlign='right';ctx.fillText(fmtR(max),padL-8,padT+4);ctx.fillText(fmtR(min),padL-8,h-padB+3);ctx.textAlign='left';
+    ctx.fillStyle='#718c9c';ctx.font='600 9px Arial';ctx.fillText('0R',padL+3,h-padB+15);
   }
   function proAllowed(lockId){
     try{
@@ -1198,7 +1314,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       if(evalAnalysis||payoutAnalysis){let passCount=0,payoutCount=0;const evalDays=[],bufferDays=[],cycleDays=[];for(let i=0;i<simRuns;i++){const ev=simulateOneAttempt(dayFactory,{start,target,evalDD:maxdd,dailyLimit,risk,trailing,consistencyPct});if(ev.passed){passCount++;evalDays.push(ev.days);if(payoutAnalysis){const bu=simulateBufferPath(ev,dayFactory,{start,risk,fundedDD,fundedTrailing,dailyLimit,buffer,fundedConsistencyPct});if(bu.bufferReached){payoutCount++;bufferDays.push(bu.days);cycleDays.push(ev.days+bu.days);}}}}
         const failCount=simRuns-passCount,passRate=passCount/simRuns*100,bufferRate=passCount?bufferDays.length/passCount*100:0,fullRate=payoutAnalysis?payoutCount/simRuns*100:passRate,avgEval=meanFinite(evalDays),minEval=minFinite(evalDays),maxEval=maxFinite(evalDays),avgBuffer=meanFinite(bufferDays),minBuffer=minFinite(bufferDays),maxBuffer=maxFinite(bufferDays),avgCycle=meanFinite(cycleDays),minCycle=minFinite(cycleDays),maxCycle=maxFinite(cycleDays);
         $id('pfCycleCount').textContent=simRuns.toLocaleString();$id('pfPassRate').textContent=passRate.toFixed(1)+'%';$id('pfPassCount').textContent=`${passCount.toLocaleString()} / ${simRuns.toLocaleString()}`;$id('pfFailCount').textContent=`${failCount.toLocaleString()} / ${simRuns.toLocaleString()}`;$id('pfAvgEvalDays').textContent=avgEval===null?'—':avgEval.toFixed(1);$id('pfEvalRange').textContent=minEval===null?'—':`${minEval}d → ${maxEval}d`;
-        $id('pfBufferCount').textContent=payoutAnalysis?`${bufferDays.length.toLocaleString()} / ${passCount.toLocaleString()}`:'—';$id('pfBufferRate').textContent=payoutAnalysis?bufferRate.toFixed(1)+'%':'—';$id('pfAvgBufferDays').textContent=payoutAnalysis&&avgBuffer!==null?avgBuffer.toFixed(1):'—';$id('pfBufferRange').textContent=payoutAnalysis&&minBuffer!==null?`${minBuffer}d → ${maxBuffer}d`:'—';$id('pfFundedConsistencyResult').textContent=consistencyLabel(fundedConsistencyPct);$id('pfFundedRuleResult').textContent=`${fundedTrailing?'Trailing':'Fixed'} · ${fmtUSD(fundedDD)}`;
+        $id('pfBufferCount').textContent=payoutAnalysis?`${bufferDays.length.toLocaleString()} / ${passCount.toLocaleString()}`:'—';$id('pfBufferMissCount').textContent=payoutAnalysis?`${Math.max(0,passCount-bufferDays.length).toLocaleString()}`:'—';$id('pfBufferRate').textContent=payoutAnalysis?bufferRate.toFixed(1)+'%':'—';$id('pfAvgBufferDays').textContent=payoutAnalysis&&avgBuffer!==null?avgBuffer.toFixed(1):'—';$id('pfBufferRange').textContent=payoutAnalysis&&minBuffer!==null?`${minBuffer}d → ${maxBuffer}d`:'—';$id('pfFundedConsistencyResult').textContent=consistencyLabel(fundedConsistencyPct);$id('pfFundedRuleResult').textContent=`${fundedTrailing?'Trailing':'Fixed'} · ${fmtUSD(fundedDD)}`;
         $id('pfPayoutCount').textContent=payoutAnalysis?`${payoutCount.toLocaleString()} / ${simRuns.toLocaleString()}`:'—';$id('pfFullCycleRate').textContent=payoutAnalysis?fullRate.toFixed(1)+'%':'—';$id('pfAvgCycleDays').textContent=payoutAnalysis&&avgCycle!==null?avgCycle.toFixed(1):'—';$id('pfCycleRange').textContent=payoutAnalysis&&minCycle!==null?`${minCycle}d → ${maxCycle}d`:'—';$id('pfCalendarTime').textContent=payoutAnalysis&&avgCycle!==null?tradingCalendarText(avgCycle):'—';$id('pfBufferTargetResult').textContent=payoutAnalysis?fmtUSD(buffer)+' above funded start':'—';
         $id('pfResultsSummary').textContent=payoutAnalysis?`${simRuns.toLocaleString()} complete cycles modeled · ${passCount.toLocaleString()} passed evaluation · ${payoutCount.toLocaleString()} reached payout-ready · ${failCount.toLocaleString()} failed evaluation.`:`${simRuns.toLocaleString()} complete cycles modeled · ${passCount.toLocaleString()} passed evaluation · ${failCount.toLocaleString()} failed evaluation.`;
         $id('pfCycleEvalText').textContent=`${passRate.toFixed(1)}% pass · ${avgEval===null?'—':avgEval.toFixed(1)+' days avg'} · range ${minEval===null?'—':minEval+'–'+maxEval+' days'}`;$id('pfCycleBufferText').textContent=payoutAnalysis?`${bufferDays.length.toLocaleString()} passes reached buffer · ${avgBuffer===null?'—':avgBuffer.toFixed(1)+' days avg'} · range ${minBuffer===null?'—':minBuffer+'–'+maxBuffer+' days'}`:'Enable first-payout analysis';$id('pfCyclePayoutText').textContent=payoutAnalysis?`${fullRate.toFixed(1)}% completed the full cycle · ${avgCycle===null?'—':avgCycle.toFixed(1)+' days avg'}`:'Enable first-payout analysis';const cTxt=consistencyPct===null?' Evaluation consistency: none.':` Evaluation consistency: ${consistencyPct}%.`;const fcTxt=fundedConsistencyPct===null?' Funded consistency: none.':` Funded consistency: ${fundedConsistencyPct}%.`;const pTxt=payoutAnalysis?` Buffer target: ${fmtUSD(buffer)} above funded starting balance. Funded DD: ${fmtUSD(fundedDD)} (${fundedTrailing?'trailing':'fixed'}).`:'';$id('pfCycleNote').textContent=`${sourceText} · ${simRuns.toLocaleString()} complete cycles.${cTxt}${fcTxt}${pTxt} Average-time figures use only cycles that reached the relevant milestone. Approx calendar time assumes 5 trading days/week.`;
@@ -1222,6 +1338,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
     ['mcSourceMode','pfSourceMode'].forEach(id=>{const el=$id(id);if(el)el.addEventListener('change',()=>setSourceUI(id.slice(0,2)));});
     const syncPfCycleOptions=()=>{const on=!!$id('pfEvalAnalysisOn')?.checked||!!$id('pfPayoutAnalysisOn')?.checked;if($id('pfCycleInputs'))$id('pfCycleInputs').hidden=!on;};
     ['pfEvalAnalysisOn','pfPayoutAnalysisOn'].forEach(id=>$id(id)?.addEventListener('change',syncPfCycleOptions));
+    syncPfCycleOptions();
     $id('runMonteCarlo')?.addEventListener('click',runMonteCarlo);$id('clearMonteCarlo')?.addEventListener('click',resetMC);
     $id('runPropSim')?.addEventListener('click',runPropSim);$id('clearPropSim')?.addEventListener('click',resetPF);
     setSourceUI('mc');setSourceUI('pf');
