@@ -667,7 +667,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>What changes if you trade less</b><p>Bluebird will compare your actual recorded trade behavior and daily order before the AI explains the patterns.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
-    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Prepare AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Loads your selected journal period into the secure AI analysis pipeline. No AI model is called yet.</span></div>
+    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button><span id="aiReviewNote" class="ai-review-note">Analyzes the selected journal period using your secure Bluebird AI pipeline.</span></div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
   </div>
 </div>
@@ -698,7 +698,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 .ai-preview-dot{width:6px;height:6px;flex:0 0 6px;border-radius:50%;margin-top:4px;background:#27d7a0;box-shadow:0 0 0 3px rgba(39,215,160,.08)}
 .ai-preview-item b{font-size:9px;color:#e8f5ff}
 .ai-preview-item p{margin:3px 0 0;font-size:8.5px;color:#7f98a9;line-height:1.5}
-.ai-review-actions{display:flex;align-items:center;gap:9px;margin-top:10px}.ai-review-note{font-size:8px;color:#6f8798;line-height:1.4}
+.ai-review-actions{display:flex;align-items:center;gap:9px;margin-top:10px}.ai-review-note{font-size:8px;color:#6f8798;line-height:1.4}.ai-review-output{margin-top:10px;border:1px solid #17684f;background:linear-gradient(145deg,#061a16,#06131d);border-radius:8px;overflow:hidden}.ai-review-output-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid #153f36;color:#8ee1bd;font-size:9px;font-weight:900;letter-spacing:1px}.ai-review-output-head small{font-size:8px;color:#6f8798;letter-spacing:.2px;font-weight:700}.ai-review-output-body{padding:11px;color:#d8e8ee;font-size:11px;line-height:1.65}.ai-review-output-body br{content:"";display:block;margin-top:3px}@media(max-width:760px){.ai-review-output-body{font-size:12px;line-height:1.7}}
 @media(max-width:760px){.ai-review-head{flex-direction:column}.ai-review-grid{grid-template-columns:1fr}.ai-mock-stats{grid-template-columns:1fr 1fr}.ai-preview-body{grid-template-columns:1fr}.ai-review-status{white-space:normal}}
 </style>
 <style>
@@ -1935,27 +1935,47 @@ function renderAIMockSnapshot(rows){
 async function prepareAIReview(){
  const btn=$('aiPrepareReview'),note=$('aiReviewNote'),box=$('aiContextResult');
  if(!btn||!box)return;
- if(!sb||!session){toast('Sign in first to prepare your private AI review.');return;}
+ if(!sb||!session){toast('Sign in first to run your private AI review.');return;}
  const range=analyticsGetRange();
- btn.disabled=true; btn.textContent='Loading journal…';
- box.hidden=false; box.className='ai-context-result'; box.innerHTML='Preparing your selected journal data securely…';
+ btn.disabled=true; btn.textContent='Analyzing…';
+ box.hidden=false; box.className='ai-context-result';
+ box.innerHTML='Running your private journal analysis securely…';
  try{
    const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
    if(error)throw error;
-   const ctx=data?.context||{}; const summary=ctx.summary||{}; const days=Array.isArray(ctx.days)?ctx.days:[];
+   const ctx=data?.context||{};
+   const summary=ctx.summary||{};
+   const days=Array.isArray(ctx.days)?ctx.days:[];
+   const review=String(data?.review||'').trim();
+
    const seqForDay=d=>String(d.manual_sequence||d.observed_sequence||'—').replace(/\s+/g,'');
    const clsForSeq=s=>s==='—'?'':(/W/.test(s)&&!/L|BE/.test(s)?'w':(/L/.test(s)&&!/W|BE/.test(s)?'l':'be'));
-   const dayHtml=days.slice(0,8).map(d=>{const declared=Number(d.declared_trade_count??d.trade_count??0);const recorded=Number(d.recorded_trade_count??0);const recText=recorded<declared?` · ${recorded} recorded`:'';return `<div class="ai-context-day"><b>${d.date||'—'}</b><div>${declared} trade${declared===1?'':'s'} · <span class="ai-context-seq ${clsForSeq(seqForDay(d))}">${seqForDay(d)}</span>${recText} · ${Number(d.total_r||0)>=0?'+':''}${fmt(Number(d.total_r||0))}R</div></div>`}).join('');
+   const dayHtml=days.slice(0,8).map(d=>{
+     const declared=Number(d.declared_trade_count??d.trade_count??0);
+     const recorded=Number(d.recorded_trade_count??0);
+     const recText=recorded<declared?` · ${recorded} recorded`:'';
+     const seq=seqForDay(d);
+     return `<div class="ai-context-day"><b>${d.date||'—'}</b><div>${declared} trade${declared===1?'':'s'} · <span class="ai-context-seq ${clsForSeq(seq)}">${seq}</span>${recText} · ${Number(d.total_r||0)>=0?'+':''}${fmt(Number(d.total_r||0))}R</div></div>`;
+   }).join('');
+
+   let html=`<strong>AI review ready.</strong> <b>${Number(summary.declared_total_trades||0)}</b> declared trade${Number(summary.declared_total_trades||0)===1?'':'s'} across <b>${Number(summary.trading_days||0)}</b> trading day${Number(summary.trading_days||0)===1?'':'s'}, with <b>${Number(summary.recorded_total_trades||0)}</b> recorded result${Number(summary.recorded_total_trades||0)===1?'':'s'}, for <b>${range.label}</b>.`;
+   html+=`<div class="ai-context-days">${dayHtml||'<div class="ai-context-day">No trades in this period.</div>'}</div>`;
+   if(days.length>8) html+=`<div style="margin-top:7px">Showing the first 8 days here; the AI received the full structured dataset for the selected period.</div>`;
+   if(review){
+     const safe=review.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${safe}</div></div>`;
+   }
    box.className='ai-context-result ai-context-ok';
-   box.innerHTML=`<strong>AI data pipeline connected.</strong> <b>${Number(summary.declared_total_trades||0)}</b> declared trade${Number(summary.declared_total_trades||0)===1?'':'s'} across <b>${Number(summary.trading_days||0)}</b> trading day${Number(summary.trading_days||0)===1?'':'s'}, with <b>${Number(summary.recorded_total_trades||0)}</b> recorded result${Number(summary.recorded_total_trades||0)===1?'':'s'}, for <b>${range.label}</b>.<div class="ai-context-days">${dayHtml||'<div class="ai-context-day">No trades in this period.</div>'}</div>${days.length>8?'<div style="margin-top:7px">Showing the first 8 days here; the full structured dataset was returned to the app.</div>':''}`;
-   if(note)note.textContent='Journal context loaded successfully. The next step is to pass this structured context to the AI model.';
+   box.innerHTML=html;
+   if(note)note.textContent='AI review generated from your selected journal period. The journal remains the source of truth; the AI does not invent missing trade results.';
  }catch(err){
-   console.error('AI review context error',err);
+   console.error('AI review error',err);
    box.className='ai-context-result ai-context-error';
-   box.innerHTML=`<strong>Could not load AI context.</strong> ${String(err?.message||err||'Unknown error')}`;
-   if(note)note.textContent='No AI model request was made.';
+   const msg=String(err?.message||err||'Unknown error');
+   box.innerHTML=`<strong>AI review could not be completed.</strong><div style="margin-top:5px">${msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+   if(note)note.textContent='The journal context is secure, but the AI request returned an error. No journal data was deleted.';
  }finally{
-   btn.disabled=false; btn.textContent='Prepare AI Review';
+   btn.disabled=false; btn.textContent='Run AI Review';
  }
 }
 
