@@ -3336,7 +3336,6 @@ if (journalDate) journalDate.addEventListener('change',()=>{
   if(f?.day_sequence) f.day_sequence.value=meta.sequence||'';
   updateDaySequenceMeta();
 });
-clearStaleAIState();
 renderAll();initCloud();
 })();
 
