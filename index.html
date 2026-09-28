@@ -640,7 +640,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
       <h3 class="ai-review-title">A structured review of your own journal</h3>
       <p class="ai-review-sub">This is the Bluebird AI report layout. The future AI engine will use your actual journal, trade order, daily sequences, screenshots, statistics and selected period to produce the review.</p>
     </div>
-    <div class="ai-review-status">PRO · AI ENGINE NOT CONNECTED</div>
+    <div class="ai-review-status">PRO · AI ENGINE CONNECTED</div>
   </div>
   <div class="ai-review-grid">
     <div class="ai-review-panel">
@@ -698,7 +698,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 .ai-preview-dot{width:6px;height:6px;flex:0 0 6px;border-radius:50%;margin-top:4px;background:#27d7a0;box-shadow:0 0 0 3px rgba(39,215,160,.08)}
 .ai-preview-item b{font-size:9px;color:#e8f5ff}
 .ai-preview-item p{margin:3px 0 0;font-size:8.5px;color:#7f98a9;line-height:1.5}
-.ai-review-actions{display:flex;align-items:center;gap:9px;margin-top:10px}.ai-review-note{font-size:8px;color:#6f8798;line-height:1.4}.ai-review-output{margin-top:10px;border:1px solid #17684f;background:linear-gradient(145deg,#061a16,#06131d);border-radius:8px;overflow:hidden}.ai-review-output-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid #153f36;color:#8ee1bd;font-size:9px;font-weight:900;letter-spacing:1px}.ai-review-output-head small{font-size:8px;color:#6f8798;letter-spacing:.2px;font-weight:700}.ai-review-output-body{padding:11px;color:#d8e8ee;font-size:11px;line-height:1.65}.ai-review-output-body br{content:"";display:block;margin-top:3px}@media(max-width:760px){.ai-review-output-body{font-size:12px;line-height:1.7}}
+.ai-review-actions{display:flex;align-items:center;gap:9px;margin-top:10px}.ai-review-note{font-size:8px;color:#6f8798;line-height:1.4}.ai-review-output{margin-top:10px;border:1px solid #17684f;background:linear-gradient(145deg,#061a16,#06131d);border-radius:8px;overflow:hidden}.ai-review-output-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #153f36;color:#8ee1bd;font-size:9px;font-weight:900;letter-spacing:1px}.ai-review-output-head small{font-size:8px;color:#6f8798;letter-spacing:.2px;font-weight:700}.ai-review-output-body{padding:11px;color:#d8e8ee;font-size:11px;line-height:1.65}.ai-review-section{border:1px solid #123c35;background:#06151a;border-radius:8px;padding:10px 11px;margin-bottom:8px}.ai-review-section:last-child{margin-bottom:0}.ai-review-section-title{font-size:9px;letter-spacing:1.1px;font-weight:950;color:#8ee1bd;margin-bottom:7px}.ai-review-paragraph{margin:0 0 7px;color:#d6e7ec}.ai-review-paragraph:last-child{margin-bottom:0}.ai-review-bullets{margin:0;padding-left:18px;color:#d6e7ec}.ai-review-bullets li{margin:0 0 5px}.ai-review-bullets li:last-child{margin-bottom:0}.ai-inline-code{display:inline-block;padding:1px 5px;border-radius:4px;border:1px solid #17455a;background:#071b25;color:#ccecff;font-size:.92em}.ai-review-output-body strong{color:#f1fbff}@media(max-width:760px){.ai-review-output-body{font-size:12px;line-height:1.7}.ai-review-section{padding:10px}.ai-review-section-title{font-size:10px}}
 @media(max-width:760px){.ai-review-head{flex-direction:column}.ai-review-grid{grid-template-columns:1fr}.ai-mock-stats{grid-template-columns:1fr 1fr}.ai-preview-body{grid-template-columns:1fr}.ai-review-status{white-space:normal}}
 </style>
 <style>
@@ -1962,8 +1962,50 @@ async function prepareAIReview(){
    html+=`<div class="ai-context-days">${dayHtml||'<div class="ai-context-day">No trades in this period.</div>'}</div>`;
    if(days.length>8) html+=`<div style="margin-top:7px">Showing the first 8 days here; the AI received the full structured dataset for the selected period.</div>`;
    if(review){
-     const safe=review.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${safe}</div></div>`;
+     const escText=(value)=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+     const inline=(value)=>escText(value).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<span class="ai-inline-code">$1</span>');
+     const renderAIReview=(text)=>{
+       const sections=[];
+       let current=null;
+       const lines=String(text||'').split(/\r?\n/);
+       const push=()=>{ if(current){ const cleaned=current.lines.filter(x=>x.trim() && x.trim()!=='---'); if(cleaned.length) sections.push({...current,lines:cleaned}); } };
+       for(const raw of lines){
+         const line=raw.trim();
+         if(/^#{2,3}\s+/.test(line)){
+           push();
+           current={title:line.replace(/^#{2,3}\s+/,'').trim(),lines:[]};
+         }else if(line==='---'){
+           if(current) current.lines.push('');
+         }else{
+           if(!current) current={title:'AI Trading Review',lines:[]};
+           current.lines.push(raw);
+         }
+       }
+       push();
+       if(!sections.length){
+         return `<div class="ai-review-section"><div class="ai-review-section-title">AI TRADING REVIEW</div><p class="ai-review-paragraph">${inline(text).replace(/\n/g,'<br>')}</p></div>`;
+       }
+       return sections.map(sec=>{
+         const bullets=[];
+         const paras=[];
+         let pending=[];
+         const flush=()=>{ if(pending.length){ paras.push(pending.join(' ')); pending=[]; } };
+         for(const raw of sec.lines){
+           const line=raw.trim();
+           if(!line){ flush(); continue; }
+           if(/^[-*]\s+/.test(line)){
+             flush(); bullets.push(line.replace(/^[-*]\s+/,''));
+           }else if(/^\d+[.)]\s+/.test(line)){
+             flush(); bullets.push(line.replace(/^\d+[.)]\s+/,''));
+           }else{
+             pending.push(line);
+           }
+         }
+         flush();
+         return `<div class="ai-review-section"><div class="ai-review-section-title">${escText(sec.title)}</div>${paras.map(x=>`<p class="ai-review-paragraph">${inline(x)}</p>`).join('')}${bullets.length?`<ul class="ai-review-bullets">${bullets.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`:''}</div>`;
+       }).join('');
+     };
+     html+=`<div class="ai-review-output"><div class="ai-review-output-head"><span>AI TRADING REVIEW</span><small>${data?.model||'Gemini'}</small></div><div class="ai-review-output-body">${renderAIReview(review)}</div></div>`;
    }
    box.className='ai-context-result ai-context-ok';
    box.innerHTML=html;
