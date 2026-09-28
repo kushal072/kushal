@@ -338,8 +338,72 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 </section>
 
 <section id="page-pro" class="page">
-<div id="proAccessNotice" class="card"><div class="smallbrand">BLUEBIRD PRO</div><h2 style="margin:6px 0">The full analytics layer</h2><p id="proAccessNoticeText" style="color:#8ea2b2;font-size:11px;line-height:1.5">Full history, unlimited journaling, advanced analytics, Prop Firm Simulator, Monte Carlo, AI reviews, strategy analysis and deeper exports.</p></div>
-<div class="grid2" style="margin-top:10px"><div class="card"><h3 style="font-size:10px;color:#899eae">FULL HISTORY</h3><div class="big" style="color:#2aaaff">ALL</div><p style="font-size:10px;color:#8196a7">1 month, 3 months, 6 months, 1 year and all-time history.</p></div><div class="card"><h3 style="font-size:10px;color:#899eae">PROP FIRM SIMULATOR</h3><div class="big" style="color:#2aaaff">RULES</div><p style="font-size:10px;color:#8196a7">Use your own statistics against target, drawdown, consistency and payout rules.</p></div></div>
+<style>
+.pro-hero{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;align-items:stretch}
+.pro-hero-main{padding:18px 18px 16px;border:1px solid #16537a;background:radial-gradient(circle at 80% 0%,#0b3960 0,#071925 45%,#040b12 100%);border-radius:9px;box-shadow:0 16px 42px #0009}
+.pro-kicker{font-size:9px;letter-spacing:2px;font-weight:950;color:#35aaff}.pro-title{font-size:38px;line-height:1.02;letter-spacing:-1.7px;margin:7px 0}.pro-title span{color:#2aaaff}.pro-sub{max-width:680px;color:#9bb0c0;font-size:11px;line-height:1.6}.pro-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.pro-badge{font-size:8px;font-weight:900;color:#ccecff;border:1px solid #1d5d84;background:#061725;padding:5px 7px;border-radius:999px}.pro-status{padding:14px;border:1px solid #164b70;background:#061521;border-radius:9px;display:flex;flex-direction:column;justify-content:space-between}.pro-status-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.pro-status-pill{font-size:8px;font-weight:950;letter-spacing:1px;padding:5px 7px;border-radius:999px;background:#0a2a3f;border:1px solid #1a6a98;color:#91d8ff}.pro-status-pill.active{background:#063629;border-color:#08744d;color:#43efae}.pro-status-label{font-size:8px;color:#7992a4;font-weight:900}.pro-status-value{font-size:23px;font-weight:950;color:#edf8ff;margin-top:4px}.pro-status-text{font-size:10px;color:#90a6b7;line-height:1.5;margin-top:5px}.pro-price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:11px}.pro-price{position:relative;border:1px solid #123d58;background:linear-gradient(#071724,#040c13);border-radius:8px;padding:13px}.pro-price.featured{border-color:#1598ef;box-shadow:0 0 0 1px #0b5f93 inset,0 12px 30px #001b2a88}.pro-price-tag{position:absolute;top:9px;right:9px;font-size:7px;font-weight:950;letter-spacing:1px;color:#05111a;background:#2aaaff;padding:4px 5px;border-radius:3px}.pro-price-name{font-size:9px;color:#91a7b7;font-weight:950;letter-spacing:1px}.pro-price-amount{font-size:28px;font-weight:950;margin:8px 0 2px}.pro-price-amount span{font-size:10px;color:#8da2b2;font-weight:800}.pro-price-note{font-size:8px;color:#7890a0;min-height:25px}.pro-price .btn{width:100%;margin-top:10px}.pro-section-title{font-size:9px;color:#899eae;font-weight:950;letter-spacing:1px;margin-bottom:7px}.pro-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:11px}.pro-feature{border:1px solid #103851;background:#06131f;border-radius:8px;padding:11px}.pro-feature h4{margin:0;font-size:10px}.pro-feature p{margin:5px 0 0;font-size:9px;color:#8097a8;line-height:1.5}.pro-ai{margin-top:11px;border:1px solid #17567d;background:linear-gradient(120deg,#061925,#07233a);border-radius:9px;padding:15px;display:grid;grid-template-columns:1fr .9fr;gap:12px}.pro-ai h3{margin:0 0 6px;font-size:16px}.pro-ai p{margin:0;color:#9bb0c0;font-size:10px;line-height:1.6}.pro-ai-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}.pro-ai-chip{font-size:8px;font-weight:900;color:#cdeaff;border:1px solid #174a69;background:#061521;border-radius:5px;padding:6px}.pro-callout{margin-top:11px;padding:10px 12px;border:1px solid #15405a;background:#061520;border-radius:7px;color:#8fa5b5;font-size:9px;line-height:1.5}
+@media(max-width:760px){.pro-hero{grid-template-columns:1fr}.pro-title{font-size:30px}.pro-price-grid{grid-template-columns:1fr}.pro-feature-grid{grid-template-columns:1fr 1fr}.pro-ai{grid-template-columns:1fr}.pro-ai-list{grid-template-columns:1fr}}
+@media(max-width:520px){.pro-feature-grid{grid-template-columns:1fr}.pro-title{font-size:28px}}
+</style>
+<div class="pro-hero">
+  <div class="pro-hero-main">
+    <div class="pro-kicker">BLUEBIRD PRO</div>
+    <div class="pro-title">Turn your journal into a <span>trading intelligence layer.</span></div>
+    <div class="pro-sub">One Pro entitlement unlocks full history, deeper analytics, Monte Carlo, prop-firm tools, strategy analysis, AI reviews and every future Pro feature we add.</div>
+    <div class="pro-badges"><span class="pro-badge">Full history</span><span class="pro-badge">AI analysis</span><span class="pro-badge">Monte Carlo</span><span class="pro-badge">Prop firm tools</span><span class="pro-badge">Advanced exports</span></div>
+  </div>
+  <div class="pro-status" id="proStatusCard">
+    <div class="pro-status-top"><span class="pro-status-label">YOUR ACCESS</span><span id="proStatusPill" class="pro-status-pill">NOT ACTIVE</span></div>
+    <div><div id="proStatusValue" class="pro-status-value">Free / Trial</div><div id="proStatusText" class="pro-status-text">Upgrade to unlock the full Pro workspace.</div></div>
+    <button class="btn" id="proStatusAction" type="button">See plans</button>
+  </div>
+</div>
+
+<div class="pro-price-grid">
+  <div class="pro-price">
+    <div class="pro-price-name">MONTHLY</div>
+    <div class="pro-price-amount">$14.99 <span>/ month</span></div>
+    <div class="pro-price-note">Flexible month-to-month Pro access.</div>
+    <button class="btn primary pro-plan-btn" data-plan="monthly" type="button">Choose monthly</button>
+  </div>
+  <div class="pro-price featured">
+    <div class="pro-price-tag">MOST FLEXIBLE</div>
+    <div class="pro-price-name">3 MONTHS</div>
+    <div class="pro-price-amount">$39.99 <span>/ 3 months</span></div>
+    <div class="pro-price-note">Lower effective monthly cost without a yearly commitment.</div>
+    <button class="btn primary pro-plan-btn" data-plan="quarterly" type="button">Choose 3 months</button>
+  </div>
+  <div class="pro-price">
+    <div class="pro-price-name">YEARLY</div>
+    <div class="pro-price-amount">$119.99 <span>/ year</span></div>
+    <div class="pro-price-note">Best effective monthly price for long-term users.</div>
+    <button class="btn primary pro-plan-btn" data-plan="yearly" type="button">Choose yearly</button>
+  </div>
+</div>
+
+<div class="card" style="margin-top:11px">
+  <div class="pro-section-title">WHAT PRO UNLOCKS</div>
+  <div class="pro-feature-grid">
+    <div class="pro-feature"><h4>Unlimited journal</h4><p>Continue journaling after the trial with full editing, screenshots and history.</p></div>
+    <div class="pro-feature"><h4>Full history</h4><p>See the complete stored journal instead of the 30-day free access window.</p></div>
+    <div class="pro-feature"><h4>Advanced analytics</h4><p>Deeper performance breakdowns across dates, sessions, setups and results.</p></div>
+    <div class="pro-feature"><h4>Monte Carlo</h4><p>Use your actual trade results to explore possible future equity paths.</p></div>
+    <div class="pro-feature"><h4>Prop Firm Simulator</h4><p>Test your own stats against drawdown, target, consistency and payout rules.</p></div>
+    <div class="pro-feature"><h4>Strategy analysis</h4><p>Compare the characteristics of the trades you actually took.</p></div>
+  </div>
+</div>
+
+<div class="pro-ai">
+  <div>
+    <div class="pro-kicker">COMING TO PRO</div>
+    <h3>AI Trading Review</h3>
+    <p>Bluebird will turn the statistics already in your journal into a structured review instead of making you manually inspect hundreds of trades.</p>
+    <div class="pro-ai-list"><div class="pro-ai-chip">Strengths & weaknesses</div><div class="pro-ai-chip">Recurring loss patterns</div><div class="pro-ai-chip">Session / setup insights</div><div class="pro-ai-chip">Drawdown behavior</div></div>
+  </div>
+  <div class="pro-callout"><b style="color:#eaf8ff">Your data stays the source.</b><br>Bluebird calculates the trading statistics first, then the AI interprets those results. That keeps the analysis tied to the journal instead of generic trading advice.</div>
+</div>
+
+<div class="pro-callout"><b style="color:#eaf8ff">Payment is not connected yet.</b> These plan buttons are the finished Pro storefront foundation; the payment provider will be connected after the product-side Pro features are ready.</div>
 </section>
 
 <section id="page-admin" class="page">
@@ -1766,5 +1830,29 @@ if (journalDate && !journalDate.value) {
 }
 renderAll();initCloud();
 })();
+
+function updateProPage(){
+  const active=proAccessActive();
+  const pill=$('proStatusPill'), val=$('proStatusValue'), txt=$('proStatusText');
+  if(!pill||!val||!txt)return;
+  if(active){
+    pill.textContent='ACTIVE'; pill.classList.add('active'); val.textContent='Pro unlocked';
+    const manual=manualAccessActive();
+    txt.textContent=manual ? 'Complimentary manual Pro access is active on this account.' : 'Your paid Pro entitlement is active.';
+  }else{
+    pill.textContent='NOT ACTIVE'; pill.classList.remove('active');
+    val.textContent = trialActive() ? '7-day trial' : 'Free plan';
+    txt.textContent = trialActive() ? 'Your journal trial is active. Upgrade when you are ready to keep full history and unlock Pro.' : 'Upgrade to unlock the full Pro workspace.';
+  }
+}
+
+document.addEventListener('click',e=>{
+ const b=e.target.closest('.pro-plan-btn');
+ if(b){
+   const plan=b.dataset.plan;
+   toast('Payment setup is not connected yet. ' + (plan==='monthly'?'Monthly':'') + (plan==='quarterly'?'3-month':'') + (plan==='yearly'?'Yearly':'') + ' Pro plan is ready for the next step.');
+ }
+ if(e.target.closest('#proStatusAction')) showPage('pro');
+});
 </script>
 </body></html>
