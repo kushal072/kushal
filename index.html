@@ -298,8 +298,8 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 #page-journal .grid2{align-items:stretch;gap:18px;margin-bottom:12px}
 #page-journal .grid2>.card{background:linear-gradient(180deg,#121618 0%,#0d1113 100%);border:1px solid var(--j-border);border-radius:14px;box-shadow:0 14px 36px rgba(0,0,0,.28);padding:18px}
 #page-journal .journal-form-title{font-size:12px!important;letter-spacing:1.15px!important;color:#dfe7eb!important;margin-bottom:14px!important}
-#page-journal .day-seq-meta{display:block;max-width:170px;margin-top:3px;font-size:8px!important;line-height:1.25!important;color:#74828b!important;font-weight:600!important;letter-spacing:.08px!important;white-space:normal!important}
-#page-journal .day-sequence-field .day-seq-meta{opacity:.92}
+#page-journal .day-seq-meta{display:block;max-width:220px;margin-top:5px;font-size:10px!important;line-height:1.4!important;color:#8d989f!important;font-weight:500!important;letter-spacing:0!important;white-space:normal!important}
+#page-journal .day-sequence-field .day-seq-meta{opacity:1}
 #page-journal #tradeForm .fields3{gap:11px}
 #page-journal #tradeForm .field label{font-size:9px;color:#a9b3ba;letter-spacing:.7px;margin-bottom:7px}
 #page-journal #tradeForm .input,#page-journal #tradeForm .select,#page-journal #tradeForm textarea{background:#0a0d0f;border:1px solid rgba(160,180,195,.16);border-radius:8px;color:#edf2f5;box-shadow:inset 0 1px 0 rgba(255,255,255,.025);transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
@@ -469,6 +469,45 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
   #page-journal #trades > table tbody tr td:nth-child(9).pos{color:#2ce0a0;font-weight:900}
   #page-journal #trades > table tbody tr td:nth-child(8).neg,
   #page-journal #trades > table tbody tr td:nth-child(9).neg{color:#ff6b77;font-weight:900}
+}
+</style>
+
+<style id="journal-mobile-v53-images">
+/* Bluebird Journal v53 — make screenshots clearly visible and tappable on phones */
+.mobile-image-actions{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap}
+.mobile-view-image{display:none}
+.journal-shot-wrap{display:flex;align-items:center;gap:8px;min-height:48px}
+@media(max-width:700px){
+  #page-journal #trades > table tbody tr td:nth-child(12){
+    display:flex;
+    align-items:flex-start;
+    flex-direction:column;
+    gap:6px;
+    min-height:86px;
+    padding-top:7px;
+    overflow:visible;
+  }
+  #page-journal #trades > table tbody tr td:nth-child(12)::before{display:block;margin-bottom:1px}
+  #page-journal #trades .journal-shot-wrap{width:100%;min-height:56px;display:flex;align-items:center;gap:8px;overflow:visible}
+  #page-journal #trades .journal-shot{display:inline-flex;align-items:center;justify-content:center;min-width:112px;min-height:68px;padding:3px;border-radius:9px;background:#08131b;border:1px solid rgba(100,125,145,.20);overflow:hidden;cursor:pointer;box-sizing:border-box}
+  #page-journal #trades .journal-shot img{width:104px;height:62px;object-fit:contain;display:block;border-radius:6px;background:#02060b}
+  #page-journal #trades .journal-shot-count{font-size:9px;color:#8fa6b6}
+  #page-journal #trades .mobile-view-image{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 10px;border-radius:8px;border:1px solid #1b597d;background:#071925;color:#bde6fb;font-size:11px;font-weight:800;cursor:pointer}
+  #page-journal #trades .mobile-view-image:active{transform:translateY(1px)}
+  #page-journal #trades .mobile-image-loading{color:#91a4af;font-size:11px;padding:8px 0}
+}
+</style>
+
+<style id="journal-mobile-v53-hard-override">
+@media(max-width:700px){
+  #page-journal #trades{overflow:visible!important}
+  #page-journal #trades > table{display:table!important;width:100%!important;min-width:0!important;table-layout:fixed!important}
+  #page-journal #trades > table thead{display:none!important}
+  #page-journal #trades > table tbody{display:grid!important;gap:10px!important}
+  #page-journal #trades > table tbody tr{display:grid!important;min-width:0!important;width:100%!important}
+  #page-journal #trades > table tbody tr td:nth-child(12){display:flex!important}
+  #page-journal #trades .journal-shot-wrap{display:flex!important;width:100%!important;align-items:center!important;gap:8px!important}
+  #page-journal #trades .mobile-view-image{display:inline-flex!important}
 }
 </style>
 </head>
@@ -1538,9 +1577,9 @@ async function renderTrades(){
      let shotHtml='—';
      if(Array.isArray(t.images)&&t.images.length){
        if(!sb||String(t.images[0]).startsWith('data:')){
-         shotHtml=`<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${t.images[0]}" alt=""><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span>`;
+         shotHtml=`<div class="journal-shot-wrap"><span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${t.images[0]}" alt="Trade screenshot"><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span><button class="btn mobile-view-image" type="button" data-view-trade="${t.id}">View ${t.images.length} image${t.images.length===1?'':'s'}</button></div>`;
        }else{
-         shotHtml=`<span id="img-${t.id}" class="journal-shot" data-view-trade="${t.id}">Loading…</span>`;
+         shotHtml=`<div class="journal-shot-wrap"><span id="img-${t.id}" class="journal-shot mobile-image-loading" data-view-trade="${t.id}">Loading image…</span><button class="btn mobile-view-image" type="button" data-view-trade="${t.id}">View ${t.images.length} image${t.images.length===1?'':'s'}</button></div>`;
        }
      }
      const seqHtml=`<div class="trade-seq">${meta.tokens.map((tok,i)=>sequenceTokenHtml(tok,i===meta.order-1)).join('')}</div>`;
@@ -1574,8 +1613,9 @@ async function renderTrades(){
      const cell=$("img-"+t.id); if(!cell)continue;
      try{
        const src=await signedImage(t.images[0]);
-       if(src)cell.innerHTML=`<span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${src}" alt=""><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span>`;
-     }catch{}
+       if(src)cell.innerHTML=`<div class="journal-shot-wrap"><span class="journal-shot" data-view-trade="${t.id}" title="Open screenshots"><img src="${src}" alt="Trade screenshot"><span class="journal-shot-count">${t.images.length>1?'+'+(t.images.length-1):''}</span></span><button class="btn mobile-view-image" type="button" data-view-trade="${t.id}">View ${t.images.length} image${t.images.length===1?'':'s'}</button></div>`;
+       else cell.innerHTML=`<div class="journal-shot-wrap"><span class="journal-shot mobile-image-loading" data-view-trade="${t.id}">Image unavailable</span><button class="btn mobile-view-image" type="button" data-view-trade="${t.id}">View ${t.images.length} image${t.images.length===1?'':'s'}</button></div>`;
+     }catch{cell.innerHTML=`<div class="journal-shot-wrap"><span class="journal-shot mobile-image-loading" data-view-trade="${t.id}">Image unavailable</span><button class="btn mobile-view-image" type="button" data-view-trade="${t.id}">View ${t.images.length} image${t.images.length===1?'':'s'}</button></div>`;}
    }
  }
  b.querySelectorAll('[data-view-trade]').forEach(el=>el.addEventListener('click',()=>{
