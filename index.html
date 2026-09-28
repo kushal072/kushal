@@ -775,7 +775,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Bluebird tests the first 1, 2, 3 and 4 recorded trades per day, plus all recorded trades, before Gemini interprets the differences.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
-    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><button class="btn" data-nav="pro" type="button">Open Pro</button></div>
+    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button></div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
     <div id="aiAskPanel" class="ai-ask-panel" hidden>
       <div class="ai-ask-head">
@@ -2538,11 +2538,11 @@ async function prepareAIReview(){
  box.innerHTML='Running your private journal analysis securely…';
  const oldAsk=$('aiAskPanel'); if(oldAsk) oldAsk.hidden=true;
 
-
- const friendlyError=()=>{
+ const friendlyError=(message)=>{
+   const clean=String(message||'').replace(/\s+/g,' ').trim();
    box.className='ai-context-result ai-context-warn';
-   box.innerHTML='<strong>Bluebird AI is temporarily busy.</strong><div style="margin-top:5px">Your journal is safe. Please wait a moment and try the review again.</div>';
-   const ask=$('aiAskPanel'); if(ask)ask.hidden=true;
+   box.innerHTML=`<strong>Bluebird AI could not complete the review.</strong><div style="margin-top:6px">${escapeHtmlAIError(clean||'The AI service returned an unexpected error. Please try again.')}</div>`;
+   const ask=$('aiAskPanel'); if(ask) ask.hidden=true;
    if(note)note.textContent='Your journal data was not changed.';
  };
 
@@ -2574,15 +2574,28 @@ async function prepareAIReview(){
    .trim();
 
  const runOnce=async()=>{
-   const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
-   if(error)throw error;
+   const result=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null}});
+   if(result.error){
+     let detail='';
+     try{
+       const ctx=result.error?.context;
+       if(ctx?.json){
+         const payload=await ctx.json();
+         detail=String(payload?.message||payload?.details||payload?.error||'').trim();
+       }else if(ctx?.text){
+         detail=String(await ctx.text()).trim();
+       }
+     }catch(_err){}
+     throw new Error(detail||result.error?.message||'The Bluebird AI function could not be reached.');
+   }
+   const data=result.data;
    if(typeof data==='string'){
      try{return JSON.parse(data);}catch{return {review:data};}
    }
    if(data?.error && !data?.review && !data?.answer){
      throw new Error(String(data.message||data.error));
    }
-   return data;
+   return data||{};
  };
 
  try{
@@ -2596,8 +2609,8 @@ async function prepareAIReview(){
        lastErr=err;
        if(attempt===0){
          box.className='ai-context-result ai-context-warn';
-         box.innerHTML='<strong>AI is busy right now.</strong><div style="margin-top:5px">Retrying securely…</div>';
-         await new Promise(r=>setTimeout(r,2200));
+         box.innerHTML='<strong>AI is retrying securely…</strong><div style="margin-top:5px">The journal is unchanged.</div>';
+         await new Promise(r=>setTimeout(r,1600));
        }
      }
    }
@@ -2607,19 +2620,19 @@ async function prepareAIReview(){
    const summary=ctx.summary||{};
    const days=Array.isArray(ctx.days)?ctx.days:[];
    const scenarios=Array.isArray(data?.scenarios)?data.scenarios:(Array.isArray(ctx.scenarios)?ctx.scenarios:[]);
-   const review=sanitizeAI(String(data?.review||'').trim());
+   const review=sanitizeAI(String(data?.review||data?.answer||'').trim());
 
    const seqForDay=d=>String(d.manual_sequence||d.observed_sequence||'—').replace(/\s+/g,'');
    const clsForSeq=s=>s==='—'?'':(/W/.test(s)&&!/L|BE/.test(s)?'w':(/L/.test(s)&&!/W|BE/.test(s)?'l':'be'));
    const dayHtml=days.slice(0,8).map(d=>{
      const declared=Number(d.declared_trade_count??d.trade_count??0);
-     const recorded=Number(d.recorded_trade_count??0);
+     const recorded=Number(d.recorded_trade_count??(Array.isArray(d.trades)?d.trades.length:0));
      const recText=recorded<declared?` · ${recorded} recorded`:'';
      const seq=seqForDay(d);
      return `<div class="ai-context-day"><b>${d.date||'—'}</b><div>${declared} trade${declared===1?'':'s'} · <span class="ai-context-seq ${clsForSeq(seq)}">${seq}</span>${recText} · ${Number(d.total_r||0)>=0?'+':''}${fmt(Number(d.total_r||0))}R</div></div>`;
    }).join('');
 
-   let html=`<strong>AI review ready.</strong> <b>${Number(summary.declared_total_trades||0)}</b> declared trade${Number(summary.declared_total_trades||0)===1?'':'s'} across <b>${Number(summary.trading_days||0)}</b> trading day${Number(summary.trading_days||0)===1?'':'s'}, with <b>${Number(summary.recorded_total_trades||0)}</b> recorded result${Number(summary.recorded_total_trades||0)===1?'':'s'}, for <b>${range.label}</b>.`;
+   let html=`<strong>AI review ready.</strong> <b>${Number(summary.declared_total_trades??summary.total_trades??0)}</b> declared trade${Number(summary.declared_total_trades??summary.total_trades??0)===1?'':'s'} across <b>${Number(summary.trading_days||0)}</b> trading day${Number(summary.trading_days||0)===1?'':'s'}, with <b>${Number(summary.recorded_total_trades??summary.total_trades??0)}</b> recorded result${Number(summary.recorded_total_trades??summary.total_trades??0)===1?'':'s'}, for <b>${range.label}</b>.`;
    html+=`<div class="ai-context-days">${dayHtml||'<div class="ai-context-day">No trades in this period.</div>'}</div>`;
    if(days.length>8) html+=`<div style="margin-top:7px">Showing a small preview here; the AI received the full selected period.</div>`;
    const imageStats=data?.image_stats||null;
@@ -2640,10 +2653,13 @@ async function prepareAIReview(){
    wireAIAsk();
  }catch(err){
    console.error('AI review error',err);
-   friendlyError();
+   friendlyError(err?.message||err);
  }finally{
    btn.disabled=false; btn.textContent='Run AI Review';
  }
+}
+function escapeHtmlAIError(value){
+  return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,900);
 }
 function normalizeAIReviewText(text){
   let s=String(text??'')
