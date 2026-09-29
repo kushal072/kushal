@@ -794,7 +794,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 @media(max-width:900px){.pro-tool-switch{min-height:110px!important}.pro-tool-metric{min-height:82px!important}#mcResultBody .pro-tool-metric:nth-child(-n+3){min-height:92px!important}.pf-section-head{align-items:flex-start!important;flex-direction:column!important}.pf-section-note{text-align:left!important}}
 @media(max-width:700px){.pro-tool-switcher{grid-template-columns:1fr!important}.pro-tool-switch{min-height:96px!important;padding:15px 16px!important}.pro-tool-switch-icon{flex-basis:50px!important;width:50px!important;height:50px!important}.pro-tool-switch-title{font-size:15px!important}.pro-tool-card{padding:15px!important}.pro-tool-chart canvas{height:290px!important}.pf-journey-header{padding:15px 16px!important}.pf-journey-title{font-size:18px!important}.pf-cycle{grid-template-columns:1fr!important}.pf-cycle-step{min-height:unset!important}.pf-cycle-step:not(:last-child)::after{right:auto!important;left:50%!important;top:auto!important;bottom:-13px!important;transform:translateX(-50%) rotate(90deg)!important}}
 </style>
-</head>
+<style id="bluebird-local-intelligence-v91">.ai-review-note{font-size:9px;color:#718a99;line-height:1.4}.ai-ask-local-meta{margin-top:10px;padding-top:9px;border-top:1px solid #16384b;color:#8199a8;font-size:10px;line-height:1.55}.ai-ask-history-answer .ai-review-section{border:0!important;background:transparent!important;margin:0!important;padding:0!important}.ai-ask-history-answer .ai-review-section-title{font-size:10px!important;color:#78c9f4!important;letter-spacing:1.2px!important}.ai-ask-history-answer .ai-review-paragraph{font-size:12px!important;line-height:1.72!important}</style></head>
 <body data-bluebird-build="v89">
 <div class="app">
 <header class="top">
@@ -917,11 +917,11 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <div class="ai-review-card">
   <div class="ai-review-head">
     <div>
-      <div class="smallbrand ai-kicker">AI TRADING REVIEW</div>
-      <h3 class="ai-review-title">A structured review of your own journal</h3>
-      <p class="ai-review-sub">Bluebird analyzes your journal, trade order, daily sequences, notes, chart screenshots and selected period. Historical comparisons are calculated from your actual journal before AI interprets the results.</p>
+      <div class="smallbrand ai-kicker">BLUEBIRD JOURNAL INTELLIGENCE</div>
+      <h3 class="ai-review-title">Your journal, analyzed by Bluebird</h3>
+      <p class="ai-review-sub">Bluebird calculates the measurable facts from your journal first. Ask questions and get immediate answers from your recorded data; optional AI can add deeper interpretation when available.</p>
     </div>
-    <div class="ai-review-status">PRO · AI ENGINE CONNECTED</div>
+    <div class="ai-review-status">BLUEBIRD ANALYTICS · AI OPTIONAL</div>
   </div>
   <div class="ai-review-grid">
     <div class="ai-review-panel">
@@ -929,7 +929,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       <div id="aiMockSnapshot" class="ai-mock-stats"></div>
     </div>
     <div class="ai-review-panel">
-      <div class="ai-panel-label">WHAT AI WILL ANALYZE</div>
+      <div class="ai-panel-label">WHAT BLUEBIRD CAN ANALYZE</div>
       <div class="ai-chip-grid">
         <span class="ai-chip">Trade count & order</span>
         <span class="ai-chip">W / L / BE sequences</span>
@@ -949,21 +949,21 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Bluebird tests the first 1, 2, 3 and 4 recorded trades per day, plus all recorded trades, before Gemini interprets the differences.</p></div></div>
       <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Actionable review</b><p>AI will turn the calculated data into a structured review of strengths, weaknesses and recurring patterns.</p></div></div>
     </div>
-    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button></div>
+    <div class="ai-review-actions"><button class="btn primary" id="aiPrepareReview" type="button">Run AI Review</button><span class="ai-review-note">Optional — the journal calculations below do not require AI.</span></div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
-    <div id="aiAskPanel" class="ai-ask-panel" hidden>
+    <div id="aiAskPanel" class="ai-ask-panel">
       <div class="ai-ask-head">
-        <div><div class="ai-panel-label">ASK BLUEBIRD AI</div><div class="ai-ask-sub">Ask a question about the selected journal period. Bluebird uses only your recorded journal data and available screenshots.</div></div>
+        <div><div class="ai-panel-label">ASK BLUEBIRD</div><div class="ai-ask-sub">Ask about your journal in normal language. Bluebird answers quantitative questions directly from your recorded trades; AI is only used for questions that need interpretation.</div></div>
       </div>
       <div class="ai-quick-prompts">
-        <button class="ai-quick-btn" type="button" data-ai-q="What patterns do you see in my daily trade sequences?">Sequences</button>
-        <button class="ai-quick-btn" type="button" data-ai-q="How did the first trades of my days compare with later trades historically?">Trade order</button>
-        <button class="ai-quick-btn" type="button" data-ai-q="What stands out in my chart screenshots and notes?">Charts</button>
-        <button class="ai-quick-btn" type="button" data-ai-q="What should I investigate further in this journal period?">What to investigate</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="What is my win rate and total R for this period?">Performance</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="How did my first 1, 2, 3 and 4 trades per day compare?">Trade limits</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="What is my longest losing streak and what happened after my losing streaks?">Streaks</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="What is my drawdown in this period?">Drawdown</button>
       </div>
       <div class="ai-ask-row">
-        <textarea id="aiQuestion" class="ai-ask-input" rows="2" placeholder="Ask Bluebird AI about this journal period..."></textarea>
-        <button id="aiAskButton" class="btn primary ai-ask-send" type="button">Ask AI</button>
+        <textarea id="aiQuestion" class="ai-ask-input" rows="2" placeholder="Ask Bluebird about your journal..."></textarea>
+        <button id="aiAskButton" class="btn primary ai-ask-send" type="button">Ask Bluebird</button>
       </div>
       <div class="ai-ask-history" id="aiAskHistory" hidden></div>
       <div class="ai-ask-footer" id="aiAskFooter" hidden>
@@ -2991,6 +2991,74 @@ function renderAIReviewText(text){
   }).join('');
 }
 
+
+/* ------------------------------------------------------------
+   Bluebird local journal intelligence
+   Deterministic answers work without Gemini.
+------------------------------------------------------------ */
+function localQueryRows(){
+  try{
+    const all=visibleTrades(),range=analyticsGetRange();
+    return filterAnalyticsRows(all,range).filter(t=>t&&Number.isFinite(Number(t.result_r)));
+  }catch{return []}
+}
+function localDays(rows){
+  const m=new Map();
+  rows.forEach(t=>{
+    const d=String(t.trade_date||'').slice(0,10);if(!d)return;
+    if(!m.has(d))m.set(d,[]);m.get(d).push(t);
+  });
+  m.forEach(a=>a.sort((x,y)=>{const kx=journalTradeSortKey(x,0),ky=journalTradeSortKey(y,0);if(kx!==ky)return kx-ky;return String(x.id||'').localeCompare(String(y.id||''));}));
+  return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+}
+function localRowsR(rows){return rows.reduce((s,t)=>s+Number(t.result_r||0),0)}
+function localWR(rows){return rows.length?rows.filter(t=>Number(t.result_r)>0).length/rows.length*100:0}
+function localPF(rows){let w=0,l=0;rows.forEach(t=>{const r=Number(t.result_r||0);if(r>0)w+=r;else if(r<0)l+=Math.abs(r)});return l?w/l:(w>0?Infinity:0)}
+function localStreak(rows,isWin){let c=0,b=0;rows.forEach(t=>{const hit=isWin?Number(t.result_r)>0:Number(t.result_r)<0;c=hit?c+1:0;b=Math.max(b,c)});return b}
+function localDD(rows){let e=0,p=0,d=0;rows.forEach(t=>{e+=Number(t.result_r||0);p=Math.max(p,e);d=Math.max(d,p-e)});return d}
+function localScenario(rows,n){let picked=[];localDays(rows).forEach(x=>picked.push(...x[1].slice(0,n)));return picked}
+function localGroup(rows,key){const m=new Map();rows.forEach(t=>{const k=String(t[key]||'Not entered').trim()||'Not entered';if(!m.has(k))m.set(k,[]);m.get(k).push(t)});return [...m.entries()].map(x=>({key:x[0],rows:x[1],r:localRowsR(x[1]),wr:localWR(x[1])})).sort((a,b)=>b.r-a.r)}
+function localAnswer(question){
+  const q=String(question||'').toLowerCase().trim(),rows=localQueryRows(),days=localDays(rows);
+  if(!q||!rows.length)return null;
+  const R=localRowsR(rows),wr=localWR(rows),avg=R/rows.length,pf=localPF(rows);
+  if(/win rate|winning percentage/.test(q))return {title:'Win rate',body:'Your win rate is **'+wr.toFixed(1)+'%**.',meta:rows.length+' recorded trades in the selected period.',source:'Bluebird Analytics'};
+  if(/total r|net r/.test(q))return {title:'Total R',body:'Your total result is **'+(R>=0?'+':'')+fmt(R)+'R**.',meta:'Average: '+(avg>=0?'+':'')+fmt(avg)+'R per trade.',source:'Bluebird Analytics'};
+  if(/how many trades|trade count|number of trades|total trades/.test(q))return {title:'Trade count',body:'You have **'+rows.length+' recorded trades** in the selected period.',meta:days.length+' trading days.',source:'Bluebird Analytics'};
+  if(/profit factor/.test(q))return {title:'Profit factor',body:'Your profit factor is **'+(pf===Infinity?'No losing R':pf.toFixed(2))+'**.',meta:'Gross winning R divided by absolute gross losing R.',source:'Bluebird Analytics'};
+  if(/drawdown|max(?:imum)? dd/.test(q))return {title:'Maximum drawdown',body:'Your maximum peak-to-trough drawdown was **'+fmt(localDD(rows))+'R**.',meta:'Calculated chronologically from cumulative R.',source:'Bluebird Analytics'};
+  if(/longest.*los|losing streak|loss streak/.test(q))return {title:'Longest losing streak',body:'Your longest losing streak was **'+localStreak(rows,false)+' consecutive losses**.',meta:'Longest winning streak: '+localStreak(rows,true)+'.',source:'Bluebird Analytics'};
+  if(/longest.*win|winning streak|win streak/.test(q))return {title:'Longest winning streak',body:'Your longest winning streak was **'+localStreak(rows,true)+' consecutive wins**.',meta:'Longest losing streak: '+localStreak(rows,false)+'.',source:'Bluebird Analytics'};
+  const afterL=q.match(/after\s+(?:a\s+)?(\d+)\s+(?:consecutive\s+)?loss/);
+  if(afterL){
+    const k=Math.max(1,Number(afterL[1])),o=[];
+    for(let i=k;i<rows.length;i++){let ok=true;for(let j=1;j<=k;j++){if(!(Number(rows[i-j].result_r)<0)){ok=false;break}}if(ok)o.push(Number(rows[i].result_r))}
+    if(!o.length)return {title:'After '+k+' losses',body:'There are not enough matching cases in this period to calculate the next trade.',meta:'Try a wider journal date range.',source:'Bluebird Analytics'};
+    const w=o.filter(x=>x>0).length,l=o.filter(x=>x<0).length,r=o.reduce((a,b)=>a+b,0);
+    return {title:'After '+k+' consecutive losses',body:'You had **'+o.length+' matching cases**. The next trade was a win **'+w+' times** and a loss **'+l+' times**. Next-trade win rate: **'+(w/o.length*100).toFixed(1)+'%**.',meta:'Net R on those next trades: '+(r>=0?'+':'')+fmt(r)+'R.',source:'Bluebird Analytics'};
+  }
+  const nMatch=q.match(/first\s+(1|2|3|4)\s+trades?/);
+  if(nMatch){const n=Number(nMatch[1]),pick=localScenario(rows,n),pr=localRowsR(pick);return {title:'First '+n+' trade'+(n===1?'':'s')+' per day',body:'The first '+n+' trade'+(n===1?'':'s')+' per day produced **'+(pr>=0?'+':'')+fmt(pr)+'R** from **'+pick.length+' trades**.',meta:'Chronological first '+n+' recorded trades from each trading day.',source:'Bluebird Analytics'}}
+  if(/compare.*1.*2|1.*2.*3.*4.*trade|trade limit|trades per day/.test(q)){
+    const lines=[1,2,3,4].map(n=>{const p=localScenario(rows,n),r=localRowsR(p);return '**'+n+'/day:** '+(r>=0?'+':'')+fmt(r)+'R · '+localWR(p).toFixed(1)+'% WR · '+p.length+' trades'});
+    return {title:'Trades-per-day comparison',body:lines.join('\n'),meta:'Historical calculation from the first 1, 2, 3 and 4 recorded trades of each day.',source:'Bluebird Analytics'};
+  }
+  const group=/session/.test(q)?['session','Session']:/setup/.test(q)?['setup','Setup']:/instrument/.test(q)?['instrument','Instrument']:/direction/.test(q)?['direction','Direction']:null;
+  if(group){const gs=localGroup(rows,group[0]).slice(0,6);return {title:group[1]+' breakdown',body:gs.map(g=>'**'+g.key+'** · '+g.rows.length+' trades · '+g.wr.toFixed(1)+'% WR · '+(g.r>=0?'+':'')+fmt(g.r)+'R').join('\n'),meta:'Groups are sorted by total R.',source:'Bluebird Analytics'}}
+  if(/best day|worst day/.test(q)){
+    const ds=days.map(x=>({date:x[0],rows:x[1],r:localRowsR(x[1])})),best=[...ds].sort((a,b)=>b.r-a.r)[0],worst=[...ds].sort((a,b)=>a.r-b.r)[0],target=/worst/.test(q)?worst:best;
+    return {title:/worst/.test(q)?'Worst trading day':'Best trading day',body:'**'+target.date+'** was '+(/worst/.test(q)?'the lowest':'the highest')+' day at **'+(target.r>=0?'+':'')+fmt(target.r)+'R** across **'+target.rows.length+' trades**.',meta:'Best: '+best.date+' · Worst: '+worst.date+'.',source:'Bluebird Analytics'}
+  }
+  if(/average r|avg r|expectancy/.test(q))return {title:'Average R per trade',body:'Your average result is **'+(avg>=0?'+':'')+fmt(avg)+'R per trade**.',meta:'Win rate: '+wr.toFixed(1)+'% · Max drawdown: '+fmt(localDD(rows))+'R.',source:'Bluebird Analytics'};
+  if(/win|loss|break.?even/.test(q))return {title:'Journal summary',body:'**'+rows.length+' trades** · **'+wr.toFixed(1)+'% win rate** · **'+(R>=0?'+':'')+fmt(R)+'R**.',meta:'Longest L streak: '+localStreak(rows,false)+' · Longest W streak: '+localStreak(rows,true)+' · Max DD: '+fmt(localDD(rows))+'R.',source:'Bluebird Analytics'};
+  return null;
+}
+function renderLocalBluebirdAnswer(result){
+  const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline=v=>esc(v).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  return '<div class="ai-review-section"><div class="ai-review-section-title">'+esc(result.title||'Bluebird answer')+'</div><p class="ai-review-paragraph">'+inline(result.body||'')+'</p>'+(result.meta?'<div class="ai-ask-local-meta">'+inline(result.meta)+'</div>':'')+'</div>';
+}
+
 function showAIAskPanel(){
   const panel=$('aiAskPanel');
   const history=$('aiAskHistory');
@@ -3038,41 +3106,33 @@ function appendAIAskHistory(question,answer,model){
 async function askAIQuestion(){
   const input=$('aiQuestion'),btn=$('aiAskButton');
   if(!input||!btn)return;
-
   const question=String(input.value||'').trim();
-  if(!question){toast('Type a question for Bluebird AI.');return;}
-  if(!sb||!session){toast('Sign in first to ask your private AI review.');return;}
-
-  const range=analyticsGetRange();
-  btn.disabled=true;
-  btn.textContent='Thinking…';
-  showAIAskPanel();
-
+  if(!question){toast('Type a question for Bluebird.');return;}
+  if(!sb||!session){toast('Sign in first to ask about your private journal.');return;}
+  btn.disabled=true;btn.textContent='Calculating…';showAIAskPanel();
   const history=$('aiAskHistory');
-  const loading=document.createElement('div');
-  loading.className='ai-ask-loading-item';
-  loading.innerHTML='<span>Bluebird AI is analyzing your selected journal period…</span>';
+  const loading=document.createElement('div');loading.className='ai-ask-loading-item';loading.innerHTML='<span>Bluebird is calculating from your journal…</span>';
   if(history){history.hidden=false;history.appendChild(loading);}
-
   try{
+    const localResult=localAnswer(question);
+    if(localResult){
+      if(loading)loading.remove();
+      appendAIAskHistory(question,renderLocalBluebirdAnswer(localResult),'Bluebird Analytics');
+      input.value='';
+      return;
+    }
+    if(loading)loading.innerHTML='<span>This question needs deeper interpretation. Trying the optional AI layer…</span>';
+    const range=analyticsGetRange();
     const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null,question}});
     if(error)throw error;
-
     const answer=String(data?.answer||data?.review||'').trim();
     if(!answer)throw new Error('No AI answer returned');
-
     if(loading)loading.remove();
-    appendAIAskHistory(question,answer,data?.model||'Gemini');
-    input.value='';
+    appendAIAskHistory(question,answer,'Gemini · optional');input.value='';
   }catch(err){
-    console.error('AI question error',err);
-    if(loading){
-      loading.innerHTML='<div class="ai-ask-history-error"><strong>Bluebird AI is temporarily busy.</strong><div>Your journal is safe. Please try the question again in a moment.</div></div>';
-    }
-  }finally{
-    btn.disabled=false;
-    btn.textContent='Ask AI';
-  }
+    console.error('Bluebird question error',err);
+    if(loading)loading.innerHTML='<div class="ai-ask-history-error"><strong>Bluebird could not answer that question.</strong><div style="margin-top:4px">'+String(err?.message||'Try a question about performance, sequences, trade limits, drawdown, sessions, setups, or dates.').replace(/</g,'&lt;')+'</div></div>';
+  }finally{btn.disabled=false;btn.textContent='Ask Bluebird';}
 }
 
 function wireAIAsk(){
