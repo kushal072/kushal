@@ -838,7 +838,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v103">
+<body data-bluebird-build="v104">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -1802,29 +1802,13 @@ async function syncCloudNow(){
   try{
     const r=await sb.from("trades").select("*").order("trade_date",{ascending:false}).order("created_at",{ascending:false});
     if(r.error)throw r.error;
-    const im=await sb.from("trade_images").select("trade_id,storage_path");
-    if(im.error)throw im.error;
-    const map={};
-    (im.data||[]).forEach(x=>{
-      if(!x?.trade_id || !x?.storage_path) return;
-      if(!map[x.trade_id]) map[x.trade_id]=new Set();
-      map[x.trade_id].add(x.storage_path);
-    });
-    const previousImages=new Map((state.trades||[]).map(t=>[String(t.id),Array.isArray(t.images)?t.images:[]]));
-    // trade_images is the authoritative screenshot index, but a temporary
-    // empty/partial read must never erase screenshots already loaded locally.
-    // Existing local refs are therefore preserved until the server confirms
-    // a non-empty mapping.
-    const trades=(r.data||[]).map(t=>({
-      ...t,
-      images:map[t.id]?[...map[t.id]]:(previousImages.get(String(t.id))||[])
-    }));
+    const previous=JSON.stringify({trades:state.trades.map(t=>({id:t.id,trade_date:t.trade_date,result_r:t.result_r,result_usd:t.result_usd,created_at:t.created_at,images:t.images||[]})),days:state.daySummaries||{}});
+    const trades=await hydrateCloudTradeImages(r.data||[]);
     const jd=await sb.from("journal_days").select("trade_date,trade_count,manual_sequence").eq("user_id",session.user.id);
     if(!jd.error){
       state.daySummaries={};
       (jd.data||[]).forEach(x=>{state.daySummaries[String(x.trade_date).slice(0,10)]={trade_count:x.trade_count,sequence:x.manual_sequence||''};});
     }
-    const previous=JSON.stringify({trades:state.trades.map(t=>({id:t.id,trade_date:t.trade_date,result_r:t.result_r,result_usd:t.result_usd,created_at:t.created_at,images:t.images||[]})),days:state.daySummaries||{}});
     const next=JSON.stringify({trades:trades.map(t=>({id:t.id,trade_date:t.trade_date,result_r:t.result_r,result_usd:t.result_usd,created_at:t.created_at,images:t.images||[]})),days:state.daySummaries||{}});
     state.trades=trades;
     saveLocal();
@@ -1860,39 +1844,62 @@ async function hydrateCloudTradeImages(trades){
   const rows=Array.isArray(trades)?trades:[];
   const im=await sb.from("trade_images").select("trade_id,storage_path").eq("user_id",session.user.id);
   if(im.error)throw im.error;
-  const map={};
+  const indexed={};
   (im.data||[]).forEach(x=>{
     if(!x?.trade_id||!x?.storage_path)return;
-    if(!map[x.trade_id])map[x.trade_id]=new Set();
-    map[x.trade_id].add(x.storage_path);
+    if(!indexed[x.trade_id])indexed[x.trade_id]=new Set();
+    indexed[x.trade_id].add(String(x.storage_path));
   });
-  const recovered=[];
+
+  const hydrated=[];
   for(const trade of rows){
     const id=String(trade.id||'');
-    if(!id)continue;
-    const existing=map[id]?[...map[id]]:[];
-    if(existing.length)continue;
-    // Recovery path: if an upload succeeded to Storage but the index row was
-    // lost, rebuild the trade_images mapping from the trade's private folder.
+    if(!id){hydrated.push({...trade,images:[]});continue;}
+    const folder=`${session.user.id}/${id}`;
+    const indexedPaths=indexed[id]?[...indexed[id]]:[];
     try{
-      const folder=`${session.user.id}/${id}`;
       const listed=await sb.storage.from("trade-images").list(folder,{limit:100,offset:0});
-      if(listed.error||!Array.isArray(listed.data)||!listed.data.length)continue;
-      const found=listed.data.map(x=>String(x?.name||'')).filter(Boolean).map(name=>`${folder}/${name}`);
-      if(!found.length)continue;
-      map[id]=new Set(found);
-      for(const path of found){
+      if(listed.error){
+        // A temporary Storage listing failure must not erase a confirmed DB mapping.
+        hydrated.push({...trade,images:indexedPaths});
+        continue;
+      }
+
+      // Storage is the source of truth for which screenshot objects actually exist.
+      const actualNames=new Set((listed.data||[])
+        .filter(x=>x && x.name && (x.id || x.metadata || x.updated_at || x.created_at))
+        .map(x=>String(x.name)));
+      const actualPaths=[...actualNames].map(name=>`${folder}/${name}`);
+      const actualSet=new Set(actualPaths);
+
+      const staleIndex=indexedPaths.filter(path=>!actualSet.has(path));
+      if(staleIndex.length){
+        const del=await sb.from("trade_images")
+          .delete()
+          .eq("trade_id",id)
+          .eq("user_id",session.user.id)
+          .in("storage_path",staleIndex);
+        if(del.error)console.warn("Could not remove stale screenshot index rows",id,del.error);
+      }
+
+      const missingIndex=actualPaths.filter(path=>!indexedPaths.includes(path));
+      for(const path of missingIndex){
         try{
           await sb.from("trade_images").insert({trade_id:id,user_id:session.user.id,storage_path:path});
-        }catch(_err){
-          // A row may already exist or an RLS/constraint may reject a recovery
-          // write; the Storage object itself is still retained and shown.
+        }catch(e){
+          console.warn("Could not rebuild screenshot index row",id,path,e);
         }
       }
-      recovered.push(id);
-    }catch(_err){}
+
+      // Never merge stale local/trades-table image arrays back in. The exact set
+      // of Storage objects for this trade is what the UI should display.
+      hydrated.push({...trade,images:actualPaths});
+    }catch(e){
+      console.warn("Could not reconcile screenshots for trade",id,e);
+      hydrated.push({...trade,images:indexedPaths});
+    }
   }
-  return rows.map(t=>({...t,images:map[t.id]?[...map[t.id]]:[]}));
+  return hydrated;
 }
 
 async function loadCloud(){
@@ -1906,12 +1913,7 @@ async function loadCloud(){
   // every trade from that table directly so adding/editing another trade can
   // never clear an older trade's screenshot list.
   const trades=r.data||[];
-  const currentById=new Map((state.trades||[]).map(t=>[String(t.id),Array.isArray(t.images)?t.images:[]]));
   state.trades=await hydrateCloudTradeImages(trades);
-  state.trades=state.trades.map(t=>({
-    ...t,
-    images:(Array.isArray(t.images)&&t.images.length) ? t.images : (currentById.get(String(t.id))||[])
-  }));
   const jd=await sb.from("journal_days").select("trade_date,trade_count,manual_sequence").eq("user_id",session.user.id);
   if(!jd.error){
     state.daySummaries={};
