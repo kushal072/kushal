@@ -515,7 +515,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 </style>
 
 <style id="pro-tools-v84-ui">
-/* Bluebird Pro workspace — v84 visual system */
+/* Bluebird Simulator workspace — v84 visual system */
 .pro-tools{margin-top:14px;display:block}
 .pro-tool-switcher{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .pro-tool-switch{appearance:none;border:1px solid #16435d;background:linear-gradient(145deg,#071824,#040c12);color:#b5cad7;border-radius:10px;padding:12px 14px;text-align:left;cursor:pointer;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;box-shadow:0 8px 22px rgba(0,0,0,.12)}
@@ -638,7 +638,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 .pro-tool-switch-arrow{flex:0 0 auto;width:30px;height:30px;border:1px solid #215571;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#8bbfd9;font-size:14px;font-weight:900;background:#071a26}
 .pro-tool-switch.active .pro-tool-switch-arrow{border-color:#2b8dc0;color:#d5f1ff}
 
-/* Give the active Pro workspace breathing room. */
+/* Give the active Simulator workspace breathing room. */
 .pro-tool-card{padding:20px!important;border-radius:14px!important}
 .pro-tool-title{font-size:24px!important}
 .pro-tool-sub{font-size:11.5px!important;line-height:1.65!important;color:#a8bbc6!important}
@@ -838,7 +838,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v98">
+<body data-bluebird-build="v100">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -859,7 +859,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 </header>
 
 <div class="nav">
-  <button class="active" data-nav="home">Home</button><button data-nav="journal">Journal</button><button data-nav="calendar">Calendar</button><button data-nav="analytics">Analytics</button><button data-nav="pro">Pro</button><button data-nav="admin" id="adminNav" class="hidden">Admin</button>
+  <button class="active" data-nav="home">Home</button><button data-nav="journal">Journal</button><button data-nav="calendar">Calendar</button><button data-nav="analytics">Analytics</button><button data-nav="pro">Simulator</button><button data-nav="admin" id="adminNav" class="hidden">Admin</button>
 </div>
 
 <section id="page-home" class="page active">
@@ -899,11 +899,11 @@ select option{background-color:#061522!important;color:#eef8ff!important}
     <div class="field"><label>SCREENSHOTS</label><input class="input" name="images" type="file" accept="image/*" multiple><div id="imagePreview" class="image-preview-wrap"></div></div>
    </div>
    <div class="field" style="margin-top:8px"><label>NOTES</label><textarea name="notes"></textarea></div>
-   <div class="actions" style="justify-content:flex-start;margin-top:9px"><button class="btn primary" id="saveTradeBtn" type="submit">Save trade</button><button class="btn hidden" id="cancelEditBtn" type="button">Cancel edit</button><span style="align-self:center;font-size:9px;color:#6f8496">R and $ are saved separately.</span></div>
+   <div class="actions" style="justify-content:flex-start;margin-top:9px"><button class="btn primary" id="saveTradeBtn" type="submit">Save trade</button><button class="btn hidden" id="cancelEditBtn" type="button">Cancel edit</button><span style="align-self:center;font-size:9px;color:#6f8496">R and $ are saved separately.</span><button class="btn" type="button" id="exportBtn">Export AI Package</button><button class="btn" type="button" id="aiPdfBtn">Download AI PDF</button></div>
    <div id="editBanner" class="edit-banner"><span id="editBannerText">Editing saved trade</span><button class="btn" type="button" id="editManageImages">Manage screenshots</button></div>
   </form>
  </div>
- <div class="card"><h3 class="access-title">ACCESS</h3><div id="access"></div><div id="accessRule" class="setup"></div></div>
+ <div class="card"><h3 class="access-title">HOW TO USE YOUR JOURNAL</h3><div class="setup">Record each trade you take with the date, instrument, direction, R result, setup and session. Add the full DAY SEQUENCE once for the day (for example LLW) and attach the chart screenshot to that trade. Bluebird keeps the trades in chronological order so your analytics, exports and simulator can use the actual journal history.</div><div class="setup">Your journal is free with full history and unlimited entries. There is no subscription or payment required to use journaling.</div></div>
 </div>
 <div class="card" style="margin-top:10px"><div class="journal-history-toolbar">
   <div class="journal-history-left">
@@ -924,7 +924,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
     </div>
   </div>
   <div id="journalFilterSummary" class="journal-history-summary"></div>
-</div><div class="journal-saved-header"><h3 style="font-size:10px;color:#899eae;margin:0">SAVED TRADES</h3><div class="journal-export-actions"><button class="btn" type="button" id="exportBtn">Export AI Package</button><button class="btn" type="button" id="aiPdfBtn">Download AI PDF</button></div></div><div id="trades"></div></div>
+</div><h3 style="font-size:10px;color:#899eae">SAVED TRADES</h3><div id="trades"></div></div>
 </section>
 
 <section id="page-calendar" class="page">
@@ -957,7 +957,68 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <div class="card analytics-summary-card" style="margin-top:10px"><div id="analytics" class="metrics analytics-metrics"></div></div>
 <div class="card analytics-chart-card" style="margin-top:10px"><div class="analytics-chart-head"><div><div class="smallbrand" style="font-size:8px;letter-spacing:2px">EQUITY CURVE</div><h3 style="font-size:11px;color:#d9efff;margin:3px 0 0">Cumulative journal performance</h3><div id="analyticsChartMeta" class="analytics-chart-meta">Cumulative R for the selected period</div></div><div id="analyticsChartResult" class="analytics-chart-result pos">+0R</div></div><div class="analytics-chart-wrap"><div id="journalCurve" class="chart analytics-chart"></div></div></div>
 
-
+<div class="ai-review-card">
+  <div class="ai-review-head">
+    <div>
+      <div class="smallbrand ai-kicker">BLUEBIRD GENERAL INTELLIGENCE</div>
+      <h3 class="ai-review-title">Your journal, analyzed by Bluebird</h3>
+      <p class="ai-review-sub">Bluebird calculates the measurable facts from your journal and lets you ask questions in normal language. Deeper review can be run below when needed.</p>
+    </div>
+    <div class="ai-review-status">BLUEBIRD ANALYTICS</div>
+  </div>
+  <div class="ai-review-grid">
+    <div class="ai-review-panel">
+      <div class="ai-panel-label">DATA SNAPSHOT</div>
+      <div id="aiMockSnapshot" class="ai-mock-stats"></div>
+    </div>
+    <div class="ai-review-panel">
+      <div class="ai-panel-label">WHAT BLUEBIRD CAN ANALYZE</div>
+      <div class="ai-chip-grid">
+        <span class="ai-chip">Trade count & order</span>
+        <span class="ai-chip">W / L / BE sequences</span>
+        <span class="ai-chip">1–4 trades/day tests</span>
+        <span class="ai-chip">R & $ performance</span>
+        <span class="ai-chip">Drawdown & streaks</span>
+        <span class="ai-chip">Session / setup patterns</span>
+        <span class="ai-chip">Chart screenshots & notes</span>
+      </div>
+    </div>
+  </div>
+  <div class="ai-review-output ai-intelligence-preview">
+    <div class="ai-panel-label">WHAT BLUEBIRD CAN SHOW</div>
+    <div class="ai-preview-body">
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Performance summary</b><p>Win rate, total R, expectancy, profit factor, streaks, drawdown, distribution and consistency metrics.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Trade behavior &amp; context</b><p>Chronological order, daily sequences, sessions, setups, instruments, directions, tags and recorded outcomes.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Compare 1, 2, 3, 4 trades per day, streak-conditioned outcomes, resampling and period breakdowns.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Questions in normal language</b><p>Ask about performance, patterns, math, sequences, risk statistics, group breakdowns and historical scenarios.</p></div></div>
+    </div>
+    <div id="aiContextResult" class="ai-context-result" hidden></div>
+    <div id="aiAskPanel" class="ai-ask-panel">
+      <div class="ai-ask-head">
+        <div><div class="ai-panel-label">ASK BLUEBIRD</div><div class="ai-ask-sub">Ask about your journal in normal language. Bluebird answers from the trades and results you actually recorded.</div></div>
+      </div>
+      <div class="ai-quick-prompts">
+        <button class="ai-quick-btn" type="button" data-ai-q="What is my win rate and total R for this period?">Performance</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="How did my first 1, 2, 3 and 4 trades per day compare?">Trade limits</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="What is my longest losing streak and what happened after my losing streaks?">Streaks</button>
+        <button class="ai-quick-btn" type="button" data-ai-q="What is my drawdown in this period?">Drawdown</button>
+      </div>
+      <div class="ai-ask-row">
+        <textarea id="aiQuestion" class="ai-ask-input" rows="2" placeholder="Ask Bluebird about your journal..."></textarea>
+        <button id="aiAskButton" class="btn primary ai-ask-send" type="button">Ask Bluebird</button>
+      </div>
+      <div class="ai-ask-history" id="aiAskHistory" hidden></div>
+      <div class="ai-ask-footer" id="aiAskFooter" hidden>
+        <button id="aiEndAnalysis" class="btn ai-end-analysis" type="button">End Analysis</button>
+      </div>
+      <div class="ai-deeper-review">
+        <div><div class="ai-deeper-title">DEEPER REVIEW</div><div class="ai-deeper-sub">Run the full review for broader interpretation of the selected journal period, notes and screenshots.</div></div>
+        <button class="btn" id="aiPrepareReview" type="button">Run AI Review</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="grid2" style="margin-top:10px"><div class="card locked"><div class="veil"><div><h3>Monte Carlo</h3><p>Run thousands of possible future paths from your actual results.</p><button class="btn primary" data-nav="pro">View Simulator</button></div></div><div class="big" style="color:#2aaaff">SIMULATOR</div></div><div class="card locked"><div class="veil"><div><h3>Prop Firm Simulator</h3><p>Test your actual journal statistics against your prop-firm rules.</p><button class="btn primary" data-nav="pro">View Simulator</button></div></div><div class="big" style="color:#2aaaff">SIMULATOR</div></div></div>
 </section>
 
 <section id="page-pro" class="page">
@@ -1048,67 +1109,16 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 .pro-tool-placeholder{border:1px dashed #173c52;background:#06111a;border-radius:7px;color:#708796;font-size:9px;line-height:1.5;padding:11px;}
 </style>
 <div class="pro-hero">
-  <div class="pro-hero-main">
-    <div class="pro-kicker">BLUEBIRD PRO</div>
-    <div class="pro-title">Turn your journal into a <span>trading intelligence layer.</span></div>
-    <div class="pro-sub">One Pro entitlement unlocks full history, deeper analytics, Monte Carlo, prop-firm tools, strategy analysis, AI reviews and every future Pro feature we add.</div>
-    <div class="pro-badges"><span class="pro-badge">Full history</span><span class="pro-badge">AI analysis</span><span class="pro-badge">Monte Carlo</span><span class="pro-badge">Prop firm tools</span><span class="pro-badge">Advanced exports</span></div>
-  </div>
-  <div class="pro-status" id="proStatusCard">
-    <div class="pro-status-top"><span class="pro-status-label">YOUR ACCESS</span><span id="proStatusPill" class="pro-status-pill">NOT ACTIVE</span></div>
-    <div><div id="proStatusValue" class="pro-status-value">Free / Trial</div><div id="proStatusText" class="pro-status-text">Upgrade to unlock the full Pro workspace.</div></div>
-    <button class="btn" id="proStatusAction" type="button">See plans</button>
+  <div class="pro-hero-main" style="grid-column:1 / -1">
+    <div class="pro-kicker">BLUEBIRD SIMULATOR</div>
+    <div class="pro-title">Pressure-test your trading plan <span>before you trade it.</span></div>
+    <div class="pro-sub">Use your journal or a clean strategy model with Monte Carlo and the Prop Firm Simulator. Everything on this page is free to use.</div>
+    <div class="pro-badges"><span class="pro-badge">Monte Carlo</span><span class="pro-badge">Prop Firm Simulator</span><span class="pro-badge">Journal data</span><span class="pro-badge">Strategy model</span><span class="pro-badge">No subscription</span></div>
   </div>
 </div>
-
-<div class="pro-price-grid">
-  <div class="pro-price">
-    <div class="pro-price-name">MONTHLY</div>
-    <div class="pro-price-amount">$14.99 <span>/ month</span></div>
-    <div class="pro-price-note">Flexible month-to-month Pro access.</div>
-    <button class="btn primary pro-plan-btn" data-plan="monthly" type="button">Choose monthly</button>
-  </div>
-  <div class="pro-price featured">
-    <div class="pro-price-tag">MOST FLEXIBLE</div>
-    <div class="pro-price-name">3 MONTHS</div>
-    <div class="pro-price-amount">$39.99 <span>/ 3 months</span></div>
-    <div class="pro-price-note">Lower effective monthly cost without a yearly commitment.</div>
-    <button class="btn primary pro-plan-btn" data-plan="quarterly" type="button">Choose 3 months</button>
-  </div>
-  <div class="pro-price">
-    <div class="pro-price-name">YEARLY</div>
-    <div class="pro-price-amount">$119.99 <span>/ year</span></div>
-    <div class="pro-price-note">Best effective monthly price for long-term users.</div>
-    <button class="btn primary pro-plan-btn" data-plan="yearly" type="button">Choose yearly</button>
-  </div>
-</div>
-
-<div class="card" style="margin-top:11px">
-  <div class="pro-section-title">WHAT PRO UNLOCKS</div>
-  <div class="pro-feature-grid">
-    <div class="pro-feature"><h4>Unlimited journal</h4><p>Continue journaling after the trial with full editing, screenshots and history.</p></div>
-    <div class="pro-feature"><h4>Full history</h4><p>See the complete stored journal instead of the 30-day free access window.</p></div>
-    <div class="pro-feature"><h4>Advanced analytics</h4><p>Deeper performance breakdowns across dates, sessions, setups and results.</p></div>
-    <div class="pro-feature"><h4>Monte Carlo</h4><p>Use your actual trade results to explore possible future equity paths.</p></div>
-    <div class="pro-feature"><h4>Prop Firm Simulator</h4><p>Test your own stats against drawdown, target, consistency and payout rules.</p></div>
-    <div class="pro-feature"><h4>Strategy analysis</h4><p>Compare the characteristics of the trades you actually took.</p></div>
-  </div>
-</div>
-
-<div class="pro-ai">
-  <div>
-    <div class="pro-kicker">PRO INTELLIGENCE</div>
-    <h3>AI Trading Review</h3>
-    <p>Bluebird will turn the statistics already in your journal into a structured review instead of making you manually inspect hundreds of trades.</p>
-    <div class="pro-ai-list"><div class="pro-ai-chip">Strengths & weaknesses</div><div class="pro-ai-chip">Recurring loss patterns</div><div class="pro-ai-chip">Session / setup insights</div><div class="pro-ai-chip">Drawdown behavior</div></div>
-  </div>
-  <div class="pro-callout"><b style="color:#eaf8ff">Your data stays the source.</b><br>Bluebird calculates the trading statistics first, then the AI interprets those results. That keeps the analysis tied to the journal instead of generic trading advice.</div>
-</div>
-
-
 
 <div class="pro-tools" id="proTools">
-  <div class="pro-tool-switcher" role="tablist" aria-label="Pro analysis tools">
+  <div class="pro-tool-switcher" role="tablist" aria-label="Simulator analysis tools">
     <button class="pro-tool-switch active" type="button" role="tab" aria-selected="true" data-pro-tool="monteCarloTool">
       <span class="pro-tool-switch-icon" aria-hidden="true">MC</span>
       <span class="pro-tool-switch-copy"><span class="pro-tool-switch-title">Monte Carlo</span><span class="pro-tool-switch-sub">Explore a range of possible equity paths</span></span>
@@ -1123,7 +1133,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
   <div class="pro-tool-card" id="monteCarloTool">
     <div class="pro-tool-head">
       <div>
-        <div class="pro-tool-kicker">PRO ANALYSIS</div>
+        <div class="pro-tool-kicker">SIMULATOR</div>
         <h3 class="pro-tool-title">Monte Carlo</h3>
         <p class="pro-tool-sub">Model a range of possible equity paths using your journal history or a clean strategy model.</p>
       </div>
@@ -1179,13 +1189,13 @@ select option{background-color:#061522!important;color:#eef8ff!important}
         <div class="pro-tool-note" id="mcSourceNote"></div>
       </div>
     </div>
-    <div class="pro-lock" id="mcLock" hidden>Monte Carlo is a Pro feature. Activate Pro to use the tool.</div>
+    <div class="pro-lock" id="mcLock" hidden>Monte Carlo is free to use.</div>
   </div>
 
   <div class="pro-tool-card" id="propSimTool" hidden>
     <div class="pro-tool-head">
       <div>
-        <div class="pro-tool-kicker">PRO ANALYSIS</div>
+        <div class="pro-tool-kicker">SIMULATOR</div>
         <h3 class="pro-tool-title">Prop Firm Simulator</h3>
         <p class="pro-tool-sub">Model the full journey from evaluation → funded buffer → first-payout ready, with pass rates and time estimates when you enable cycle analysis.</p>
       </div>
@@ -1334,7 +1344,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
         <div class="pf-journey-table" id="pfRuleTable"></div>
       </div>
     </div>
-    <div class="pro-lock" id="pfLock" hidden>Prop Firm Simulator is a Pro feature. Activate Pro to use the tool.</div>
+    <div class="pro-lock" id="pfLock" hidden>Prop Firm Simulator is free to use.</div>
   </div>
 </div>
 
@@ -1521,13 +1531,13 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <section id="page-admin" class="page">
   <div class="card">
     <div class="admin-page-head">
-      <div><div class="smallbrand">BLUEBIRD ADMIN</div><div class="admin-title">Manual Pro Access</div><div class="admin-sub">Grant selected users full Pro access without changing their password or payment status. Access is controlled by the expiry date you choose.</div></div>
+      <div><div class="smallbrand">BLUEBIRD ADMIN</div><div class="admin-title">User Management</div><div class="admin-sub">Grant selected users full Pro access without changing their password or payment status. Access is controlled by the expiry date you choose.</div></div>
       <button class="btn" id="adminRefresh" type="button">Refresh list</button>
     </div>
     <div class="admin-form">
       <div class="field"><label>USER EMAIL</label><input id="adminEmail" class="input" type="email" placeholder="friend@example.com"></div>
       <div class="field"><label>ACCESS UNTIL</label><input id="adminUntil" class="input" type="datetime-local"></div>
-      <button class="btn primary" id="adminGrant" type="button">Grant Pro Access</button>
+      <button class="btn primary" id="adminGrant" type="button">Grant Access</button>
     </div>
     <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Access until</th><th>Status</th><th></th></tr></thead><tbody id="adminRows"></tbody></table></div>
   </div>
@@ -1637,19 +1647,12 @@ function proActive(){
   return !exp || Date.now()<exp;
 }
 // Unified Pro entitlement: either a paid Pro subscription or admin-granted manual access.
-function proAccessActive(){return !!profile && (manualAccessActive() || proActive())}
+function proAccessActive(){return true}
 function everSubscribed(){return !!profile && !!(profile.subscription_started_at || profile.subscription_expires_at)}
-function hasFullJournalAccess(){return !profile || manualAccessActive() || trialActive() || proActive()}
-function canJournal(){return !sb || !profile || manualAccessActive() || trialActive() || proActive()}
+function hasFullJournalAccess(){return true}
+function canJournal(){return true}
 function visibleTrades(){
-  if(!profile)return state.trades;
-  if(manualAccessActive()||trialActive()||proActive())return state.trades;
-  if(!everSubscribed())return [];
-  const cutoff=new Date();
-  cutoff.setHours(0,0,0,0);
-  cutoff.setDate(cutoff.getDate()-29);
-  const cutoffKey=localDateKey(cutoff);
-  return state.trades.filter(t=>String(t.trade_date||"").slice(0,10)>=cutoffKey);
+  return state.trades;
 }
 // Public bridges for standalone Pro tools.
 window.bluebirdProAccessActive=proAccessActive;
@@ -3397,38 +3400,7 @@ function setJournalControls(){
   if(note)note.textContent=locked?journalLockMessage():"R and $ are saved separately.";
 }
 function renderAccess(){
-  const a=$("access"), rule=$("accessRule");
-  if(!a)return;
-  if(!profile){
-    a.innerHTML='<div class="note"><b>Sign in to sync your journal.</b><br>Your weekly simulator works free without an account.</div>';
-    if(rule)rule.textContent="Create an account to start your 7-day journal trial.";
-  }else if(manualAccessActive()){
-    const left=manualAccessEndsAt()-Date.now();
-    const exp=new Date(manualAccessEndsAt());
-    a.innerHTML='<div class="access-status pro"><div class="access-status-main"><b>Manual access</b><span>FULL JOURNAL ACCESS</span></div><div class="access-countdown">'+durationText(left)+' remaining</div></div>';
-    if(rule)rule.innerHTML='You have been granted complimentary access until <b>'+exp.toLocaleDateString()+'.</b><br>Full history and unlimited journaling are unlocked during this period.';
-  }else if(trialActive()){
-    const left=trialEndsAt()-Date.now();
-    a.innerHTML='<div class="access-status"><div class="access-status-main"><b>7-day journal trial</b><span>FULL JOURNAL ACCESS</span></div><div class="access-countdown">'+durationText(left)+' remaining</div></div>';
-    if(rule)rule.innerHTML='<b>During the trial:</b> unlimited journaling and full access to your trial history.<br><b>When the trial ends:</b> journaling locks and trial journal history is hidden until you subscribe.';
-  }else if(proActive()){
-    const exp=profile.subscription_expires_at?new Date(profile.subscription_expires_at):null;
-    const left=exp?exp.getTime()-Date.now():Infinity;
-    a.innerHTML='<div class="access-status pro"><div class="access-status-main"><b>Pro active</b><span>FULL JOURNAL ACCESS</span></div><div class="access-countdown">'+(exp?durationText(left)+' remaining':'No expiry set')+'</div></div>';
-    if(rule)rule.innerHTML=exp?('Full history and unlimited journaling until <b>'+exp.toLocaleDateString()+'.</b><br>After expiry, journaling locks and only the most recent 30 days remain visible.'):'Full history and unlimited journaling are unlocked.';
-  }else if(everSubscribed()){
-    a.innerHTML='<div class="access-status expired"><div class="access-status-main"><b>Subscription ended</b><span>READ-ONLY · 30-DAY WINDOW</span></div><div class="access-countdown">0 days remaining</div></div>';
-    if(rule)rule.innerHTML='<b>Journaling is locked.</b> You can still view the most recent 30 days of journal data. Older stored data remains safe and becomes visible again when you resubscribe.';
-  }else{
-    a.innerHTML='<div class="access-status expired"><div class="access-status-main"><b>Trial ended</b><span>JOURNAL LOCKED</span></div><div class="access-countdown">0 days remaining</div></div>';
-    if(rule)rule.innerHTML='<b>Your trial journal history is hidden after the 7-day trial.</b> Your simulator remains free. Subscribe to restore journal access and stored trial data.';
-  }
   setJournalControls();
-  const pn=$("proAccessNoticeText");
-  if(pn){
-    if(proAccessActive()) pn.innerHTML='<b style="color:#2aaaff">Pro access unlocked.</b> All Pro features on this account can be enabled through the same Pro entitlement.';
-    else pn.textContent='Pro features require an active paid subscription or complimentary manual access.';
-  }
 }
 function renderTop(){updateAuthButton();renderAccess()}
 function renderAll(){renderTop();renderTrades();renderCalendar();renderAnalytics()}
@@ -3525,7 +3497,7 @@ async function prepareExportData(rows){
   const baseCols=[['Date','trade_date'],['Instrument','instrument'],['Direction','direction'],['Result R','result_r'],['Result $','result_usd']];
   const optionalCols=[['Setup','setup'],['Session','session'],['Tag','tag'],['Notes','notes']].filter(([_,key])=>rows.some(t=>String(t[key]??'').trim()!==''));
   const includeImages=rows.some(t=>Array.isArray(t.images)&&t.images.length);
-  const sequenceCols=[['Trade Reference','trade_reference'],['Daily Trade Count','daily_trade_count'],['Trade Order','trade_order'],['Daily Sequence','daily_sequence']];
+  const sequenceCols=[['Daily Trade Count','daily_trade_count'],['Trade Order','trade_order'],['Daily Sequence','daily_sequence']];
   const cols=[...baseCols,...sequenceCols,...optionalCols];
   if(includeImages)cols.push(['Image Files','image_files']);
   const imageFiles=[];
@@ -3552,7 +3524,6 @@ async function prepareExportData(rows){
     const meta=journalSequenceInfo(rows,t);
     const rec={};
     for(const [,key] of baseCols.concat(optionalCols))rec[key]=t[key]??'';
-    rec.trade_reference=`Trade ${String(ri+1).padStart(3,'0')}`;
     rec.daily_trade_count=meta.count;
     rec.trade_order=meta.order||'';
     rec.daily_sequence=meta.sequence;
@@ -3560,7 +3531,6 @@ async function prepareExportData(rows){
     exportedRows.push(cols.map(([_,key])=>rec[key]??''));
     reportRows.push({t,images:reportImages,tradeIndex:ri+1,sequenceMeta:meta});
     manifest.push({
-      trade_reference:`Trade ${String(ri+1).padStart(3,'0')}`,
       trade_index:ri+1,
       trade_id:t.id||null,
       date:t.trade_date||null,
@@ -3621,7 +3591,7 @@ async function buildAiPdf(rows, reportRows){
     doc.setTextColor(15,30,43);
     doc.setFont('helvetica','bold');
     doc.setFontSize(13);
-    doc.text(`Trade ${String(tradeIndex).padStart(3,'0')}`,M,82);
+    doc.text(`Trade ${tradeIndex}`,M,82);
     const rr=trade.result_r===null||trade.result_r===undefined||trade.result_r===''?'—':(Number(trade.result_r)>=0?'+':'')+fmt(Number(trade.result_r))+'R';
     const usd=trade.result_usd===null||trade.result_usd===undefined||trade.result_usd===''?'—':(Number(trade.result_usd)>=0?'+$':'-$')+Math.abs(Number(trade.result_usd)).toLocaleString();
     const seq=(reportRows.find(x=>String(x.t?.id||'')===String(trade?.id))?.sequenceMeta)||journalSequenceInfo(rows,trade);
@@ -3699,8 +3669,8 @@ async function buildAiPdf(rows, reportRows){
       doc.setFont('helvetica','normal');
       doc.setFontSize(7.5);
       doc.setTextColor(100,118,130);
-      doc.text(`Trade ${String(item.tradeIndex).padStart(3,'0')} · ${t.trade_date||'undated'} · order ${item.sequenceMeta?.order||'—'}/${item.sequenceMeta?.count||'—'}`,M,PH-28);
-      doc.text(`Image ${ii+1}/${imgs.length} · ${imgs[ii].path}`,PW-M,PH-28,{align:'right'});
+      doc.text(`Image file: ${imgs[ii].path}`,M,PH-28);
+      doc.text(`Trade ID: ${String(t.id||'—')}`,PW-M,PH-28,{align:'right'});
     }
   }
   return doc;
@@ -3748,16 +3718,6 @@ async function exportAI(){
   #tradeForm .fields3{grid-template-columns:1fr 1fr}
 }
 </style>
-<style id="journal-export-layout-v98">
-.journal-saved-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;margin-bottom:8px}
-.journal-export-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
-.journal-export-actions .btn{font-size:9px;padding:7px 10px}
-@media(max-width:700px){
-  .journal-saved-header{align-items:flex-start;flex-direction:column}
-  .journal-export-actions{width:100%;justify-content:flex-start}
-  .journal-export-actions .btn{font-size:10px}
-}
-</style>
 <style id="bluebird-local-intelligence-v93">
 .ai-local-block{padding:0 0 15px;margin:0 0 15px;border-bottom:1px solid #17384b}
 .ai-local-block:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
@@ -3776,7 +3736,7 @@ async function exportAI(){
 .ai-local-table .ai-local-row:nth-child(even){background:#061722}
 @media(max-width:760px){.ai-local-statgrid{grid-template-columns:1fr 1fr}.ai-local-body{font-size:12px}.ai-local-row{font-size:9px;grid-template-columns:1.2fr .7fr .9fr .9fr .9fr;padding:8px 7px}}
 </style>
-</head><body><div class="wrap"><div class="title">Bluebird Journal Export</div><div class="sub">${escHtml(new Date().toLocaleString())} · ${rows.length} trades · ${prepared.imageCount} images</div>${reportRows.map((item)=>{const t=item.t;const rr=t.result_r===null||t.result_r===undefined||t.result_r===''?'—':(Number(t.result_r)>=0?'+':'')+fmt(Number(t.result_r))+'R';const amount=t.result_usd===null||t.result_usd===undefined||t.result_usd===''?'—':(Number(t.result_usd)>=0?'+$':'-$')+Math.abs(Number(t.result_usd)).toLocaleString();const seq=item.sequenceMeta||journalSequenceInfo(rows,t);const optional=prepared.optionalCols.length?`<div class="meta" style="margin-top:8px">${prepared.optionalCols.map(([label,key])=>`<div class="cell"><div class="k">${escHtml(label)}</div><div class="v">${escHtml(t[key]||'—')}</div></div>`).join('')}</div>`:'';const imgs=item.images.length?`<div class="imgs">${item.images.map(im=>`<div class="shot"><img src="${im.dataUrl}" alt="Trade ${String(item.tradeIndex).padStart(3,'0')} screenshot"><div class="cap"><strong>Trade ${String(item.tradeIndex).padStart(3,'0')}</strong> · ${escHtml(t.trade_date||'undated')} · ${escHtml(seq.order||'—')}/${escHtml(seq.count||'—')} · ${escHtml(im.path)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:12px">No images attached.</div>';return `<section class="trade"><div class="meta"><div class="cell"><div class="k">Trade Reference</div><div class="v">Trade ${String(item.tradeIndex).padStart(3,'0')}</div></div><div class="cell"><div class="k">Trade</div><div class="v">${item.tradeIndex}</div></div><div class="cell"><div class="k">Date</div><div class="v">${escHtml(t.trade_date||'—')}</div></div><div class="cell"><div class="k">Instrument</div><div class="v">${escHtml(t.instrument||'—')}</div></div><div class="cell"><div class="k">Result R</div><div class="v">${escHtml(rr)}</div></div><div class="cell"><div class="k">Result $</div><div class="v">${escHtml(amount)}</div></div></div><div class="meta" style="margin-top:8px"><div class="cell"><div class="k">Day trades</div><div class="v">${seq.count}</div></div><div class="cell"><div class="k">Trade order</div><div class="v">${seq.order||'—'} / ${seq.count}</div></div><div class="cell"><div class="k">Day sequence</div><div class="v">${escHtml(seq.sequence)}</div></div></div>${optional}${t.notes?`<div class="notes">${escHtml(t.notes)}</div>`:''}${imgs}</section>`;}).join('')}</div>
+</head><body><div class="wrap"><div class="title">Bluebird Journal Export</div><div class="sub">${escHtml(new Date().toLocaleString())} · ${rows.length} trades · ${prepared.imageCount} images</div>${reportRows.map((item)=>{const t=item.t;const rr=t.result_r===null||t.result_r===undefined||t.result_r===''?'—':(Number(t.result_r)>=0?'+':'')+fmt(Number(t.result_r))+'R';const amount=t.result_usd===null||t.result_usd===undefined||t.result_usd===''?'—':(Number(t.result_usd)>=0?'+$':'-$')+Math.abs(Number(t.result_usd)).toLocaleString();const seq=item.sequenceMeta||journalSequenceInfo(rows,t);const optional=prepared.optionalCols.length?`<div class="meta" style="margin-top:8px">${prepared.optionalCols.map(([label,key])=>`<div class="cell"><div class="k">${escHtml(label)}</div><div class="v">${escHtml(t[key]||'—')}</div></div>`).join('')}</div>`:'';const imgs=item.images.length?`<div class="imgs">${item.images.map(im=>`<div class="shot"><img src="${im.dataUrl}" alt=""><div class="cap">${escHtml(im.path)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:12px">No images attached.</div>';return `<section class="trade"><div class="meta"><div class="cell"><div class="k">Trade</div><div class="v">${item.tradeIndex}</div></div><div class="cell"><div class="k">Date</div><div class="v">${escHtml(t.trade_date||'—')}</div></div><div class="cell"><div class="k">Instrument</div><div class="v">${escHtml(t.instrument||'—')}</div></div><div class="cell"><div class="k">Result R</div><div class="v">${escHtml(rr)}</div></div><div class="cell"><div class="k">Result $</div><div class="v">${escHtml(amount)}</div></div></div><div class="meta" style="margin-top:8px"><div class="cell"><div class="k">Day trades</div><div class="v">${seq.count}</div></div><div class="cell"><div class="k">Trade order</div><div class="v">${seq.order||'—'} / ${seq.count}</div></div><div class="cell"><div class="k">Day sequence</div><div class="v">${escHtml(seq.sequence)}</div></div></div>${optional}${t.notes?`<div class="notes">${escHtml(t.notes)}</div>`:''}${imgs}</section>`;}).join('')}</div>
 <style id="pro-tools-v83-cycle-ui">
 .pf-inline-select{min-width:92px;border:1px solid #1a4861;background:#06131d;color:#eaf7ff;border-radius:7px;padding:7px 9px;font:inherit;font-size:10px;font-weight:850;outline:none;color-scheme:dark}
 .pf-inline-select:focus{border-color:#2a8fc2;box-shadow:0 0 0 2px rgba(42,143,194,.12)}
@@ -3888,7 +3848,7 @@ async function exportAI(){
       'BLUEBIRD JOURNAL AI EXPORT',
       '',
       'Use bluebird-journal-manifest.json as the authoritative mapping between trade records and screenshots.',
-      'Each trade contains a human-readable trade_reference plus trade_index, date, daily_trade_count, trade_order, daily_sequence, result fields, and an images array.',
+      'Each trade contains trade_index, trade_id, date, daily_trade_count, trade_order, daily_sequence, result fields, and an images array.',
       'Each images[].file points to the exact screenshot file inside the images/ folder.',
       'The PDF repeats the trade metadata on every screenshot page so an AI can identify which image belongs to which trade and date.',
       'The CSV preserves chronological trade order and removes optional columns that are completely empty.'
@@ -3970,7 +3930,7 @@ async function adminGrant(){
   if(Number.isNaN(until.getTime())||until.getTime()<=Date.now()){toast("Choose a future expiry date.");return}
   const {error}=await sb.rpc("admin_grant_manual_access",{target_email:email,until_at:until.toISOString()});
   if(error){toast("Grant failed: "+error.message);return}
-  toast("Pro access granted to "+email+".");
+  toast("Access updated for "+email+".");
   $("adminEmail").value="";
   adminRefresh();
 }
@@ -4084,29 +4044,7 @@ if (journalDate) journalDate.addEventListener('change',()=>{
 renderAll();initCloud();
 })();
 
-function updateProPage(){
-  const active=proAccessActive();
-  const pill=$('proStatusPill'), val=$('proStatusValue'), txt=$('proStatusText');
-  if(!pill||!val||!txt)return;
-  if(active){
-    pill.textContent='ACTIVE'; pill.classList.add('active'); val.textContent='Pro unlocked';
-    const manual=manualAccessActive();
-    txt.textContent=manual ? 'Complimentary manual Pro access is active on this account.' : 'Your paid Pro entitlement is active.';
-  }else{
-    pill.textContent='NOT ACTIVE'; pill.classList.remove('active');
-    val.textContent = trialActive() ? '7-day trial' : 'Free plan';
-    txt.textContent = trialActive() ? 'Your journal trial is active. Upgrade when you are ready to keep full history and unlock Pro.' : 'Upgrade to unlock the full Pro workspace.';
-  }
-}
 
-document.addEventListener('click',e=>{
- const b=e.target.closest('.pro-plan-btn');
- if(b){
-   const plan=b.dataset.plan;
-   toast('Payment setup is not connected yet. ' + (plan==='monthly'?'Monthly':'') + (plan==='quarterly'?'3-month':'') + (plan==='yearly'?'Yearly':'') + ' Pro plan is ready for the next step.');
- }
- if(e.target.closest('#proStatusAction')) showPage('pro');
-});
 </script>
 
 <style id="ai-premium-ui-v67">
