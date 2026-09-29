@@ -838,7 +838,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v89">
+<body data-bluebird-build="v93">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -987,10 +987,10 @@ select option{background-color:#061522!important;color:#eef8ff!important}
   <div class="ai-review-output ai-intelligence-preview">
     <div class="ai-panel-label">WHAT BLUEBIRD CAN SHOW</div>
     <div class="ai-preview-body">
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Performance summary</b><p>Win rate, total R, average R, profit factor, streaks, drawdown and other measurable journal results.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Trade behavior &amp; context</b><p>Chronological trade order, daily sequences, sessions, setups, instruments, notes and recorded outcomes.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Compare the first 1, 2, 3 and 4 recorded trades per day with the full recorded history.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Questions in normal language</b><p>Ask Bluebird about your journal and get answers calculated from the data you actually recorded.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Performance summary</b><p>Win rate, total R, expectancy, profit factor, streaks, drawdown, distribution and consistency metrics.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Trade behavior &amp; context</b><p>Chronological order, daily sequences, sessions, setups, instruments, directions, tags and recorded outcomes.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Compare 1, 2, 3, 4 trades per day, streak-conditioned outcomes, resampling and period breakdowns.</p></div></div>
+      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Questions in normal language</b><p>Ask about performance, patterns, math, sequences, risk statistics, group breakdowns and historical scenarios.</p></div></div>
     </div>
     <div id="aiContextResult" class="ai-context-result" hidden></div>
     <div id="aiAskPanel" class="ai-ask-panel">
@@ -3055,53 +3055,179 @@ function localDays(rows){
   m.forEach(a=>a.sort((x,y)=>{const kx=journalTradeSortKey(x,0),ky=journalTradeSortKey(y,0);if(kx!==ky)return kx-ky;return String(x.id||'').localeCompare(String(y.id||''));}));
   return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
 }
+function bluebirdSortRows(rows){
+  return [...(rows||[])].filter(t=>t&&Number.isFinite(Number(t.result_r))).sort((a,b)=>{
+    const da=String(a.trade_date||'').slice(0,10),db=String(b.trade_date||'').slice(0,10);
+    if(da!==db)return da.localeCompare(db);
+    const ka=journalTradeSortKey(a,0),kb=journalTradeSortKey(b,0);
+    if(ka!==kb)return ka-kb;
+    return String(a.id||'').localeCompare(String(b.id||''));
+  });
+}
+function localDays(rows){
+  const m=new Map();
+  bluebirdSortRows(rows).forEach(t=>{
+    const d=String(t.trade_date||'').slice(0,10);if(!d)return;
+    if(!m.has(d))m.set(d,[]);m.get(d).push(t);
+  });
+  return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+}
 function localRowsR(rows){return rows.reduce((s,t)=>s+Number(t.result_r||0),0)}
-function localWR(rows){return rows.length?rows.filter(t=>Number(t.result_r)>0).length/rows.length*100:0}
+function localWR(rows){const a=rows.filter(t=>Number(t.result_r)!==0);return a.length?a.filter(t=>Number(t.result_r)>0).length/a.length*100:0}
 function localPF(rows){let w=0,l=0;rows.forEach(t=>{const r=Number(t.result_r||0);if(r>0)w+=r;else if(r<0)l+=Math.abs(r)});return l?w/l:(w>0?Infinity:0)}
-function localStreak(rows,isWin){let c=0,b=0;rows.forEach(t=>{const hit=isWin?Number(t.result_r)>0:Number(t.result_r)<0;c=hit?c+1:0;b=Math.max(b,c)});return b}
-function localDD(rows){let e=0,p=0,d=0;rows.forEach(t=>{e+=Number(t.result_r||0);p=Math.max(p,e);d=Math.max(d,p-e)});return d}
+function localStreak(rows,isWin){let c=0,b=0;bluebirdSortRows(rows).forEach(t=>{const r=Number(t.result_r||0),hit=isWin?r>0:r<0;c=hit?c+1:0;b=Math.max(b,c)});return b}
+function localCurrentStreak(rows){let c=0,kind='none';const a=bluebirdSortRows(rows);for(let i=a.length-1;i>=0;i--){const r=Number(a[i].result_r||0),k=r>0?'win':r<0?'loss':'be';if(i===a.length-1){kind=k;c=1;continue}if(k===kind)c++;else break}return {count:c,kind}}
+function localDD(rows){let e=0,p=0,d=0;bluebirdSortRows(rows).forEach(t=>{e+=Number(t.result_r||0);p=Math.max(p,e);d=Math.max(d,p-e)});return d}
+function localRunup(rows){let e=0,tr=0;bluebirdSortRows(rows).forEach(t=>{e+=Number(t.result_r||0);tr=Math.max(tr,e)});return tr}
 function localScenario(rows,n){let picked=[];localDays(rows).forEach(x=>picked.push(...x[1].slice(0,n)));return picked}
-function localGroup(rows,key){const m=new Map();rows.forEach(t=>{const k=String(t[key]||'Not entered').trim()||'Not entered';if(!m.has(k))m.set(k,[]);m.get(k).push(t)});return [...m.entries()].map(x=>({key:x[0],rows:x[1],r:localRowsR(x[1]),wr:localWR(x[1])})).sort((a,b)=>b.r-a.r)}
+function localGroup(rows,key){const m=new Map();bluebirdSortRows(rows).forEach(t=>{const raw=t[key];const k=String(raw==null||raw===''?'Not entered':raw).trim()||'Not entered';if(!m.has(k))m.set(k,[]);m.get(k).push(t)});return [...m.entries()].map(x=>({key:x[0],rows:x[1],r:localRowsR(x[1]),wr:localWR(x[1]),pf:localPF(x[1]),avg:x[1].length?localRowsR(x[1])/x[1].length:0})).sort((a,b)=>b.r-a.r)}
+function localMedian(a){const x=[...a].sort((m,n)=>m-n);if(!x.length)return 0;const i=Math.floor(x.length/2);return x.length%2?x[i]:(x[i-1]+x[i])/2}
+function localQuantile(a,p){const x=[...a].sort((m,n)=>m-n);if(!x.length)return 0;const i=(x.length-1)*p,b=Math.floor(i),f=i-b;return x[b]+(x[b+1]??x[b]-x[b])*f}
+function localStd(a){if(a.length<2)return 0;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1))}
+function localCI(p,n){if(!n)return [0,0];const se=Math.sqrt(Math.max(0,p*(1-p))/n),z=1.96;return [Math.max(0,p-z*se),Math.min(1,p+z*se)]}
+function localConditional(rows,k,wantLosses=true){
+  const a=bluebirdSortRows(rows),out=[];const n=Math.max(1,Number(k)||1);
+  for(let i=n;i<a.length;i++){
+    let ok=true;for(let j=1;j<=n;j++){const r=Number(a[i-j].result_r||0);if(wantLosses?!((r)<0):!(r>0)){ok=false;break}}
+    if(ok)out.push(Number(a[i].result_r||0));
+  }
+  return out;
+}
+function localFormatPct(p){return Number.isFinite(p)?(p*100).toFixed(1)+'%':'—'}
+function localFormatMoneyValue(n){return Number.isFinite(Number(n))?(Number(n)>=0?'+$':'-$')+Math.abs(Number(n)).toLocaleString(undefined,{maximumFractionDigits:2}):'—'}
+function localOutcome(r){return Number(r)>0?'W':Number(r)<0?'L':'BE'}
+function localDateLabel(d){return analyticsFmtDate(String(d||''),'long')}
+function localQuestionRange(q){
+  const base=analyticsGetRange();
+  const today=new Date();today.setHours(0,0,0,0);
+  if(/all time|all history|entire history|everything|whole history/.test(q))return {from:null,to:null,label:'All available history'};
+  if(/this week/.test(q))return journalWeekRange(today,0);
+  if(/last week/.test(q))return journalWeekRange(today,-1);
+  if(/this month/.test(q)){const from=new Date(today.getFullYear(),today.getMonth(),1);return {from:localDateKey(from),to:localDateKey(today),label:'This month'}}
+  if(/last month/.test(q)){const from=new Date(today.getFullYear(),today.getMonth()-1,1),to=new Date(today.getFullYear(),today.getMonth(),0);return {from:localDateKey(from),to:localDateKey(to),label:'Last month'}}
+  const past=q.match(/past\s+(7|14|30|60|90|180|365)\s+days?/);
+  if(past){const n=Number(past[1]),from=new Date(today);from.setDate(from.getDate()-n+1);return {from:localDateKey(from),to:localDateKey(today),label:'Past '+n+' days'}}
+  const isoRange=q.match(/(?:from|between)\s+(\d{4}-\d{2}-\d{2})\s+(?:to|and)\s+(\d{4}-\d{2}-\d{2})/);
+  if(isoRange)return {from:isoRange[1],to:isoRange[2],label:isoRange[1]+' → '+isoRange[2]};
+  return base;
+}
+function localRowsForQuestion(q){
+  const range=localQuestionRange(q),all=visibleTrades();
+  return {rows:filterAnalyticsRows(all,range),range};
+}
+function localDayStats(rows){
+  const days=localDays(rows).map(([date,rs])=>({date,rows:rs,r:localRowsR(rs),trades:rs.length}));
+  const positive=days.filter(x=>x.r>0).length,negative=days.filter(x=>x.r<0).length,flat=days.filter(x=>x.r===0).length;
+  return {days,positive,negative,flat,avgR:days.length?days.reduce((s,x)=>s+x.r,0)/days.length:0,avgTrades:days.length?rows.length/days.length:0};
+}
+function localOutcomeCounts(rows){const a=bluebirdSortRows(rows),wins=a.filter(t=>Number(t.result_r)>0).length,losses=a.filter(t=>Number(t.result_r)<0).length,be=a.length-wins-losses;return {total:a.length,wins,losses,be,decisive:wins+losses}}
+function localStats(rows){
+  const a=bluebirdSortRows(rows),c=localOutcomeCounts(a),rs=a.map(t=>Number(t.result_r||0)),R=rs.reduce((s,x)=>s+x,0),avg=c.total?R/c.total:0;
+  const wins=rs.filter(x=>x>0),losses=rs.filter(x=>x<0),grossWin=wins.reduce((s,x)=>s+x,0),grossLoss=losses.reduce((s,x)=>s+Math.abs(x),0),pf=grossLoss?grossWin/grossLoss:(grossWin?Infinity:0);
+  const day=localDayStats(a),dd=localDD(a),ci=localCI(c.decisive?c.wins/c.decisive:0,c.decisive),sd=localStd(rs);
+  const cash=a.map(t=>Number(t.result_usd)).filter(Number.isFinite),cashTotal=cash.reduce((s,x)=>s+x,0);
+  const winP=c.decisive?c.wins/c.decisive:0,kelly=(c.decisive&&wins.length&&losses.length)?(winP-((1-winP)/((grossWin/wins.length)/(grossLoss/losses.length)))):null;return {rows:a,...c,R,avg,pf,grossWin,grossLoss,avgWin:wins.length?grossWin/wins.length:0,avgLoss:losses.length?grossLoss/losses.length:0,payoff:(wins.length&&losses.length)?(grossWin/wins.length)/(grossLoss/losses.length):null,median:localMedian(rs),p25:localQuantile(rs,.25),p75:localQuantile(rs,.75),bestTrade:wins.length?Math.max(...wins):0,worstTrade:losses.length?Math.min(...losses):0,dd,runup:localRunup(a),recovery:dd?R/dd:null,sd,sqn:sd?(avg/sd)*Math.sqrt(c.total):null,winRate:winP,beRate:c.total?c.be/c.total:0,ci,kelly,day,cashAvailable:cash.length,cashTotal,avgCash:cash.length?cashTotal/cash.length:null};
+}
+function localTable(rows,cols){
+  const head='<div class="ai-local-table"><div class="ai-local-row ai-local-head">'+cols.map(c=>'<span>'+c.h+'</span>').join('')+'</div>'+rows.map(r=>'<div class="ai-local-row">'+cols.map(c=>'<span>'+String(c.v(r)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>').join('')+'</div>').join('')+'</div>';
+  return head;
+}
+function localBlock(title,html,meta=''){return '<section class="ai-local-block"><div class="ai-review-section-title">'+String(title).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div><div class="ai-local-body">'+html+'</div>'+(meta?'<div class="ai-local-meta">'+meta+'</div>':'')+'</section>'}
+function localStrong(v){return '<strong>'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</strong>'}
+function localRangeMeta(range,stats){return (range.label||'Selected period')+' · '+stats.total+' trades · '+stats.day.days.length+' trading day'+(stats.day.days.length===1?'':'s')}
+function localScenarioResult(rows,n){const p=localScenario(rows,n),s=localStats(p);return {n,p,stats:s}}
+function localMonteCarlo(rows,question){
+  const a=bluebirdSortRows(rows).map(t=>Number(t.result_r||0));if(!a.length)return null;
+  let seed=2166136261>>>0;for(const ch of (question+':'+a.length+':'+localRowsR(rows)).slice(0,400)){seed^=ch.charCodeAt(0);seed=Math.imul(seed,16777619)>>>0}
+  const rand=()=>{seed+=0x6D2B79F5;let t=seed;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296};
+  const sims=Math.min(3500,Math.max(800,Math.floor(240000/a.length))),ends=[],dds=[];
+  for(let i=0;i<sims;i++){let e=0,p=0,dd=0;for(let j=0;j<a.length;j++){e+=a[Math.floor(rand()*a.length)];p=Math.max(p,e);dd=Math.max(dd,p-e)}ends.push(e);dds.push(dd)}
+  ends.sort((x,y)=>x-y);dds.sort((x,y)=>x-y);return {sims,terminal5:localQuantile(ends,.05),terminal50:localQuantile(ends,.5),terminal95:localQuantile(ends,.95),positive:ends.filter(x=>x>0).length/sims,maxDD95:localQuantile(dds,.95)};
+}
+function localHelpAnswer(range){
+  return localBlock('WHAT BLUEBIRD CAN ANALYZE','<p>Ask about performance, expectancy, profit factor, drawdown, streaks, sequences, first 1–4 trades per day, sessions, setups, instruments, direction, tags, best or worst days, break-even frequency, dollars, trade distributions, conditional outcomes after winning or losing streaks, and historical resampling.</p><p class="ai-local-note">Bluebird uses the trades you actually recorded. It does not invent missing trades or outcomes.</p>',localRangeMeta(range,{total:localQueryRows().length,day:{days:localDays(localQueryRows()).length}}));
+}
 function localAnswer(question){
-  const q=String(question||'').toLowerCase().trim(),rows=localQueryRows(),days=localDays(rows);
-  if(!q||!rows.length)return null;
-  const R=localRowsR(rows),wr=localWR(rows),avg=R/rows.length,pf=localPF(rows);
-  if(/win rate|winning percentage/.test(q))return {title:'Win rate',body:'Your win rate is **'+wr.toFixed(1)+'%**.',meta:rows.length+' recorded trades in the selected period.',source:'Bluebird Analytics'};
-  if(/total r|net r/.test(q))return {title:'Total R',body:'Your total result is **'+(R>=0?'+':'')+fmt(R)+'R**.',meta:'Average: '+(avg>=0?'+':'')+fmt(avg)+'R per trade.',source:'Bluebird Analytics'};
-  if(/how many trades|trade count|number of trades|total trades/.test(q))return {title:'Trade count',body:'You have **'+rows.length+' recorded trades** in the selected period.',meta:days.length+' trading days.',source:'Bluebird Analytics'};
-  if(/profit factor/.test(q))return {title:'Profit factor',body:'Your profit factor is **'+(pf===Infinity?'No losing R':pf.toFixed(2))+'**.',meta:'Gross winning R divided by absolute gross losing R.',source:'Bluebird Analytics'};
-  if(/drawdown|max(?:imum)? dd/.test(q))return {title:'Maximum drawdown',body:'Your maximum peak-to-trough drawdown was **'+fmt(localDD(rows))+'R**.',meta:'Calculated chronologically from cumulative R.',source:'Bluebird Analytics'};
-  if(/longest.*los|losing streak|loss streak/.test(q))return {title:'Longest losing streak',body:'Your longest losing streak was **'+localStreak(rows,false)+' consecutive losses**.',meta:'Longest winning streak: '+localStreak(rows,true)+'.',source:'Bluebird Analytics'};
-  if(/longest.*win|winning streak|win streak/.test(q))return {title:'Longest winning streak',body:'Your longest winning streak was **'+localStreak(rows,true)+' consecutive wins**.',meta:'Longest losing streak: '+localStreak(rows,false)+'.',source:'Bluebird Analytics'};
-  const afterL=q.match(/after\s+(?:a\s+)?(\d+)\s+(?:consecutive\s+)?loss/);
-  if(afterL){
-    const k=Math.max(1,Number(afterL[1])),o=[];
-    for(let i=k;i<rows.length;i++){let ok=true;for(let j=1;j<=k;j++){if(!(Number(rows[i-j].result_r)<0)){ok=false;break}}if(ok)o.push(Number(rows[i].result_r))}
-    if(!o.length)return {title:'After '+k+' losses',body:'There are not enough matching cases in this period to calculate the next trade.',meta:'Try a wider journal date range.',source:'Bluebird Analytics'};
-    const w=o.filter(x=>x>0).length,l=o.filter(x=>x<0).length,r=o.reduce((a,b)=>a+b,0);
-    return {title:'After '+k+' consecutive losses',body:'You had **'+o.length+' matching cases**. The next trade was a win **'+w+' times** and a loss **'+l+' times**. Next-trade win rate: **'+(w/o.length*100).toFixed(1)+'%**.',meta:'Net R on those next trades: '+(r>=0?'+':'')+fmt(r)+'R.',source:'Bluebird Analytics'};
+  const q=String(question||'').toLowerCase().trim();if(!q)return null;
+  const picked=localRowsForQuestion(q),rows=picked.rows,range=picked.range;
+  if(!rows.length)return {html:localBlock('NO RECORDED TRADES','<p>There are no recorded trades in <strong>'+String(range.label||'the selected period').replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</strong>.</p><p class="ai-local-note">Choose another date range or add trades to the journal.</p>')};
+  const s=localStats(rows),meta=localRangeMeta(range,s);
+  const compound=[];
+  if(/win rate|winning percentage|percentage.*wins/.test(q))compound.push(localBlock('WIN RATE','<p>Your win rate is <strong>'+localFormatPct(s.winRate)+'</strong>.</p><p>Wins: <strong>'+s.wins+'</strong> · Losses: <strong>'+s.losses+'</strong> · Break-even: <strong>'+s.be+'</strong>.</p>','Win rate excludes break-even trades from the denominator.'));
+  if(/total r|net r|how much r|r result/.test(q))compound.push(localBlock('TOTAL R','<p>Your total result is <strong>'+(s.R>=0?'+':'')+fmt(s.R)+'R</strong>.</p><p>Average result: <strong>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R per trade</strong>.</p>'));
+  if(/expectancy|average r|avg r|expected r/.test(q))compound.push(localBlock('EXPECTANCY','<p>Average result per trade is <strong>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R</strong>.</p><p>Average winner: <strong>+'+fmt(s.avgWin)+'R</strong> · Average loser: <strong>-'+fmt(s.avgLoss)+'R</strong> · Payoff ratio: <strong>'+(s.payoff?fmt(s.payoff):'—')+'</strong>.</p>'));
+  if(/profit factor|pf\b/.test(q))compound.push(localBlock('PROFIT FACTOR','<p>Your profit factor is <strong>'+(s.pf===Infinity?'∞ (no losing R)':s.pf.toFixed(2))+'</strong>.</p><p>Gross winning R: <strong>+'+fmt(s.grossWin)+'R</strong> · Gross losing R: <strong>-'+fmt(s.grossLoss)+'R</strong>.</p>'));
+  if(/drawdown|max(?:imum)? dd|peak.?to.?trough/.test(q))compound.push(localBlock('DRAWDOWN','<p>Maximum peak-to-trough drawdown was <strong>'+fmt(s.dd)+'R</strong>.</p><p>Maximum run-up: <strong>+'+fmt(s.runup)+'R</strong>.</p>'));
+  if(/stdev|standard deviation|volatility|dispersion/.test(q))compound.push(localBlock('R VOLATILITY','<p>Standard deviation of trade R is <strong>'+fmt(s.sd)+'R</strong>.</p>'));
+  if(/sqn|system quality/.test(q))compound.push(localBlock('SQN-STYLE','<p>R-based SQN-style value: <strong>'+(s.sqn===null?'—':fmt(s.sqn))+'</strong>.</p>'));
+  if(/kelly/.test(q))compound.push(localBlock('EMPIRICAL KELLY FRACTION','<p>Using the recorded win rate and average payoff, the empirical Kelly fraction is <strong>'+(s.kelly===null?'—':fmt(s.kelly*100)+'%')+'</strong>.</p><p class="ai-local-note">This is a sample statistic, not a position-size recommendation.</p>'));
+  if(/dollar|usd|p&l|pnl|cash|money/.test(q)&&s.cashAvailable)compound.push(localBlock('DOLLAR RESULT','<p>Recorded dollar result: <strong>'+localFormatMoneyValue(s.cashTotal)+'</strong>.</p><p>Average recorded dollar result: <strong>'+localFormatMoneyValue(s.avgCash)+'</strong> per trade.</p>'));
+  if(compound.length>=2 && !/compare|first\s+(1|2|3|4)|after\s+\d+|monte carlo|simulate|sequence|best day|worst day|session|setup|instrument|direction|tag/.test(q))return {html:compound.join('')};
+  const wantsOverview=/\b(analy[sz]e|overview|summary|what do you see|what stands out|how am i doing|performance review|review my journal)\b/.test(q);
+  if(wantsOverview){
+    const cur=localCurrentStreak(rows);
+    const seqs=localDays(rows).map(([d,rs])=>rs.map(t=>localOutcome(t.result_r)).join('')).filter(Boolean),seqMap={};seqs.forEach(x=>seqMap[x]=(seqMap[x]||0)+1);const common=Object.entries(seqMap).sort((a,b)=>b[1]-a[1])[0];
+    let html='';
+    html+=localBlock('PERFORMANCE SUMMARY','<div class="ai-local-statgrid"><div><span>Win rate</span><b>'+localFormatPct(s.winRate)+'</b></div><div><span>Total R</span><b class="'+(s.R<0?'neg':'pos')+'">'+(s.R>=0?'+':'')+fmt(s.R)+'R</b></div><div><span>Expectancy</span><b>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R</b></div><div><span>Profit factor</span><b>'+(s.pf===Infinity?'∞':s.pf.toFixed(2))+'</b></div><div><span>Max drawdown</span><b>'+fmt(s.dd)+'R</b></div><div><span>Longest loss streak</span><b>'+localStreak(rows,false)+'</b></div></div>',meta);
+    html+=localBlock('TRADE DISTRIBUTION','<p>Wins: <strong>'+s.wins+'</strong> · Losses: <strong>'+s.losses+'</strong> · Break-even: <strong>'+s.be+'</strong>.</p><p>Average winner: <strong>+'+fmt(s.avgWin)+'R</strong> · Average loser: <strong>-'+fmt(s.avgLoss)+'R</strong> · Payoff ratio: <strong>'+(s.payoff?fmt(s.payoff):'—')+'</strong>.</p><p>Median trade: <strong>'+(s.median>=0?'+':'')+fmt(s.median)+'R</strong> · Best: <strong>+'+fmt(s.bestTrade)+'R</strong> · Worst: <strong>'+fmt(s.worstTrade)+'R</strong>.</p>');
+    html+=localBlock('RISK & CONSISTENCY','<p>Current streak: <strong>'+cur.count+' '+(cur.kind==='win'?'win'+(cur.count===1?'':'s'):cur.kind==='loss'?'loss'+(cur.count===1?'':'es'):'break-even')+'</strong>.</p><p>Winning days: <strong>'+s.day.positive+'</strong> · Losing days: <strong>'+s.day.negative+'</strong> · Flat days: <strong>'+s.day.flat+'</strong> · Average R/day: <strong>'+(s.day.avgR>=0?'+':'')+fmt(s.day.avgR)+'R</strong>.</p><p>Approx. 95% range for the observed win rate: <strong>'+localFormatPct(s.ci[0])+' to '+localFormatPct(s.ci[1])+'</strong> using the recorded decisive trades.</p>');
+    html+=localBlock('RECORDED PATTERNS','<p>Average trades/day: <strong>'+fmt(s.day.avgTrades)+'</strong>. Most common daily sequence: <strong>'+(common?String(common[0]).replace(/&/g,'&amp;').replace(/</g,'&lt;'):'—')+'</strong>'+(common?' ('+common[1]+' day'+(common[1]===1?'':'s')+')':'')+'.</p>');
+    return {html};
   }
-  const nMatch=q.match(/first\s+(1|2|3|4)\s+trades?/);
-  if(nMatch){const n=Number(nMatch[1]),pick=localScenario(rows,n),pr=localRowsR(pick);return {title:'First '+n+' trade'+(n===1?'':'s')+' per day',body:'The first '+n+' trade'+(n===1?'':'s')+' per day produced **'+(pr>=0?'+':'')+fmt(pr)+'R** from **'+pick.length+' trades**.',meta:'Chronological first '+n+' recorded trades from each trading day.',source:'Bluebird Analytics'}}
-  if(/compare.*1.*2|1.*2.*3.*4.*trade|trade limit|trades per day/.test(q)){
-    const lines=[1,2,3,4].map(n=>{const p=localScenario(rows,n),r=localRowsR(p);return '**'+n+'/day:** '+(r>=0?'+':'')+fmt(r)+'R · '+localWR(p).toFixed(1)+'% WR · '+p.length+' trades'});
-    return {title:'Trades-per-day comparison',body:lines.join('\n'),meta:'Historical calculation from the first 1, 2, 3 and 4 recorded trades of each day.',source:'Bluebird Analytics'};
+  if(/win rate|winning percentage|percentage.*wins/.test(q))return {html:localBlock('WIN RATE','<p>Your win rate is <strong>'+localFormatPct(s.winRate)+'</strong>.</p><p>Wins: <strong>'+s.wins+'</strong> · Losses: <strong>'+s.losses+'</strong> · Break-even: <strong>'+s.be+'</strong>.</p>','Win rate excludes break-even trades from the denominator: wins ÷ (wins + losses). · '+meta)};
+  if(/break.?even|breakeven/.test(q))return {html:localBlock('BREAK-EVEN','<p>You recorded <strong>'+s.be+' break-even trade'+(s.be===1?'':'s')+'</strong>, which is <strong>'+localFormatPct(s.beRate)+'</strong> of all recorded trades.</p>',meta)};
+  if(/total r|net r|how much r|r result/.test(q))return {html:localBlock('TOTAL R','<p>Your total result is <strong>'+(s.R>=0?'+':'')+fmt(s.R)+'R</strong>.</p><p>Average result: <strong>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R per trade</strong>.</p>',meta)};
+  if(/how much money|dollar|usd|p&l|pnl|cash|money/.test(q)&&s.cashAvailable)return {html:localBlock('DOLLAR RESULT','<p>Recorded dollar result: <strong>'+localFormatMoneyValue(s.cashTotal)+'</strong>.</p><p>Average recorded dollar result per trade: <strong>'+localFormatMoneyValue(s.avgCash)+'</strong>.</p>',s.cashAvailable+' trades contain recorded dollar results. · '+meta)};
+  if(/how many trades|trade count|number of trades|total trades/.test(q))return {html:localBlock('TRADE COUNT','<p>You have <strong>'+s.total+' recorded trades</strong> in this period across <strong>'+s.day.days.length+' trading days</strong>.</p><p>Average: <strong>'+fmt(s.day.avgTrades)+' trades/day</strong>.</p>',range.label)};
+  if(/profit factor|pf\b/.test(q))return {html:localBlock('PROFIT FACTOR','<p>Your profit factor is <strong>'+(s.pf===Infinity?'∞ (no losing R) ':s.pf.toFixed(2))+'</strong>.</p><p>Gross winning R: <strong>+'+fmt(s.grossWin)+'R</strong> · Gross losing R: <strong>-'+fmt(s.grossLoss)+'R</strong>.</p>',meta)};
+  if(/expectancy|average r|avg r|expected r/.test(q))return {html:localBlock('EXPECTANCY','<p>Your average result per recorded trade is <strong>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R</strong>.</p><p>Average winner: <strong>+'+fmt(s.avgWin)+'R</strong> · Average loser: <strong>-'+fmt(s.avgLoss)+'R</strong> · Payoff ratio: <strong>'+(s.payoff?fmt(s.payoff):'—')+'</strong>.</p>',meta)};
+  if(/drawdown|max(?:imum)? dd|peak.?to.?trough|underwater/.test(q)){
+    let e=0,p=0,cur=0;bluebirdSortRows(rows).forEach(t=>{e+=Number(t.result_r||0);p=Math.max(p,e);cur=p-e});
+    return {html:localBlock('DRAWDOWN','<p>Maximum peak-to-trough drawdown was <strong>'+fmt(s.dd)+'R</strong>.</p><p>Current drawdown from the running peak is <strong>'+fmt(cur)+'R</strong>. Maximum run-up was <strong>+'+fmt(s.runup)+'R</strong>.</p><p>Recovery factor: <strong>'+(s.recovery===null?'—':fmt(s.recovery))+'</strong>.</p>',meta)};
   }
-  const group=/session/.test(q)?['session','Session']:/setup/.test(q)?['setup','Setup']:/instrument/.test(q)?['instrument','Instrument']:/direction/.test(q)?['direction','Direction']:null;
-  if(group){const gs=localGroup(rows,group[0]).slice(0,6);return {title:group[1]+' breakdown',body:gs.map(g=>'**'+g.key+'** · '+g.rows.length+' trades · '+g.wr.toFixed(1)+'% WR · '+(g.r>=0?'+':'')+fmt(g.r)+'R').join('\n'),meta:'Groups are sorted by total R.',source:'Bluebird Analytics'}}
-  if(/best day|worst day/.test(q)){
-    const ds=days.map(x=>({date:x[0],rows:x[1],r:localRowsR(x[1])})),best=[...ds].sort((a,b)=>b.r-a.r)[0],worst=[...ds].sort((a,b)=>a.r-b.r)[0],target=/worst/.test(q)?worst:best;
-    return {title:/worst/.test(q)?'Worst trading day':'Best trading day',body:'**'+target.date+'** was '+(/worst/.test(q)?'the lowest':'the highest')+' day at **'+(target.r>=0?'+':'')+fmt(target.r)+'R** across **'+target.rows.length+' trades**.',meta:'Best: '+best.date+' · Worst: '+worst.date+'.',source:'Bluebird Analytics'}
+  if(/longest.*los|losing streak|loss streak|longest.*win|winning streak|win streak|current streak/.test(q)){
+    const cur=localCurrentStreak(rows);return {html:localBlock('STREAKS','<p>Longest winning streak: <strong>'+localStreak(rows,true)+'</strong>.</p><p>Longest losing streak: <strong>'+localStreak(rows,false)+'</strong>.</p><p>Current streak: <strong>'+cur.count+' '+cur.kind+'</strong>.</p>',meta)};
   }
-  if(/average r|avg r|expectancy/.test(q))return {title:'Average R per trade',body:'Your average result is **'+(avg>=0?'+':'')+fmt(avg)+'R per trade**.',meta:'Win rate: '+wr.toFixed(1)+'% · Max drawdown: '+fmt(localDD(rows))+'R.',source:'Bluebird Analytics'};
-  if(/win|loss|break.?even/.test(q))return {title:'Journal summary',body:'**'+rows.length+' trades** · **'+wr.toFixed(1)+'% win rate** · **'+(R>=0?'+':'')+fmt(R)+'R**.',meta:'Longest L streak: '+localStreak(rows,false)+' · Longest W streak: '+localStreak(rows,true)+' · Max DD: '+fmt(localDD(rows))+'R.',source:'Bluebird Analytics'};
-  return null;
+  const after=q.match(/after\s+(?:a\s+)?(\d+)\s+(?:consecutive\s+)?(loss|losses|winning|wins|win)/);
+  if(after){const k=Number(after[1]),isLoss=/loss/.test(after[2]),o=localConditional(rows,k,isLoss);if(!o.length)return {html:localBlock('CONDITIONAL RESULT','<p>There are not enough matching cases after '+k+' consecutive '+(isLoss?'losses':'wins')+' to calculate the next trade.</p>',meta)};const w=o.filter(x=>x>0).length,l=o.filter(x=>x<0).length,be=o.length-w-l,rr=o.reduce((a,b)=>a+b,0);return {html:localBlock('AFTER '+k+' CONSECUTIVE '+(isLoss?'LOSSES':'WINS'),'<p>Matching cases: <strong>'+o.length+'</strong>. Next trade was a win <strong>'+w+'</strong> times, loss <strong>'+l+'</strong> times, break-even <strong>'+be+'</strong> times.</p><p>Observed next-trade win rate: <strong>'+localFormatPct(o.length?(w/o.length):0)+'</strong> · Net R from those next trades: <strong>'+(rr>=0?'+':'')+fmt(rr)+'R</strong>.</p>','This is a historical conditional frequency, not a prediction. · '+meta)};
+  }
+  if(/what happened after|after (?:my )?(?:losing|winning) streak/.test(q)){
+    const parts=[1,2,3,4].map(k=>{const o=localConditional(rows,k,true);return {k,n:o.length,wr:o.length?o.filter(x=>x>0).length/o.length:0,r:o.reduce((a,b)=>a+b,0)}}).filter(x=>x.n);return {html:localBlock('AFTER LOSING STREAKS',parts.length?localTable(parts,[{h:'Streak',v:r=>r.k+' L'},{h:'Cases',v:r=>r.n},{h:'Next W %',v:r=>localFormatPct(r.wr)},{h:'Next R',v:r=>(r.r>=0?'+':'')+fmt(r.r)+'R'}]):'<p>There are not enough matching losing-streak cases in this period.</p>','Historical occurrences only. · '+meta)};
+  }
+  const nMatch=q.match(/(?:first|only)\s+(1|2|3|4)\s+trades?/);
+  if(nMatch){const n=Number(nMatch[1]),x=localScenarioResult(rows,n);return {html:localBlock('FIRST '+n+' TRADE'+(n===1?'':'S')+' PER DAY','<p>The first '+n+' recorded trade'+(n===1?'':'s')+' from each day produced <strong>'+(x.stats.R>=0?'+':'')+fmt(x.stats.R)+'R</strong> from <strong>'+x.stats.total+' trades</strong>.</p><p>Win rate: <strong>'+localFormatPct(x.stats.winRate)+'</strong> · Average: <strong>'+(x.stats.avg>=0?'+':'')+fmt(x.stats.avg)+'R/trade</strong>.</p>',meta)};
+  }
+  if(/compare.*(?:1.*2|2.*3)|1.*2.*3.*4|trade limit|trades per day|different number of trades/.test(q)){
+    const arr=[1,2,3,4].map(n=>({n,...localScenarioResult(rows,n).stats}));arr.push({n:'all',...s});
+    return {html:localBlock('TRADES PER DAY COMPARISON',localTable(arr,[{h:'Limit',v:r=>r.n==='all'?'All':r.n+'/day'},{h:'Trades',v:r=>r.total},{h:'Win %',v:r=>localFormatPct(r.winRate)},{h:'Total R',v:r=>(r.R>=0?'+':'')+fmt(r.R)+'R'},{h:'Avg R',v:r=>(r.avg>=0?'+':'')+fmt(r.avg)}]),'Each daily limit uses the first N chronological recorded trades from each day. · '+meta)};
+  }
+  const groupKey=/session/.test(q)?['session','SESSION']:/setup/.test(q)?['setup','SETUP']:/instrument/.test(q)?['instrument','INSTRUMENT']:/direction/.test(q)?['direction','DIRECTION']:/tag/.test(q)?['tag','TAG']:null;
+  if(groupKey){const gs=localGroup(rows,groupKey[0]).slice(0,10);return {html:localBlock(groupKey[1]+' BREAKDOWN',localTable(gs,[{h:groupKey[1],v:r=>r.key},{h:'Trades',v:r=>r.rows.length},{h:'Win %',v:r=>localFormatPct(r.wr/100)},{h:'Total R',v:r=>(r.r>=0?'+':'')+fmt(r.r)+'R'},{h:'Avg R',v:r=>(r.avg>=0?'+':'')+fmt(r.avg)}]),'Groups are ordered by recorded total R. · '+meta)};
+  }
+  if(/best day|worst day|highest day|lowest day/.test(q)){
+    const ds=s.day.days;if(!ds.length)return null;const best=[...ds].sort((a,b)=>b.r-a.r)[0],worst=[...ds].sort((a,b)=>a.r-b.r)[0],pick=/worst|lowest/.test(q)?worst:best;return {html:localBlock(/worst|lowest/.test(q)?'WORST TRADING DAY':'BEST TRADING DAY','<p><strong>'+localDateLabel(pick.date)+'</strong> recorded <strong>'+(pick.r>=0?'+':'')+fmt(pick.r)+'R</strong> across <strong>'+pick.trades+' trades</strong>.</p><p>Best day: <strong>'+localDateLabel(best.date)+'</strong> · Worst day: <strong>'+localDateLabel(worst.date)+'</strong>.</p>',meta)};
+  }
+  if(/average trades.*day|trades per day|frequency.*day/.test(q))return {html:localBlock('TRADING FREQUENCY','<p>Average trades/day: <strong>'+fmt(s.day.avgTrades)+'</strong>.</p><p>Trading days: <strong>'+s.day.days.length+'</strong> · Total trades: <strong>'+s.total+'</strong>.</p>',meta)};
+  if(/standard deviation|volatility|dispersion|spread of r/.test(q))return {html:localBlock('R DISTRIBUTION','<p>Standard deviation of trade R: <strong>'+fmt(s.sd)+'R</strong>.</p><p>25th percentile: <strong>'+(s.p25>=0?'+':'')+fmt(s.p25)+'R</strong> · Median: <strong>'+(s.median>=0?'+':'')+fmt(s.median)+'R</strong> · 75th percentile: <strong>'+(s.p75>=0?'+':'')+fmt(s.p75)+'R</strong>.</p>',meta)};
+  if(/kelly/.test(q))return {html:localBlock('EMPIRICAL KELLY FRACTION','<p>Using the recorded win rate and average payoff, the empirical Kelly fraction is <strong>'+(s.kelly===null?'—':fmt(s.kelly*100)+'%')+'</strong>.</p><p class="ai-local-note">This is a sample statistic, not a position-size recommendation.</p>',meta)};
+  if(/sqn|system quality/.test(q))return {html:localBlock('SQN-STYLE METRIC','<p>R-based SQN-style value: <strong>'+(s.sqn===null?'—':fmt(s.sqn))+'</strong>.</p><p>It uses average R, R standard deviation and sample size. Higher values indicate a more consistent positive distribution within this recorded sample; it is not a guarantee of future performance.</p>',meta)};
+  if(/monte carlo|simulate|resampl/.test(q)){
+    const mc=localMonteCarlo(rows,q);if(!mc)return null;return {html:localBlock('HISTORICAL RESAMPLING','<div class="ai-local-statgrid"><div><span>Simulations</span><b>'+mc.sims.toLocaleString()+'</b></div><div><span>5th outcome</span><b>'+(mc.terminal5>=0?'+':'')+fmt(mc.terminal5)+'R</b></div><div><span>Median outcome</span><b>'+(mc.terminal50>=0?'+':'')+fmt(mc.terminal50)+'R</b></div><div><span>95th outcome</span><b>'+(mc.terminal95>=0?'+':'')+fmt(mc.terminal95)+'R</b></div><div><span>Positive finish</span><b>'+localFormatPct(mc.positive)+'</b></div><div><span>95th max drawdown</span><b>'+fmt(mc.maxDD95)+'R</b></div></div>','Bluebird resampled your recorded R outcomes with replacement to study path variability. This is a scenario analysis, not a forecast. · '+meta)};
+  }
+  if(/most common|common.*sequence|frequent.*sequence|day sequence/.test(q)){
+    const counts=new Map();localDays(rows).forEach(([d,rs])=>{const seq=rs.map(t=>localOutcome(t.result_r)).join('');if(seq)counts.set(seq,(counts.get(seq)||0)+1)});const arr=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);return {html:localBlock('DAILY SEQUENCES',arr.length?localTable(arr.map(x=>({seq:x[0],n:x[1]})),[{h:'Sequence',v:r=>r.seq},{h:'Days',v:r=>r.n}]):'<p>No daily sequence data is available.</p>',meta)};
+  }
+  if(/month|monthly|week|weekly/.test(q)){
+    const monthly=/month/.test(q),m=new Map();bluebirdSortRows(rows).forEach(t=>{const d=String(t.trade_date||'').slice(0,10),k=monthly?d.slice(0,7):(()=>{const dt=new Date(d+'T00:00:00');const day=(dt.getDay()+6)%7;dt.setDate(dt.getDate()-day);return localDateKey(dt)})();if(!m.has(k))m.set(k,[]);m.get(k).push(t)});const arr=[...m.entries()].map(([k,rs])=>{const st=localStats(rs);return {period:k,...st}}).sort((a,b)=>a.period.localeCompare(b.period));return {html:localBlock(monthly?'MONTHLY BREAKDOWN':'WEEKLY BREAKDOWN',localTable(arr,[{h:monthly?'Month':'Week',v:r=>r.period},{h:'Trades',v:r=>r.total},{h:'Win %',v:r=>localFormatPct(r.winRate)},{h:'R',v:r=>(r.R>=0?'+':'')+fmt(r.R)+'R'},{h:'Avg',v:r=>(r.avg>=0?'+':'')+fmt(r.avg)}]),meta)};
+  }
+  if(/why am i|why.*los|what should i improve|improve|weakness|problem/.test(q)){
+    const groups=[['session','Session'],['setup','Setup'],['instrument','Instrument'],['direction','Direction']].map(x=>({name:x[1],rows:localGroup(rows,x[0]).filter(g=>g.rows.length>=2).slice(0,3)})).filter(x=>x.rows.length);
+    return {html:localBlock('PATTERN-BASED DIAGNOSTIC','<p>Bluebird cannot prove a cause from journal data alone, but it can show where results differ.</p>'+groups.map(g=>'<p><strong>'+g.name+':</strong> '+g.rows.map(x=>String(x.key)+' '+(x.r>=0?'+':'')+fmt(x.r)+'R / '+localFormatPct(x.wr/100)).join(' · ')+'</p>').join(''), 'Associations in the journal are not proof of causation. · '+meta)};
+  }
+  if(/predict|next trade|will i win|tomorrow|future/.test(q))return {html:localBlock('HISTORICAL, NOT PREDICTIVE','<p>Bluebird cannot know the next trade outcome. It can calculate the historical frequency of what happened after the same conditions in your recorded journal.</p><p>Try: <strong>“What happened after 2 consecutive losses?”</strong> or ask about a specific session, setup, direction, or daily trade limit.</p>',meta)};
+  return {html:localBlock('BLUEBIRD CAN ANALYZE THIS','<p>I can calculate your journal directly. Try asking about win rate, total R, expectancy, profit factor, drawdown, streaks, what happened after N losses or wins, first 1–4 trades per day, sessions, setups, instruments, direction, tags, best/worst days, monthly or weekly results, R distribution, or historical resampling.</p>',meta)};
 }
-function renderLocalBluebirdAnswer(result){
-  const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const inline=v=>esc(v).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-  return '<div class="ai-review-section"><div class="ai-review-section-title">'+esc(result.title||'Bluebird answer')+'</div><p class="ai-review-paragraph">'+inline(result.body||'')+'</p>'+(result.meta?'<div class="ai-ask-local-meta">'+inline(result.meta)+'</div>':'')+'</div>';
-}
+function renderLocalBluebirdAnswer(result){return result?.html||'';}
 
 function showAIAskPanel(){
   const panel=$('aiAskPanel');
@@ -3122,25 +3248,24 @@ function clearAIAskHistory(){
   if(input)input.value='';
 }
 
-function appendAIAskHistory(question,answer,model){
+function appendAIAskHistory(question,answer,model,isHtml=false){
   const history=$('aiAskHistory');
   if(!history)return;
-
+  const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const item=document.createElement('article');
   item.className='ai-ask-history-item';
   item.innerHTML=`
     <div class="ai-ask-history-question">
       <span class="ai-ask-history-label">YOU</span>
-      <span>${String(question).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+      <span>${esc(question)}</span>
     </div>
     <div class="ai-ask-history-answer">
       <div class="ai-ask-history-answer-head">
         <span>BLUEBIRD AI</span>
-        <small>${String(model||'Gemini').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</small>
+        <small>${esc(model||'Bluebird Intelligence')}</small>
       </div>
-      <div class="ai-review-output-body">${safeRenderAIReviewText(answer)}</div>
+      <div class="ai-review-output-body">${isHtml?String(answer||''):safeRenderAIReviewText(answer)}</div>
     </div>`;
-
   history.appendChild(item);
   history.hidden=false;
   const footer=$('aiAskFooter');
@@ -3153,29 +3278,30 @@ async function askAIQuestion(){
   const question=String(input.value||'').trim();
   if(!question){toast('Type a question for Bluebird.');return;}
   if(!sb||!session){toast('Sign in first to ask about your private journal.');return;}
-  btn.disabled=true;btn.textContent='Calculating…';showAIAskPanel();
+  btn.disabled=true;btn.textContent='Analyzing…';showAIAskPanel();
   const history=$('aiAskHistory');
-  const loading=document.createElement('div');loading.className='ai-ask-loading-item';loading.innerHTML='<span>Bluebird is calculating from your journal…</span>';
+  const loading=document.createElement('div');loading.className='ai-ask-loading-item';loading.innerHTML='<span>Bluebird is analyzing your recorded journal data…</span>';
   if(history){history.hidden=false;history.appendChild(loading);}
   try{
     const localResult=localAnswer(question);
     if(localResult){
       if(loading)loading.remove();
-      appendAIAskHistory(question,renderLocalBluebirdAnswer(localResult),'Bluebird Analytics');
+      appendAIAskHistory(question,renderLocalBluebirdAnswer(localResult),'Bluebird Intelligence',true);
       input.value='';
       return;
     }
-    if(loading)loading.innerHTML='<span>This question needs deeper interpretation. Trying the optional AI layer…</span>';
-    const range=analyticsGetRange();
+    if(loading)loading.innerHTML='<span>Bluebird is running a deeper interpretation of the selected journal period…</span>';
+    const range=localQuestionRange(question);
     const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null,question}});
     if(error)throw error;
     const answer=String(data?.answer||data?.review||'').trim();
-    if(!answer)throw new Error('No AI answer returned');
+    if(!answer)throw new Error('No review answer returned');
     if(loading)loading.remove();
-    appendAIAskHistory(question,answer,'Gemini · optional');input.value='';
+    appendAIAskHistory(question,answer,'Bluebird Deep Review');input.value='';
   }catch(err){
     console.error('Bluebird question error',err);
-    if(loading)loading.innerHTML='<div class="ai-ask-history-error"><strong>Bluebird could not answer that question.</strong><div style="margin-top:4px">'+String(err?.message||'Try a question about performance, sequences, trade limits, drawdown, sessions, setups, or dates.').replace(/</g,'&lt;')+'</div></div>';
+    const msg=String(err?.message||'The deeper review could not answer that question.');
+    if(loading)loading.innerHTML='<div class="ai-ask-history-error"><strong>Bluebird could not complete that deeper review.</strong><div style="margin-top:4px">'+msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div><div style="margin-top:7px;color:#b9cfda">The local Bluebird intelligence is still available for journal calculations and historical analysis.</div></div>';
   }finally{btn.disabled=false;btn.textContent='Ask Bluebird';}
 }
 
@@ -3641,7 +3767,26 @@ async function exportAI(){
   #page-journal .day-trade-subtable{min-width:780px}
   #tradeForm .fields3{grid-template-columns:1fr 1fr}
 }
-</style></head><body><div class="wrap"><div class="title">Bluebird Journal Export</div><div class="sub">${escHtml(new Date().toLocaleString())} · ${rows.length} trades · ${prepared.imageCount} images</div>${reportRows.map((item)=>{const t=item.t;const rr=t.result_r===null||t.result_r===undefined||t.result_r===''?'—':(Number(t.result_r)>=0?'+':'')+fmt(Number(t.result_r))+'R';const amount=t.result_usd===null||t.result_usd===undefined||t.result_usd===''?'—':(Number(t.result_usd)>=0?'+$':'-$')+Math.abs(Number(t.result_usd)).toLocaleString();const seq=item.sequenceMeta||journalSequenceInfo(rows,t);const optional=prepared.optionalCols.length?`<div class="meta" style="margin-top:8px">${prepared.optionalCols.map(([label,key])=>`<div class="cell"><div class="k">${escHtml(label)}</div><div class="v">${escHtml(t[key]||'—')}</div></div>`).join('')}</div>`:'';const imgs=item.images.length?`<div class="imgs">${item.images.map(im=>`<div class="shot"><img src="${im.dataUrl}" alt=""><div class="cap">${escHtml(im.path)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:12px">No images attached.</div>';return `<section class="trade"><div class="meta"><div class="cell"><div class="k">Trade</div><div class="v">${item.tradeIndex}</div></div><div class="cell"><div class="k">Date</div><div class="v">${escHtml(t.trade_date||'—')}</div></div><div class="cell"><div class="k">Instrument</div><div class="v">${escHtml(t.instrument||'—')}</div></div><div class="cell"><div class="k">Result R</div><div class="v">${escHtml(rr)}</div></div><div class="cell"><div class="k">Result $</div><div class="v">${escHtml(amount)}</div></div></div><div class="meta" style="margin-top:8px"><div class="cell"><div class="k">Day trades</div><div class="v">${seq.count}</div></div><div class="cell"><div class="k">Trade order</div><div class="v">${seq.order||'—'} / ${seq.count}</div></div><div class="cell"><div class="k">Day sequence</div><div class="v">${escHtml(seq.sequence)}</div></div></div>${optional}${t.notes?`<div class="notes">${escHtml(t.notes)}</div>`:''}${imgs}</section>`;}).join('')}</div>
+</style>
+<style id="bluebird-local-intelligence-v93">
+.ai-local-block{padding:0 0 15px;margin:0 0 15px;border-bottom:1px solid #17384b}
+.ai-local-block:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.ai-local-body{color:#d9e8ef;font-size:12px;line-height:1.75}
+.ai-local-body p{margin:0 0 8px}.ai-local-body p:last-child{margin-bottom:0}
+.ai-local-body strong{color:#eff9ff;font-weight:900}.ai-local-note{color:#8198a8!important}
+.ai-local-meta{margin-top:8px;color:#758e9f;font-size:9px;line-height:1.5}
+.ai-local-statgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.ai-local-statgrid>div{border:1px solid #163b53;background:#071824;border-radius:7px;padding:10px}
+.ai-local-statgrid span{display:block;font-size:7px;letter-spacing:.8px;color:#7890a0;font-weight:900;text-transform:uppercase}
+.ai-local-statgrid b{display:block;margin-top:5px;font-size:15px;color:#edf8ff}
+.ai-local-statgrid b.pos{color:#20e8a1}.ai-local-statgrid b.neg{color:#ff6370}
+.ai-local-table{margin-top:8px;border:1px solid #15394f;border-radius:8px;overflow:hidden;background:#06131c}
+.ai-local-row{display:grid;grid-template-columns:1.3fr .7fr .9fr .9fr .9fr;gap:7px;align-items:center;padding:8px 9px;border-top:1px solid #123143;font-size:9px;color:#c6d7df}
+.ai-local-row:first-child{border-top:0}.ai-local-row span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ai-local-head{background:#071b28;color:#7ea8bc;text-transform:uppercase;font-weight:950;letter-spacing:.7px;font-size:7px}
+.ai-local-table .ai-local-row:nth-child(even){background:#061722}
+@media(max-width:760px){.ai-local-statgrid{grid-template-columns:1fr 1fr}.ai-local-body{font-size:12px}.ai-local-row{font-size:9px;grid-template-columns:1.2fr .7fr .9fr .9fr .9fr;padding:8px 7px}}
+</style>
+</head><body><div class="wrap"><div class="title">Bluebird Journal Export</div><div class="sub">${escHtml(new Date().toLocaleString())} · ${rows.length} trades · ${prepared.imageCount} images</div>${reportRows.map((item)=>{const t=item.t;const rr=t.result_r===null||t.result_r===undefined||t.result_r===''?'—':(Number(t.result_r)>=0?'+':'')+fmt(Number(t.result_r))+'R';const amount=t.result_usd===null||t.result_usd===undefined||t.result_usd===''?'—':(Number(t.result_usd)>=0?'+$':'-$')+Math.abs(Number(t.result_usd)).toLocaleString();const seq=item.sequenceMeta||journalSequenceInfo(rows,t);const optional=prepared.optionalCols.length?`<div class="meta" style="margin-top:8px">${prepared.optionalCols.map(([label,key])=>`<div class="cell"><div class="k">${escHtml(label)}</div><div class="v">${escHtml(t[key]||'—')}</div></div>`).join('')}</div>`:'';const imgs=item.images.length?`<div class="imgs">${item.images.map(im=>`<div class="shot"><img src="${im.dataUrl}" alt=""><div class="cap">${escHtml(im.path)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:12px">No images attached.</div>';return `<section class="trade"><div class="meta"><div class="cell"><div class="k">Trade</div><div class="v">${item.tradeIndex}</div></div><div class="cell"><div class="k">Date</div><div class="v">${escHtml(t.trade_date||'—')}</div></div><div class="cell"><div class="k">Instrument</div><div class="v">${escHtml(t.instrument||'—')}</div></div><div class="cell"><div class="k">Result R</div><div class="v">${escHtml(rr)}</div></div><div class="cell"><div class="k">Result $</div><div class="v">${escHtml(amount)}</div></div></div><div class="meta" style="margin-top:8px"><div class="cell"><div class="k">Day trades</div><div class="v">${seq.count}</div></div><div class="cell"><div class="k">Trade order</div><div class="v">${seq.order||'—'} / ${seq.count}</div></div><div class="cell"><div class="k">Day sequence</div><div class="v">${escHtml(seq.sequence)}</div></div></div>${optional}${t.notes?`<div class="notes">${escHtml(t.notes)}</div>`:''}${imgs}</section>`;}).join('')}</div>
 <style id="pro-tools-v83-cycle-ui">
 .pf-inline-select{min-width:92px;border:1px solid #1a4861;background:#06131d;color:#eaf7ff;border-radius:7px;padding:7px 9px;font:inherit;font-size:10px;font-weight:850;outline:none;color-scheme:dark}
 .pf-inline-select:focus{border-color:#2a8fc2;box-shadow:0 0 0 2px rgba(42,143,194,.12)}
