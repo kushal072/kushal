@@ -838,7 +838,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v93">
+<body data-bluebird-build="v95">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -3133,6 +3133,46 @@ function localBlock(title,html,meta=''){return '<section class="ai-local-block">
 function localStrong(v){return '<strong>'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</strong>'}
 function localRangeMeta(range,stats){return (range.label||'Selected period')+' · '+stats.total+' trades · '+stats.day.days.length+' trading day'+(stats.day.days.length===1?'':'s')}
 function localScenarioResult(rows,n){const p=localScenario(rows,n),s=localStats(p);return {n,p,stats:s}}
+function bluebirdNormalizeQuestion(question){
+  let s=String(question||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
+  const nums={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,once:1,twice:2};
+  for(const [word,n] of Object.entries(nums))s=s.replace(new RegExp('\\b'+word+'\\b','g'),String(n));
+  return s.replace(/\bper[- ]?day\b/g,' per day ').replace(/\b(each|every)\s+day\b/g,' per day ').replace(/\ba\s+day\b/g,' per day ').replace(/\bdaily\b/g,' per day ').replace(/\s+/g,' ').trim();
+}
+function bluebirdDailyLimitFromQuestion(question){
+  const q=bluebirdNormalizeQuestion(question); let m=q.match(/\b(\d+)\s*(?:trade|trades)\s*(?:\/\s*)?per\s*day\b/);
+  if(m)return Math.max(1,Math.min(50,Number(m[1])));
+  m=q.match(/\b(?:first|only|just)\s+(\d+)\s*(?:trade|trades)\b[^.?!]{0,35}\bper\s*day\b/);
+  if(m)return Math.max(1,Math.min(50,Number(m[1])));
+  m=q.match(/\b(\d+)\s*(?:trade|trades)\b[^.?!]{0,35}\b(?:each|every)\s*day\b/);
+  if(m)return Math.max(1,Math.min(50,Number(m[1])));
+  if(/\bfirst\s+trade\b[^.?!]{0,25}\bper\s*day\b/.test(q))return 1;
+  m=q.match(/\b(?:once|twice)\s*(?:per|each)\s*day\b/); if(m)return m[0].includes('twice')?2:1;
+  m=q.match(/\b(\d+)\s*(?:\/\s*day)\b/); if(m)return Math.max(1,Math.min(50,Number(m[1])));
+  return null;
+}
+function bluebirdScenarioMetric(question){
+  const q=bluebirdNormalizeQuestion(question);
+  if(/win\s*rate|winning\s*percentage|percentage\s*(?:of|that)\s*wins?|how\s*often\s*(?:did|would).*win|how\s*many\s*(?:wins|winning trades)/.test(q))return 'winrate';
+  if(/total\s*r|net\s*r|how\s*much\s*r|total\s*result|overall\s*(?:result|return)|would\s*i\s*(?:be|have been)\s*(?:positive|profitable)/.test(q))return 'totalr';
+  if(/expectancy|average\s*r|avg\s*r|expected\s*r|average\s*result/.test(q))return 'expectancy';
+  if(/profit\s*factor|\bpf\b/.test(q))return 'pf';
+  if(/drawdown|\bdd\b|peak.?to.?trough/.test(q))return 'drawdown';
+  if(/how\s*many\s*trades|trade\s*count|number\s*of\s*trades/.test(q))return 'count';
+  if(/how\s*many\s*days|trading\s*days/.test(q))return 'days';
+  return 'summary';
+}
+function bluebirdScenarioAnswer(rows,n,question,meta){
+  const x=localScenarioResult(rows,n),s=x.stats,metric=bluebirdScenarioMetric(question),label=n===1?'1 trade/day':`${n} trades/day`;
+  const first='first '+n+' chronological recorded trade'+(n===1?'':'s')+' from each day';
+  if(metric==='winrate')return {html:localBlock('HISTORICAL '+label.toUpperCase(),'<p>If you had limited yourself to <strong>'+label+'</strong>, your historical win rate would have been <strong>'+localFormatPct(s.winRate)+'</strong>.</p><p>Using the '+first+'. Wins: <strong>'+s.wins+'</strong> · Losses: <strong>'+s.losses+'</strong> · Break-even: <strong>'+s.be+'</strong>.</p>',meta)};
+  if(metric==='totalr')return {html:localBlock('HISTORICAL '+label.toUpperCase(),'<p>Using the '+first+', the recorded result would have been <strong>'+(s.R>=0?'+':'')+fmt(s.R)+'R</strong>.</p><p>Average result: <strong>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R per trade</strong> · Win rate: <strong>'+localFormatPct(s.winRate)+'</strong>.</p>',meta)};
+  if(metric==='expectancy')return {html:localBlock('HISTORICAL '+label.toUpperCase(),'<p>Average result using the '+first+': <strong>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R per trade</strong>.</p><p>Average winner: <strong>+'+fmt(s.avgWin)+'R</strong> · Average loser: <strong>-'+fmt(s.avgLoss)+'R</strong>.</p>',meta)};
+  if(metric==='pf')return {html:localBlock('HISTORICAL '+label.toUpperCase(),'<p>Profit factor using the '+first+': <strong>'+(s.pf===Infinity?'∞ (no losing R)':s.pf.toFixed(2))+'</strong>.</p><p>Total R: <strong>'+(s.R>=0?'+':'')+fmt(s.R)+'R</strong> · Win rate: <strong>'+localFormatPct(s.winRate)+'</strong>.</p>',meta)};
+  if(metric==='drawdown')return {html:localBlock('HISTORICAL '+label.toUpperCase(),'<p>Maximum drawdown using the '+first+' was <strong>'+fmt(s.dd)+'R</strong>.</p><p>Total R: <strong>'+(s.R>=0?'+':'')+fmt(s.R)+'R</strong>.</p>',meta)};
+  if(metric==='count')return {html:localBlock('HISTORICAL '+label.toUpperCase(),'<p>This rule would have used <strong>'+s.total+' trades</strong> across <strong>'+s.day.days.length+' trading days</strong>.</p>',meta)};
+  return {html:localBlock('HISTORICAL '+label.toUpperCase(),'<p>Using the '+first+':</p><div class="ai-local-statgrid"><div><span>Win rate</span><b>'+localFormatPct(s.winRate)+'</b></div><div><span>Total R</span><b>'+(s.R>=0?'+':'')+fmt(s.R)+'R</b></div><div><span>Expectancy</span><b>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R</b></div><div><span>Profit factor</span><b>'+(s.pf===Infinity?'∞':s.pf.toFixed(2))+'</b></div><div><span>Trades</span><b>'+s.total+'</b></div><div><span>Max DD</span><b>'+fmt(s.dd)+'R</b></div></div>',meta)};
+}
 function localMonteCarlo(rows,question){
   const a=bluebirdSortRows(rows).map(t=>Number(t.result_r||0));if(!a.length)return null;
   let seed=2166136261>>>0;for(const ch of (question+':'+a.length+':'+localRowsR(rows)).slice(0,400)){seed^=ch.charCodeAt(0);seed=Math.imul(seed,16777619)>>>0}
@@ -3149,6 +3189,8 @@ function localAnswer(question){
   const picked=localRowsForQuestion(q),rows=picked.rows,range=picked.range;
   if(!rows.length)return {html:localBlock('NO RECORDED TRADES','<p>There are no recorded trades in <strong>'+String(range.label||'the selected period').replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</strong>.</p><p class="ai-local-note">Choose another date range or add trades to the journal.</p>')};
   const s=localStats(rows),meta=localRangeMeta(range,s);
+  const dailyLimit=bluebirdDailyLimitFromQuestion(q);
+  if(dailyLimit!==null)return bluebirdScenarioAnswer(rows,dailyLimit,q,meta);
   const compound=[];
   if(/win rate|winning percentage|percentage.*wins/.test(q))compound.push(localBlock('WIN RATE','<p>Your win rate is <strong>'+localFormatPct(s.winRate)+'</strong>.</p><p>Wins: <strong>'+s.wins+'</strong> · Losses: <strong>'+s.losses+'</strong> · Break-even: <strong>'+s.be+'</strong>.</p>','Win rate excludes break-even trades from the denominator.'));
   if(/total r|net r|how much r|r result/.test(q))compound.push(localBlock('TOTAL R','<p>Your total result is <strong>'+(s.R>=0?'+':'')+fmt(s.R)+'R</strong>.</p><p>Average result: <strong>'+(s.avg>=0?'+':'')+fmt(s.avg)+'R per trade</strong>.</p>'));
@@ -3222,7 +3264,7 @@ function localAnswer(question){
     return {html:localBlock('PATTERN-BASED DIAGNOSTIC','<p>Bluebird cannot prove a cause from journal data alone, but it can show where results differ.</p>'+groups.map(g=>'<p><strong>'+g.name+':</strong> '+g.rows.map(x=>String(x.key)+' '+(x.r>=0?'+':'')+fmt(x.r)+'R / '+localFormatPct(x.wr/100)).join(' · ')+'</p>').join(''), 'Associations in the journal are not proof of causation. · '+meta)};
   }
   if(/predict|next trade|will i win|tomorrow|future/.test(q))return {html:localBlock('HISTORICAL, NOT PREDICTIVE','<p>Bluebird cannot know the next trade outcome. It can calculate the historical frequency of what happened after the same conditions in your recorded journal.</p><p>Try: <strong>“What happened after 2 consecutive losses?”</strong> or ask about a specific session, setup, direction, or daily trade limit.</p>',meta)};
-  return {html:localBlock('BLUEBIRD CAN ANALYZE THIS','<p>I can calculate your journal directly. Try asking about win rate, total R, expectancy, profit factor, drawdown, streaks, what happened after N losses or wins, first 1–4 trades per day, sessions, setups, instruments, direction, tags, best/worst days, monthly or weekly results, R distribution, or historical resampling.</p>',meta)};
+  return {needsAI:true,html:localBlock('NEEDS DEEPER INTERPRETATION','<p>I could not confidently map that question to a journal calculation yet.</p><p>Bluebird will try one deeper AI interpretation. If that is unavailable, use <strong>Run AI Review</strong> once for a broader journal analysis.</p>',meta)};
 }
 function renderLocalBluebirdAnswer(result){return result?.html||'';}
 
@@ -3281,13 +3323,13 @@ async function askAIQuestion(){
   if(history){history.hidden=false;history.appendChild(loading);}
   try{
     const localResult=localAnswer(question);
-    if(localResult){
+    if(localResult && !localResult.needsAI){
       if(loading)loading.remove();
       appendAIAskHistory(question,renderLocalBluebirdAnswer(localResult),'Bluebird Intelligence',true);
       input.value='';
       return;
     }
-    if(loading)loading.innerHTML='<span>Bluebird is running a deeper interpretation of the selected journal period…</span>';
+    if(loading)loading.innerHTML='<span>Bluebird could not confidently map that question to a calculation. Trying one deeper AI interpretation…</span>';
     const range=localQuestionRange(question);
     const {data,error}=await sb.functions.invoke('ai-trading-review',{body:{fromDate:range.from||null,toDate:range.to||null,question}});
     if(error)throw error;
@@ -3298,7 +3340,7 @@ async function askAIQuestion(){
   }catch(err){
     console.error('Bluebird question error',err);
     const msg=String(err?.message||'The deeper review could not answer that question.');
-    if(loading)loading.innerHTML='<div class="ai-ask-history-error"><strong>Bluebird could not complete that deeper review.</strong><div style="margin-top:4px">'+msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div><div style="margin-top:7px;color:#b9cfda">The local Bluebird intelligence is still available for journal calculations and historical analysis.</div></div>';
+    if(loading)loading.innerHTML='<div class="ai-ask-history-error"><strong>Bluebird could not confidently answer that question.</strong><div style="margin-top:4px">'+msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div><div style="margin-top:7px;color:#b9cfda">Try rephrasing the question once, or use <strong>Run AI Review</strong> for a broader journal analysis.</div></div>';
   }finally{btn.disabled=false;btn.textContent='Ask Bluebird';}
 }
 
