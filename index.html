@@ -365,6 +365,15 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 #page-journal .journal-shot img{width:58px;height:40px;border-radius:6px;border:1px solid rgba(160,180,195,.14);background:#070a0c}
 #page-journal .journal-shot-count{font-size:8px;color:#7e8b94}
 #page-journal .journal-money{font-weight:800;color:#dce7eb}
+#page-journal .journal-money.pos{color:#36d99e!important}
+#page-journal .journal-money.neg{color:#ff6973!important}
+#page-journal #trades > table tbody tr td:nth-child(8).pos{color:#36d99e!important;font-weight:900}
+#page-journal #trades > table tbody tr td:nth-child(8).neg{color:#ff4d5f!important;font-weight:900}
+#page-journal #trades > table tbody tr td:nth-child(9).pos{color:#36d99e!important;font-weight:900}
+#page-journal #trades > table tbody tr td:nth-child(9).neg{color:#ff4d5f!important;font-weight:900}
+
+#page-journal #trades td.pos{color:#36d99e!important}
+#page-journal #trades td.neg{color:#ff6973!important}
 #page-journal .pos{color:#36d99e}.neg{color:#ff6973}
 #page-journal .trade-manage-left .trade-select{width:14px;height:14px}
 #page-journal #deleteSelectedTrades{border-radius:7px}
@@ -2490,7 +2499,7 @@ async function renderTrades(){
        `<td>${escHtml(t.instrument||'—')}</td>`+
        `<td>${escHtml(t.direction||'—')}</td>`+
        `<td class="${t.result_r>0?'pos':t.result_r<0?'neg':''}">${t.result_r===null||t.result_r===undefined?'—':((t.result_r>=0?'+':'')+fmt(t.result_r)+'R')}</td>`+
-       `<td class="journal-money">${moneyText}</td>`+
+       `<td class="journal-money ${Number(t.result_usd)>0?'pos':Number(t.result_usd)<0?'neg':''}">${moneyText}</td>`+
        `<td>${escHtml(t.setup||'—')}</td>`+
        `<td>${escHtml(t.session||'—')}</td>`+
        `<td>${shotHtml}</td>`+
