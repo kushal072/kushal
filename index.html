@@ -30,7 +30,26 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;border-bottom:1px solid #102c40;text-align:left}th{font-size:8px;color:#74899a}
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.calh{text-align:center;color:#87a0b3;font-size:10px;font-weight:900;padding:6px}.month-total{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:12px;padding-top:11px;border-top:1px solid #12344e}.month-total .mt-box{border:1px solid #123f5d;background:#06131f;border-radius:7px;padding:10px 12px}.month-total .mt-label{display:block;font-size:9px;font-weight:900;color:#8aa2b4;margin-bottom:5px}.month-total .mt-value{font-size:19px;font-weight:950;color:#edf6ff}.month-total .mt-r{color:#17e99f}.month-total .mt-cash{color:#2aaaff}.month-total .mt-cash.neg{color:#ff4d5f}.calendar-card{padding:16px}.calendar-month-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-month-title{font-size:18px;font-weight:950;letter-spacing:.2px}.cald{min-height:112px;border:1px solid #113249;background:#06111a;border-radius:6px;padding:9px}.cald .num{font-size:10px;font-weight:900;color:#8aa2b4}.cald .cash{font-size:18px;font-weight:950;margin-top:15px;line-height:1.05;white-space:nowrap}.cald .rrsmall{font-size:10px;font-weight:800;margin-top:5px;color:#8ba1b2;line-height:1.25}.cald.pos{border-color:#0b6145;background:#06241b}.cald.neg{border-color:#651821;background:#22090e}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{border:1px solid #11334d;background:#06111a;padding:11px;border-radius:6px}.metric span{display:block;font-size:8px;color:#718799}.metric strong{display:block;font-size:15px;margin-top:4px}
-.analytics-filter-card{background:linear-gradient(180deg,#081725,#040b12);border-color:#1a4260;box-shadow:0 16px 42px #0009;padding:16px}.analytics-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}.analytics-title{margin:5px 0 3px;font-size:26px;font-weight:950;letter-spacing:-.8px;line-height:1.05}.analytics-range-label{font-size:10px;color:#91a7b8;font-weight:700;letter-spacing:.1px}.analytics-filter-row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.analytics-filter-field{min-width:180px}.analytics-filter-field label,.analytics-custom-range .field label{font-size:8px!important;letter-spacing:.9px!important;color:#8ca5b8!important;font-weight:950!important}.analytics-filter-field .select,.analytics-custom-range .input{height:39px;border-color:#18435e;background:#050c13;font-size:12px;font-weight:850}.analytics-custom-range{display:flex;align-items:flex-end;gap:7px}.analytics-custom-range .field{min-width:145px}.analytics-apply{height:39px;padding:0 13px}.analytics-summary-card{padding:11px;background:#040b12;border-color:#122e44;box-shadow:0 14px 36px #0008}.analytics-metrics{grid-template-columns:repeat(5,1fr)}.analytics-metrics .metric{min-height:79px;padding:12px 13px;background:linear-gradient(180deg,#07141f,#041018);border-color:#163b56;border-radius:7px}.analytics-metrics .metric span{font-size:8px;letter-spacing:.75px;font-weight:950;color:#8097aa}.analytics-metrics .metric strong{font-size:19px;letter-spacing:-.2px;font-weight:950;line-height:1.05}.analytics-metrics .metric:nth-child(3) strong,.analytics-metrics .metric:nth-child(4) strong{font-size:21px}.analytics-chart-card{padding:16px;background:linear-gradient(180deg,#07141e,#030a10);border-color:#173d58;box-shadow:0 16px 42px #0009}.analytics-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.analytics-chart-head h3{font-size:10px!important;letter-spacing:1.1px!important;color:#d7ecfb!important;font-weight:950!important}.analytics-chart-meta{font-size:9px;color:#73899b;margin-top:5px;font-weight:650}.analytics-chart-result{font-size:24px;font-weight:950;letter-spacing:-.5px}.analytics-chart{height:340px;margin-top:14px;border:1px solid #102f46;border-radius:8px;background:radial-gradient(circle at 50% 0,#0a1b28 0,#040b12 55%,#02070b 100%);position:relative;overflow:hidden}.analytics-chart svg{display:block;width:100%;height:100%}.analytics-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#718799;font-size:11px;text-align:center;padding:20px;font-weight:700}.analytics-summary-card .metric:nth-child(3){box-shadow:inset 0 0 0 1px #0f4b3a}.analytics-summary-card .metric:nth-child(4){box-shadow:inset 0 0 0 1px #16486a}
+.analytics-filter-card{background:linear-gradient(180deg,#081725,#040b12);border-color:#1a4260;box-shadow:0 16px 42px #0009;padding:16px}.analytics-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}.analytics-title{margin:5px 0 3px;font-size:26px;font-weight:950;letter-spacing:-.8px;line-height:1.05}.analytics-range-label{font-size:10px;color:#91a7b8;font-weight:700;letter-spacing:.1px}.analytics-filter-row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.analytics-filter-field{min-width:180px}.analytics-filter-field label,.analytics-custom-range .field label{font-size:8px!important;letter-spacing:.9px!important;color:#8ca5b8!important;font-weight:950!important}.analytics-filter-field .select,.analytics-custom-range .input{height:39px;border-color:#18435e;background:#050c13;font-size:12px;font-weight:850}.analytics-custom-range{display:flex;align-items:flex-end;gap:7px}.analytics-custom-range .field{min-width:145px}.analytics-apply{height:39px;padding:0 13px}
+.custom-date-picker{position:fixed;z-index:80;width:292px;padding:12px;border:1px solid #1a4e6c;background:linear-gradient(180deg,#071725,#040c12);border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.55);color:#eaf7ff}
+.custom-date-picker[hidden],.custom-date-picker.hidden{display:none!important}
+.custom-date-picker-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.custom-date-picker-title{font-size:12px;font-weight:950;letter-spacing:.2px}
+.custom-date-picker-nav{display:flex;gap:5px}
+.custom-date-picker-nav button{width:30px;height:30px;padding:0;border:1px solid #1b4b66;background:#06141f;color:#ccecff;border-radius:7px;font-weight:900;cursor:pointer}
+.custom-date-picker-nav button:hover{border-color:#2c84b1;background:#092033}
+.custom-date-picker-week,.custom-date-picker-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.custom-date-picker-week{margin-bottom:4px}
+.custom-date-picker-week span{font-size:8px;color:#71899a;text-align:center;font-weight:950;letter-spacing:.6px;padding:4px 0}
+.custom-date-picker-day{height:34px;border:1px solid #12354b;background:#06131e;color:#d7e8f0;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer}
+.custom-date-picker-day:hover{border-color:#2b90c2;background:#0a2233;color:#fff}
+.custom-date-picker-day.is-today{border-color:#2679a4;color:#7fd5ff}
+.custom-date-picker-day.is-selected{border-color:#19c99a;background:#07352b;color:#65efc2;box-shadow:inset 0 0 0 1px rgba(25,201,154,.18)}
+.custom-date-picker-day.is-outside{visibility:hidden;pointer-events:none}
+.date-picker-trigger{width:100%;height:39px;border:1px solid #18435e;background:#050c13;color:#c7dbe6;border-radius:7px;padding:0 11px;font:inherit;font-size:12px;font-weight:850;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.date-picker-trigger::after{content:'▾';font-size:10px;color:#7190a2}
+.date-picker-trigger:hover,.date-picker-trigger.is-open{border-color:#2c8ab8;background:#071724;color:#edf9ff}
+.analytics-summary-card{padding:11px;background:#040b12;border-color:#122e44;box-shadow:0 14px 36px #0008}.analytics-metrics{grid-template-columns:repeat(5,1fr)}.analytics-metrics .metric{min-height:79px;padding:12px 13px;background:linear-gradient(180deg,#07141f,#041018);border-color:#163b56;border-radius:7px}.analytics-metrics .metric span{font-size:8px;letter-spacing:.75px;font-weight:950;color:#8097aa}.analytics-metrics .metric strong{font-size:19px;letter-spacing:-.2px;font-weight:950;line-height:1.05}.analytics-metrics .metric:nth-child(3) strong,.analytics-metrics .metric:nth-child(4) strong{font-size:21px}.analytics-chart-card{padding:16px;background:linear-gradient(180deg,#07141e,#030a10);border-color:#173d58;box-shadow:0 16px 42px #0009}.analytics-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.analytics-chart-head h3{font-size:10px!important;letter-spacing:1.1px!important;color:#d7ecfb!important;font-weight:950!important}.analytics-chart-meta{font-size:9px;color:#73899b;margin-top:5px;font-weight:650}.analytics-chart-result{font-size:24px;font-weight:950;letter-spacing:-.5px}.analytics-chart{height:340px;margin-top:14px;border:1px solid #102f46;border-radius:8px;background:radial-gradient(circle at 50% 0,#0a1b28 0,#040b12 55%,#02070b 100%);position:relative;overflow:hidden}.analytics-chart svg{display:block;width:100%;height:100%}.analytics-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#718799;font-size:11px;text-align:center;padding:20px;font-weight:700}.analytics-summary-card .metric:nth-child(3){box-shadow:inset 0 0 0 1px #0f4b3a}.analytics-summary-card .metric:nth-child(4){box-shadow:inset 0 0 0 1px #16486a}
 
 
 /* Analytics v35: smoother equity curve, adaptive date axis and hover tooltip */
@@ -365,15 +384,6 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 #page-journal .journal-shot img{width:58px;height:40px;border-radius:6px;border:1px solid rgba(160,180,195,.14);background:#070a0c}
 #page-journal .journal-shot-count{font-size:8px;color:#7e8b94}
 #page-journal .journal-money{font-weight:800;color:#dce7eb}
-#page-journal .journal-money.pos{color:#36d99e!important}
-#page-journal .journal-money.neg{color:#ff6973!important}
-#page-journal #trades > table tbody tr td:nth-child(8).pos{color:#36d99e!important;font-weight:900}
-#page-journal #trades > table tbody tr td:nth-child(8).neg{color:#ff4d5f!important;font-weight:900}
-#page-journal #trades > table tbody tr td:nth-child(9).pos{color:#36d99e!important;font-weight:900}
-#page-journal #trades > table tbody tr td:nth-child(9).neg{color:#ff4d5f!important;font-weight:900}
-
-#page-journal #trades td.pos{color:#36d99e!important}
-#page-journal #trades td.neg{color:#ff6973!important}
 #page-journal .pos{color:#36d99e}.neg{color:#ff6973}
 #page-journal .trade-manage-left .trade-select{width:14px;height:14px}
 #page-journal #deleteSelectedTrades{border-radius:7px}
@@ -847,7 +857,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v105">
+<body data-bluebird-build="v108">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -956,10 +966,11 @@ select option{background-color:#061522!important;color:#eef8ff!important}
         <option value="custom">Custom range</option>
       </select></div>
       <div id="analyticsCustomRange" class="analytics-custom-range hidden">
-        <div class="field"><label>FROM</label><input id="analyticsFrom" class="input" type="date"></div>
-        <div class="field"><label>TO</label><input id="analyticsTo" class="input" type="date"></div>
+        <div class="field"><label>FROM</label><button class="date-picker-trigger" id="analyticsFromPicker" type="button" data-date-picker="analyticsFrom">Select date</button><input id="analyticsFrom" type="hidden" value=""></div>
+        <div class="field"><label>TO</label><button class="date-picker-trigger" id="analyticsToPicker" type="button" data-date-picker="analyticsTo">Select date</button><input id="analyticsTo" type="hidden" value=""></div>
         <button class="btn primary analytics-apply" id="analyticsApply" type="button">Apply</button>
       </div>
+      <div id="analyticsDatePicker" class="custom-date-picker hidden" aria-hidden="true"></div>
     </div>
   </div>
 </div>
@@ -2499,7 +2510,7 @@ async function renderTrades(){
        `<td>${escHtml(t.instrument||'—')}</td>`+
        `<td>${escHtml(t.direction||'—')}</td>`+
        `<td class="${t.result_r>0?'pos':t.result_r<0?'neg':''}">${t.result_r===null||t.result_r===undefined?'—':((t.result_r>=0?'+':'')+fmt(t.result_r)+'R')}</td>`+
-       `<td class="journal-money ${Number(t.result_usd)>0?'pos':Number(t.result_usd)<0?'neg':''}">${moneyText}</td>`+
+       `<td class="journal-money">${moneyText}</td>`+
        `<td>${escHtml(t.setup||'—')}</td>`+
        `<td>${escHtml(t.session||'—')}</td>`+
        `<td>${shotHtml}</td>`+
@@ -4017,8 +4028,80 @@ function updateDaySequenceMeta(){
 }
 if(daySequenceInput)daySequenceInput.addEventListener('input',updateDaySequenceMeta);
 
+
+const bluebirdDatePicker={target:null,month:new Date(),positioned:false};
+function bluebirdIsoToDate(v){
+  const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3])):null;
+}
+function bluebirdPad(n){return String(n).padStart(2,'0')}
+function bluebirdDateKey(d){return `${d.getFullYear()}-${bluebirdPad(d.getMonth()+1)}-${bluebirdPad(d.getDate())}`}
+function bluebirdFormatPickerDate(v){
+  const d=bluebirdIsoToDate(v); if(!d)return 'Select date';
+  return d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+}
+function bluebirdPositionPicker(trigger){
+  const picker=$('analyticsDatePicker'); if(!picker||!trigger)return;
+  picker.style.visibility='hidden'; picker.classList.remove('hidden');
+  const r=trigger.getBoundingClientRect(),pw=picker.offsetWidth||292,ph=picker.offsetHeight||330;
+  let left=Math.min(Math.max(8,r.left),window.innerWidth-pw-8);
+  let top=r.bottom+8;
+  if(top+ph>window.innerHeight-8)top=Math.max(8,r.top-ph-8);
+  picker.style.left=`${left}px`;picker.style.top=`${top}px`;picker.style.visibility='visible';
+}
+function bluebirdRenderDatePicker(){
+  const picker=$('analyticsDatePicker'); if(!picker||!bluebirdDatePicker.target)return;
+  const target=$(`${bluebirdDatePicker.target}`),selected=target?.value||'';
+  const view=new Date(bluebirdDatePicker.month.getFullYear(),bluebirdDatePicker.month.getMonth(),1);
+  const year=view.getFullYear(),month=view.getMonth();
+  const monthName=view.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  const first=new Date(year,month,1).getDay();
+  const days=new Date(year,month+1,0).getDate();
+  const today=bluebirdDateKey(new Date());
+  const week=['SU','MO','TU','WE','TH','FR','SA'];
+  const cells=[];
+  for(let i=0;i<first;i++)cells.push('<button class="custom-date-picker-day is-outside" type="button" tabindex="-1"></button>');
+  for(let day=1;day<=days;day++){
+    const key=bluebirdDateKey(new Date(year,month,day));
+    const cls=['custom-date-picker-day'];
+    if(key===today)cls.push('is-today');
+    if(key===selected)cls.push('is-selected');
+    cells.push(`<button class="${cls.join(' ')}" type="button" data-picker-date="${key}">${day}</button>`);
+  }
+  picker.innerHTML=`<div class="custom-date-picker-head"><strong class="custom-date-picker-title">${monthName}</strong><div class="custom-date-picker-nav"><button type="button" data-picker-prev aria-label="Previous month">←</button><button type="button" data-picker-next aria-label="Next month">→</button></div></div><div class="custom-date-picker-week">${week.map(x=>`<span>${x}</span>`).join('')}</div><div class="custom-date-picker-days">${cells.join('')}</div>`;
+  picker.querySelector('[data-picker-prev]').onclick=()=>{bluebirdDatePicker.month.setMonth(bluebirdDatePicker.month.getMonth()-1);bluebirdRenderDatePicker();bluebirdPositionPicker(document.getElementById(bluebirdDatePicker.target+'Picker'));};
+  picker.querySelector('[data-picker-next]').onclick=()=>{bluebirdDatePicker.month.setMonth(bluebirdDatePicker.month.getMonth()+1);bluebirdRenderDatePicker();bluebirdPositionPicker(document.getElementById(bluebirdDatePicker.target+'Picker'));};
+  picker.querySelectorAll('[data-picker-date]').forEach(btn=>btn.onclick=()=>{
+    target.value=btn.dataset.pickerDate;
+    const trigger=document.getElementById(bluebirdDatePicker.target+'Picker');
+    if(trigger)trigger.textContent=bluebirdFormatPickerDate(target.value);
+    picker.classList.add('hidden'); picker.setAttribute('aria-hidden','true');
+    if(bluebirdDatePicker.target==='analyticsFrom' || bluebirdDatePicker.target==='analyticsTo'){
+      const from=$('analyticsFrom')?.value||'',to=$('analyticsTo')?.value||'';
+      if(from&&to&&from>to)toast('From date must be before To date.');
+    }
+  });
+}
+function bluebirdOpenDatePicker(targetId){
+  const target=$(targetId),trigger=$(targetId+'Picker'),picker=$('analyticsDatePicker'); if(!target||!trigger||!picker)return;
+  bluebirdDatePicker.target=targetId;
+  bluebirdDatePicker.month=bluebirdIsoToDate(target.value)||new Date();
+  if(!target.value)bluebirdDatePicker.month=new Date();
+  bluebirdRenderDatePicker();picker.setAttribute('aria-hidden','false');bluebirdPositionPicker(trigger);trigger.classList.add('is-open');
+}
+function bluebirdCloseDatePicker(){
+  const picker=$('analyticsDatePicker'); if(picker)picker.classList.add('hidden');
+  if(bluebirdDatePicker.target){const trigger=$(bluebirdDatePicker.target+'Picker');if(trigger)trigger.classList.remove('is-open');}
+  bluebirdDatePicker.target=null;
+}
+['analyticsFromPicker','analyticsToPicker'].forEach(id=>{const b=$(id);if(b)b.onclick=e=>{e.preventDefault();e.stopPropagation();const target=b.dataset.datePicker;if(bluebirdDatePicker.target===target && !$('analyticsDatePicker')?.classList.contains('hidden'))bluebirdCloseDatePicker();else bluebirdOpenDatePicker(target);};});
+document.addEventListener('click',e=>{const picker=$('analyticsDatePicker');if(!picker||picker.classList.contains('hidden'))return;if(e.target.closest('#analyticsDatePicker')||e.target.closest('#analyticsFromPicker')||e.target.closest('#analyticsToPicker'))return;bluebirdCloseDatePicker();});
+window.addEventListener('resize',()=>{if(bluebirdDatePicker.target){bluebirdPositionPicker($(bluebirdDatePicker.target+'Picker'));}});
+window.addEventListener('scroll',()=>{if(bluebirdDatePicker.target){bluebirdPositionPicker($(bluebirdDatePicker.target+'Picker'));}},true);
+
 const analyticsPeriod=$('analyticsPeriod');
 if(analyticsPeriod)analyticsPeriod.addEventListener('change',()=>{const custom=$('analyticsCustomRange');if(custom)custom.classList.toggle('hidden',analyticsPeriod.value!=='custom');renderAnalytics();});
+['analyticsFrom','analyticsTo'].forEach(id=>{const input=$(id),trigger=$(id+'Picker');if(input&&trigger)trigger.textContent=bluebirdFormatPickerDate(input.value);});
 const analyticsApply=$('analyticsApply');
 if(analyticsApply)analyticsApply.onclick=()=>{const from=$('analyticsFrom')?.value||'',to=$('analyticsTo')?.value||'';if(!from||!to){toast('Choose both From and To dates.');return}if(from>to){toast('From date must be before To date.');return}renderAnalytics();};
 if($('analyticsFrom'))$('analyticsFrom').addEventListener('change',()=>{if($('analyticsPeriod')?.value==='custom')renderAnalytics()});
