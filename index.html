@@ -383,7 +383,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:7px 5px;bo
 #page-journal .seq-token.current{box-shadow:0 0 0 2px rgba(61,128,255,.28);transform:none}
 #page-journal .journal-shot img{width:58px;height:40px;border-radius:6px;border:1px solid rgba(160,180,195,.14);background:#070a0c}
 #page-journal .journal-shot-count{font-size:8px;color:#7e8b94}
-#page-journal .journal-money{font-weight:800;color:#dce7eb}
+#page-journal .journal-money{font-weight:800;color:#dce7eb}#page-journal table tbody td.pos{color:#36d99e!important;font-weight:900}#page-journal table tbody td.neg{color:#ff6973!important;font-weight:900}#page-journal table tbody td.journal-money.pos{color:#36d99e!important}#page-journal table tbody td.journal-money.neg{color:#ff6973!important}
 #page-journal .pos{color:#36d99e}.neg{color:#ff6973}
 #page-journal .trade-manage-left .trade-select{width:14px;height:14px}
 #page-journal #deleteSelectedTrades{border-radius:7px}
@@ -857,7 +857,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v108">
+<body data-bluebird-build="v109">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -2509,8 +2509,8 @@ async function renderTrades(){
        `<td class="sequence-col">${seqHtml||'<span class="muted-dash">—</span>'}</td>`+
        `<td>${escHtml(t.instrument||'—')}</td>`+
        `<td>${escHtml(t.direction||'—')}</td>`+
-       `<td class="${t.result_r>0?'pos':t.result_r<0?'neg':''}">${t.result_r===null||t.result_r===undefined?'—':((t.result_r>=0?'+':'')+fmt(t.result_r)+'R')}</td>`+
-       `<td class="journal-money">${moneyText}</td>`+
+       `<td class="${t.result_r>0?'pos':t.result_r<0?'neg':''}" style="color:${Number(t.result_r)>0?'#36d99e':Number(t.result_r)<0?'#ff6973':'#dfe6ea'}">${t.result_r===null||t.result_r===undefined?'—':((t.result_r>=0?'+':'')+fmt(t.result_r)+'R')}</td>`+
+       `<td class="journal-money ${Number(moneyValue)>0?'pos':Number(moneyValue)<0?'neg':''}" style="color:${Number(moneyValue)>0?'#36d99e':Number(moneyValue)<0?'#ff6973':'#dce7eb'}">${moneyText}</td>`+
        `<td>${escHtml(t.setup||'—')}</td>`+
        `<td>${escHtml(t.session||'—')}</td>`+
        `<td>${shotHtml}</td>`+
@@ -2589,7 +2589,7 @@ function renderCalendar(){
    const rText=(monthR>=0?"+":"")+fmt(monthR)+"R";
    monthTotal.innerHTML=
      `<div class="mt-box"><span class="mt-label">MONTH TOTAL $</span><span class="mt-value mt-cash ${monthUsd<0?"neg":""}">${cashText}</span></div>`+
-     `<div class="mt-box"><span class="mt-label">MONTH TOTAL R</span><span class="mt-value mt-r">${rText}</span></div>`+
+     `<div class="mt-box"><span class="mt-label">MONTH TOTAL R</span><span class="mt-value mt-r" style="color:${monthR>0?'#17e99f':monthR<0?'#ff4d5f':'#edf6ff'}">${rText}</span></div>`+
      `<div class="mt-box"><span class="mt-label">TRADES</span><span class="mt-value">${monthTrades}</span></div>`;
  }
 
@@ -2624,8 +2624,8 @@ function renderCalendar(){
 
      c.innerHTML=
        '<div class="num">'+day+'</div>' +
-       '<div class="cash">'+cashText+'</div>' +
-       '<div class="rrsmall">'+rrText+tradeText+'</div>';
+       '<div class="cash" style="color:'+(cash<0?'#ff4d5f':cash>0?'#36d99e':'#edf6ff')+'">'+cashText+'</div>' +
+       '<div class="rrsmall" style="color:'+(data.r<0?'#ff4d5f':data.r>0?'#36d99e':'#8ba1b2')+'">'+rrText+tradeText+'</div>';
    }else{
      c.innerHTML='<div class="num">'+day+'</div>';
    }
