@@ -857,7 +857,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v110">
+<body data-bluebird-build="v111">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -885,7 +885,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <div class="card">
   <div class="controls">
     <div class="field"><label>INSTRUMENT</label><select id="instrument" class="select"><option>NQ mini ($20/pt)</option><option>MNQ ($2/pt)</option><option>ES mini ($50/pt)</option><option>GC ($100/pt)</option></select></div>
-    <div class="field"><label>MAX TRADES / DAY</label><input id="maxTrades" class="input" value="3" type="number" min="1"></div>
+    <div class="field"><label>MAX TRADES / DAY</label><input id="maxTrades" class="input" value="1" type="number" min="1"></div>
     <div class="field"><label>RISK-TO-REWARD</label><input id="rr" class="input" value="1.5" type="number" min=".1" step=".1"></div>
     <div class="field"><label>WIN RATE</label><div style="display:flex;gap:4px;align-items:center"><input id="winRate" class="input" value="60" type="number" min="0" max="100" step="1" style="flex:1"><span style="font-size:11px;color:#8fa6b8">%</span></div></div>
     <div class="field"><label>1R =</label><input id="oneR" class="input" value="500" type="number" min="1" step="25"></div>
@@ -977,10 +977,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <div class="card analytics-summary-card" style="margin-top:10px"><div id="analytics" class="metrics analytics-metrics"></div></div>
 <div class="card analytics-chart-card" style="margin-top:10px"><div class="analytics-chart-head"><div><div class="smallbrand" style="font-size:8px;letter-spacing:2px">EQUITY CURVE</div><h3 style="font-size:11px;color:#d9efff;margin:3px 0 0">Cumulative journal performance</h3><div id="analyticsChartMeta" class="analytics-chart-meta">Cumulative R for the selected period</div></div><div id="analyticsChartResult" class="analytics-chart-result pos">+0R</div></div><div class="analytics-chart-wrap"><div id="journalCurve" class="chart analytics-chart"></div></div></div>
 
-<div class="grid2" style="margin-top:10px">
-<div class="card"><div style="padding:2px"><div class="pro-kicker">SIMULATOR</div><h3 style="font-size:15px;margin:6px 0 4px;color:#eef8ff">Monte Carlo</h3><p style="font-size:9px;color:#849cab;line-height:1.5;margin:0 0 9px">Run thousands of possible future paths from your journal results.</p><button class="btn primary" data-nav="simulator">Open Simulator</button></div></div>
-<div class="card"><div style="padding:2px"><div class="pro-kicker">SIMULATOR</div><h3 style="font-size:15px;margin:6px 0 4px;color:#eef8ff">Prop Firm Simulator</h3><p style="font-size:9px;color:#849cab;line-height:1.5;margin:0 0 9px">Test your recorded statistics against evaluation, drawdown and payout rules.</p><button class="btn primary" data-nav="simulator">Open Simulator</button></div></div>
-</div>
+<div class="card" style="margin-top:10px"><div style="padding:2px"><div class="pro-kicker">SIMULATOR</div><h3 style="font-size:15px;margin:6px 0 4px;color:#eef8ff">Prop Firm Simulator</h3><p style="font-size:9px;color:#849cab;line-height:1.5;margin:0 0 9px">Test your recorded statistics against evaluation, drawdown and payout rules.</p><button class="btn primary" data-nav="simulator">Open Simulator</button></div></div>
 </section>
 
 <section id="page-simulator" class="page">
@@ -1071,83 +1068,9 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 .pro-tool-placeholder{border:1px dashed #173c52;background:#06111a;border-radius:7px;color:#708796;font-size:9px;line-height:1.5;padding:11px;}
 </style>
 <div class="pro-hero">
-<div class="pro-hero-main"><div class="pro-kicker">BLUEBIRD SIMULATOR</div><div class="pro-title">Test your trading statistics with <span>real journal data.</span></div><div class="pro-sub">Use Monte Carlo and the Prop Firm Simulator to explore possible outcomes, drawdown paths and evaluation-to-payout journeys from the data you enter.</div><div class="pro-badges"><span class="pro-badge">Free</span><span class="pro-badge">Monte Carlo</span><span class="pro-badge">Prop firm rules</span><span class="pro-badge">Journal data</span></div></div><div class="pro-status"><div class="pro-status-top"><span class="pro-status-label">SIMULATOR ACCESS</span><span class="pro-status-pill active">FREE</span></div><div><div class="pro-status-value">Fully unlocked</div><div class="pro-status-text">Monte Carlo and Prop Firm Simulator are available without a subscription.</div></div></div></div>
+<div class="pro-hero-main"><div class="pro-kicker">BLUEBIRD SIMULATOR</div><div class="pro-title">Test your trading statistics with <span>real journal data.</span></div><div class="pro-sub">Use the Prop Firm Simulator to model evaluation, funded-buffer and payout journeys from your journal data.</div><div class="pro-badges"><span class="pro-badge">Free</span><span class="pro-badge">Prop firm rules</span><span class="pro-badge">Journal data</span></div></div><div class="pro-status"><div class="pro-status-top"><span class="pro-status-label">SIMULATOR ACCESS</span><span class="pro-status-pill active">FREE</span></div><div><div class="pro-status-value">Fully unlocked</div><div class="pro-status-text">Prop Firm Simulator is available without a subscription.</div></div></div></div>
 
 <div class="pro-tools" id="proTools">
-  <div class="pro-tool-switcher" role="tablist" aria-label="Simulator analysis tools">
-    <button class="pro-tool-switch active" type="button" role="tab" aria-selected="true" data-pro-tool="monteCarloTool">
-      <span class="pro-tool-switch-icon" aria-hidden="true">MC</span>
-      <span class="pro-tool-switch-copy"><span class="pro-tool-switch-title">Monte Carlo</span><span class="pro-tool-switch-sub">Explore a range of possible equity paths</span></span>
-      <span class="pro-tool-switch-arrow" aria-hidden="true">→</span>
-    </button>
-    <button class="pro-tool-switch" type="button" role="tab" aria-selected="false" data-pro-tool="propSimTool">
-      <span class="pro-tool-switch-icon pro-tool-switch-icon-pf" aria-hidden="true">PF</span>
-      <span class="pro-tool-switch-copy"><span class="pro-tool-switch-title">Prop Firm Simulator</span><span class="pro-tool-switch-sub">Model the journey from evaluation to payout-ready</span></span>
-      <span class="pro-tool-switch-arrow" aria-hidden="true">→</span>
-    </button>
-  </div>
-  <div class="pro-tool-card" id="monteCarloTool">
-    <div class="pro-tool-head">
-      <div>
-        <div class="pro-tool-kicker">SIMULATOR</div>
-        <h3 class="pro-tool-title">Monte Carlo</h3>
-        <p class="pro-tool-sub">Model a range of possible equity paths using your journal history or a clean strategy model.</p>
-      </div>
-      <span class="pro-tool-badge">SCENARIO TOOL</span>
-    </div>
-
-    <div class="pro-tool-source">
-      <label>BUILD FROM</label>
-      <select id="mcSourceMode" class="pro-tool-source-select">
-        <option value="journal">Journal history</option>
-        <option value="strategy">Strategy model</option>
-      </select>
-      <span class="pro-tool-source-help">Use recorded results or define a clean statistical model.</span>
-    </div>
-
-    <div id="mcJournalInputs" class="pro-tool-controls">
-      <div class="pro-tool-field"><label>FROM DATE</label><input id="mcFrom" type="date"></div>
-      <div class="pro-tool-field"><label>TO DATE</label><input id="mcTo" type="date"></div>
-      <div class="pro-tool-field"><label>SIMULATIONS</label><input id="mcRuns" type="number" min="100" max="10000" step="100" value="2000"></div>
-      <div class="pro-tool-field"><label>TRADES / PATH</label><input id="mcTrades" type="number" min="1" max="500" step="1" value="100"></div>
-      <div class="pro-tool-field"><label>RISK / TRADE ($)</label><input id="mcRisk" type="number" min="1" step="1" value="250"></div>
-      <div class="pro-tool-field"><label>STARTING BALANCE ($)</label><input id="mcStart" type="number" min="0" step="100" value="50000"></div>
-    </div>
-
-    <div id="mcStrategyInputs" class="pro-tool-controls" hidden>
-      <div class="pro-tool-field"><label>WIN RATE (%)</label><input id="mcWinRate" type="number" min="0" max="100" step="0.1" value="60"></div>
-      <div class="pro-tool-field"><label>RISK : REWARD</label><input id="mcRR" type="number" min="0.1" max="20" step="0.1" value="1.5"></div>
-      <div class="pro-tool-field"><label>MAX TRADES / DAY</label><input id="mcMaxTrades" type="number" min="1" max="20" step="1" value="3"></div>
-      <div class="pro-tool-field"><label>TRADING DAYS</label><input id="mcDays" type="number" min="1" max="3650" step="1" value="30"></div>
-      <div class="pro-tool-field"><label>SIMULATIONS</label><input id="mcStrategyRuns" type="number" min="100" max="10000" step="100" value="2000"></div>
-      <div class="pro-tool-field"><label>RISK / TRADE ($)</label><input id="mcStrategyRisk" type="number" min="1" step="1" value="250"></div>
-      <div class="pro-tool-field"><label>STARTING BALANCE ($)</label><input id="mcStrategyStart" type="number" min="0" step="100" value="50000"></div>
-    </div>
-
-    <div class="pro-tool-actions">
-      <button class="btn primary" id="runMonteCarlo" type="button">Run Monte Carlo</button>
-      <button class="btn" id="clearMonteCarlo" type="button">Reset</button>
-    </div>
-
-    <div class="pro-tool-results" id="mcResults">
-      <div class="pro-tool-result-title">SCENARIO RESULTS</div>
-      <div class="pro-tool-placeholder" id="mcPlaceholder">Run Monte Carlo to generate the scenario results here.</div>
-      <div id="mcResultBody" hidden>
-        <div class="pro-tool-metrics">
-          <div class="pro-tool-metric"><span>Median final R</span><b id="mcMedianR">—</b></div>
-          <div class="pro-tool-metric" data-dynamic-tone="true"><span title="The result near the stronger end of the simulated outcomes">Higher-end result</span><b id="mcP95R">—</b></div>
-          <div class="pro-tool-metric" data-dynamic-tone="true"><span title="The result near the weaker end of the simulated outcomes">Lower-end result</span><b id="mcP5R">—</b></div>
-          <div class="pro-tool-metric"><span>Chance positive</span><b id="mcPositive">—</b></div>
-          <div class="pro-tool-metric warn"><span>Median max DD</span><b id="mcDD">—</b></div>
-          <div class="pro-tool-metric"><span>Samples</span><b id="mcSamples">—</b></div>
-        </div>
-        <div class="pro-tool-chart"><canvas id="mcCanvas" width="900" height="190"></canvas></div>
-        <div class="pro-tool-note" id="mcSourceNote"></div>
-      </div>
-    </div>
-    <div class="pro-lock" id="mcLock" hidden>Monte Carlo is a Pro feature. Activate Pro to use the tool.</div>
-  </div>
-
   <div class="pro-tool-card" id="propSimTool" hidden>
     <div class="pro-tool-head">
       <div>
@@ -1196,7 +1119,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
         <div class="pf-grid">
           <div class="pf-field"><label>WIN RATE (%)</label><input id="pfWinRate" type="number" min="0" max="100" step="0.1" value="60"></div>
           <div class="pf-field"><label>RISK : REWARD</label><input id="pfRR" type="number" min="0.1" max="20" step="0.1" value="1.5"></div>
-          <div class="pf-field"><label>TRADES / DAY</label><input id="pfMaxTrades" type="number" min="1" max="20" step="1" value="3"></div>
+          <div class="pf-field"><label>TRADES / DAY</label><input id="pfMaxTrades" type="number" min="1" max="20" step="1" value="1"></div>
           <div class="pf-field"><label>RISK / TRADE ($)</label><input id="pfStrategyRisk" type="number" min="1" step="1" value="250"></div>
           <div class="pf-field"><label>STARTING BALANCE ($)</label><input id="pfStrategyStart" type="number" min="1" step="100" value="50000"></div>
           <div class="pf-field"><label>EVALUATION PROFIT TARGET ($)</label><input id="pfStrategyTarget" type="number" min="0" step="100" value="3000"></div>
@@ -1434,7 +1357,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
         start=Math.max(1,num('pfStart',50000));target=Math.max(0,num('pfTarget',3000));maxdd=Math.max(0,num('pfDD',2000));dailyLimit=Math.max(0,num('pfDaily',0));risk=Math.max(1,num('pfRisk',250));trailing=$id('pfDDType')?.value==='trailing';sourceText=`Journal ${from||'all'} → ${to||'all'} · ${rows.length} recorded trades.`;
         const jdays=groupJournalDays(rows);if(!jdays.length){$id('pfPlaceholder').hidden=false;$id('pfResultBody').hidden=true;$id('pfPlaceholder').textContent='No recorded R results were found in that journal date range.';return;}dayFactory=()=>jdays[Math.floor(Math.random()*jdays.length)].rs;
       }else{
-        const wr=Math.min(1,Math.max(0,num('pfWinRate',60)/100)),rr=Math.max(.1,num('pfRR',1.5)),maxTrades=Math.min(20,Math.max(1,Math.floor(num('pfMaxTrades',3))));
+        const wr=Math.min(1,Math.max(0,num('pfWinRate',60)/100)),rr=Math.max(.1,num('pfRR',1.5)),maxTrades=Math.min(20,Math.max(1,Math.floor(num('pfMaxTrades',1))));
         start=Math.max(1,num('pfStrategyStart',50000));target=Math.max(0,num('pfStrategyTarget',3000));maxdd=Math.max(0,num('pfStrategyDD',2000));dailyLimit=Math.max(0,num('pfStrategyDaily',0));risk=Math.max(1,num('pfStrategyRisk',250));trailing=$id('pfStrategyDDType')?.value==='trailing';sourceText=`Strategy model · ${Math.round(wr*1000)/10}% win rate · ${rr}:1 RR · ${maxTrades} trades/day · ${fmtUSD(risk)} risk/trade.`;dayFactory=()=>buildStrategyDay(wr,rr,maxTrades);
       }
       const consistencyRaw=mode==='journal'?($id('pfConsistencyPct')?.value??''):($id('pfStrategyConsistencyPct')?.value??'');const consistencyPct=consistencyRaw===''?null:Math.min(100,Math.max(1,Number(consistencyRaw)));
@@ -1464,12 +1387,11 @@ select option{background-color:#061522!important;color:#eef8ff!important}
       btn.classList.toggle('active',active);
       btn.setAttribute('aria-selected',active?'true':'false');
     });
-    ['monteCarloTool','propSimTool'].forEach(id=>{const card=$id(id);if(card)card.hidden=id!==toolId;});
+    const prop=$id('propSimTool');if(prop)prop.hidden=toolId!=='propSimTool';
   }
   function wire(){
     fillJournalDates();
-    document.querySelectorAll('.pro-tool-switch').forEach(btn=>btn.addEventListener('click',()=>activateProTool(btn.dataset.proTool||'monteCarloTool')));
-    ['mcSourceMode','pfSourceMode'].forEach(id=>{const el=$id(id);if(el)el.addEventListener('change',()=>setSourceUI(id.slice(0,2)));});
+        ['pfSourceMode'].forEach(id=>{const el=$id(id);if(el)el.addEventListener('change',()=>setSourceUI('pf'));});
     const syncPfCycleOptions=()=>{const on=!!$id('pfEvalAnalysisOn')?.checked||!!$id('pfPayoutAnalysisOn')?.checked;if($id('pfCycleInputs'))$id('pfCycleInputs').hidden=!on;};
     ['pfEvalAnalysisOn','pfPayoutAnalysisOn'].forEach(id=>$id(id)?.addEventListener('change',syncPfCycleOptions));
     syncPfCycleOptions();
