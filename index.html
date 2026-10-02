@@ -857,7 +857,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v111">
+<body data-bluebird-build="v112">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -1071,7 +1071,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <div class="pro-hero-main"><div class="pro-kicker">BLUEBIRD SIMULATOR</div><div class="pro-title">Test your trading statistics with <span>real journal data.</span></div><div class="pro-sub">Use the Prop Firm Simulator to model evaluation, funded-buffer and payout journeys from your journal data.</div><div class="pro-badges"><span class="pro-badge">Free</span><span class="pro-badge">Prop firm rules</span><span class="pro-badge">Journal data</span></div></div><div class="pro-status"><div class="pro-status-top"><span class="pro-status-label">SIMULATOR ACCESS</span><span class="pro-status-pill active">FREE</span></div><div><div class="pro-status-value">Fully unlocked</div><div class="pro-status-text">Prop Firm Simulator is available without a subscription.</div></div></div></div>
 
 <div class="pro-tools" id="proTools">
-  <div class="pro-tool-card" id="propSimTool" hidden>
+  <div class="pro-tool-card" id="propSimTool">
     <div class="pro-tool-head">
       <div>
         <div class="pro-tool-kicker">SIMULATOR</div>
@@ -1397,8 +1397,8 @@ select option{background-color:#061522!important;color:#eef8ff!important}
     syncPfCycleOptions();
     $id('runMonteCarlo')?.addEventListener('click',runMonteCarlo);$id('clearMonteCarlo')?.addEventListener('click',resetMC);
     $id('runPropSim')?.addEventListener('click',runPropSim);$id('clearPropSim')?.addEventListener('click',resetPF);
-    setSourceUI('mc');setSourceUI('pf');
-    activateProTool('monteCarloTool');
+    setSourceUI('pf');
+    activateProTool('propSimTool');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
 })();
