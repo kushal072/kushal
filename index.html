@@ -857,7 +857,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v109">
+<body data-bluebird-build="v110">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -977,67 +977,6 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 <div class="card analytics-summary-card" style="margin-top:10px"><div id="analytics" class="metrics analytics-metrics"></div></div>
 <div class="card analytics-chart-card" style="margin-top:10px"><div class="analytics-chart-head"><div><div class="smallbrand" style="font-size:8px;letter-spacing:2px">EQUITY CURVE</div><h3 style="font-size:11px;color:#d9efff;margin:3px 0 0">Cumulative journal performance</h3><div id="analyticsChartMeta" class="analytics-chart-meta">Cumulative R for the selected period</div></div><div id="analyticsChartResult" class="analytics-chart-result pos">+0R</div></div><div class="analytics-chart-wrap"><div id="journalCurve" class="chart analytics-chart"></div></div></div>
 
-<div class="ai-review-card">
-  <div class="ai-review-head">
-    <div>
-      <div class="smallbrand ai-kicker">BLUEBIRD GENERAL INTELLIGENCE</div>
-      <h3 class="ai-review-title">Your journal, analyzed by Bluebird</h3>
-      <p class="ai-review-sub">Bluebird calculates the measurable facts from your journal and lets you ask questions in normal language. Deeper review can be run below when needed.</p>
-    </div>
-    <div class="ai-review-status">BLUEBIRD ANALYTICS</div>
-  </div>
-  <div class="ai-review-grid">
-    <div class="ai-review-panel">
-      <div class="ai-panel-label">DATA SNAPSHOT</div>
-      <div id="aiMockSnapshot" class="ai-mock-stats"></div>
-    </div>
-    <div class="ai-review-panel">
-      <div class="ai-panel-label">WHAT BLUEBIRD CAN ANALYZE</div>
-      <div class="ai-chip-grid">
-        <span class="ai-chip">Trade count & order</span>
-        <span class="ai-chip">W / L / BE sequences</span>
-        <span class="ai-chip">1–4 trades/day tests</span>
-        <span class="ai-chip">R & $ performance</span>
-        <span class="ai-chip">Drawdown & streaks</span>
-        <span class="ai-chip">Session / setup patterns</span>
-        <span class="ai-chip">Chart screenshots & notes</span>
-      </div>
-    </div>
-  </div>
-  <div class="ai-review-output ai-intelligence-preview">
-    <div class="ai-panel-label">WHAT BLUEBIRD CAN SHOW</div>
-    <div class="ai-preview-body">
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Performance summary</b><p>Win rate, total R, expectancy, profit factor, streaks, drawdown, distribution and consistency metrics.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Trade behavior &amp; context</b><p>Chronological order, daily sequences, sessions, setups, instruments, directions, tags and recorded outcomes.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Historical trade-limit analysis</b><p>Compare 1, 2, 3, 4 trades per day, streak-conditioned outcomes, resampling and period breakdowns.</p></div></div>
-      <div class="ai-preview-item"><span class="ai-preview-dot"></span><div><b>Questions in normal language</b><p>Ask about performance, patterns, math, sequences, risk statistics, group breakdowns and historical scenarios.</p></div></div>
-    </div>
-    <div id="aiContextResult" class="ai-context-result" hidden></div>
-    <div id="aiAskPanel" class="ai-ask-panel">
-      <div class="ai-ask-head">
-        <div><div class="ai-panel-label">ASK BLUEBIRD</div><div class="ai-ask-sub">Ask about your journal in normal language. Bluebird answers from the trades and results you actually recorded.</div></div>
-      </div>
-      <div class="ai-quick-prompts">
-        <button class="ai-quick-btn" type="button" data-ai-q="What is my win rate and total R for this period?">Performance</button>
-        <button class="ai-quick-btn" type="button" data-ai-q="How did my first 1, 2, 3 and 4 trades per day compare?">Trade limits</button>
-        <button class="ai-quick-btn" type="button" data-ai-q="What is my longest losing streak and what happened after my losing streaks?">Streaks</button>
-        <button class="ai-quick-btn" type="button" data-ai-q="What is my drawdown in this period?">Drawdown</button>
-      </div>
-      <div class="ai-ask-row">
-        <textarea id="aiQuestion" class="ai-ask-input" rows="2" placeholder="Ask Bluebird about your journal..."></textarea>
-        <button id="aiAskButton" class="btn primary ai-ask-send" type="button">Ask Bluebird</button>
-      </div>
-      <div class="ai-ask-history" id="aiAskHistory" hidden></div>
-      <div class="ai-ask-footer" id="aiAskFooter" hidden>
-        <button id="aiEndAnalysis" class="btn ai-end-analysis" type="button">End Analysis</button>
-      </div>
-      <div class="ai-deeper-review">
-        <div><div class="ai-deeper-title">DEEPER REVIEW</div><div class="ai-deeper-sub">Run the full review for broader interpretation of the selected journal period, notes and screenshots.</div></div>
-        <button class="btn" id="aiPrepareReview" type="button">Run AI Review</button>
-      </div>
-    </div>
-  </div>
-</div>
 <div class="grid2" style="margin-top:10px">
 <div class="card"><div style="padding:2px"><div class="pro-kicker">SIMULATOR</div><h3 style="font-size:15px;margin:6px 0 4px;color:#eef8ff">Monte Carlo</h3><p style="font-size:9px;color:#849cab;line-height:1.5;margin:0 0 9px">Run thousands of possible future paths from your journal results.</p><button class="btn primary" data-nav="simulator">Open Simulator</button></div></div>
 <div class="card"><div style="padding:2px"><div class="pro-kicker">SIMULATOR</div><h3 style="font-size:15px;margin:6px 0 4px;color:#eef8ff">Prop Firm Simulator</h3><p style="font-size:9px;color:#849cab;line-height:1.5;margin:0 0 9px">Test your recorded statistics against evaluation, drawdown and payout rules.</p><button class="btn primary" data-nav="simulator">Open Simulator</button></div></div>
