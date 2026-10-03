@@ -857,7 +857,7 @@ select option{background-color:#061522!important;color:#eef8ff!important}
 }
 </style>
 </head>
-<body data-bluebird-build="v112">
+<body data-bluebird-build="v114">
 <div class="app">
 <header class="top">
   <div class="brand"><img class="logo" src="logo.jpg"><div><div class="smallbrand">BLUEBIRD</div><div class="title">Bluebird <span>Trading</span></div><div class="desc">Pressure-test your week before you trade it. Set your win rate, risk-to-reward and risk per trade, then see how different sequences can unfold.</div></div></div>
@@ -2546,10 +2546,10 @@ function smoothPath(points){
 
 function renderAIMockSnapshot(rows){
  const host=$('aiMockSnapshot'); if(!host)return;
- const list=rows||[];
+ const list=analyticsOutcomeRows(rows);
  const wins=list.filter(t=>Number(t.result_r)>0).length;
  const losses=list.filter(t=>Number(t.result_r)<0).length;
- const R=list.reduce((a,t)=>a+Number(t.result_r||0),0);
+ const R=list.reduce((a,t)=>a+Number(t.result_r),0);
  const days=new Set(list.map(t=>String(t.trade_date||'').slice(0,10)).filter(Boolean));
  const dayKeys=[...days].sort();
  const daySummaries=state.daySummaries||{};
@@ -2898,7 +2898,7 @@ function localDays(rows){
   return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
 }
 function localRowsR(rows){return rows.reduce((s,t)=>s+Number(t.result_r||0),0)}
-function localWR(rows){const a=rows.filter(t=>Number(t.result_r)!==0);return a.length?a.filter(t=>Number(t.result_r)>0).length/a.length*100:0}
+function localWR(rows){const a=analyticsOutcomeRows(rows),decisive=a.filter(t=>Number(t.result_r)!==0);return decisive.length?decisive.filter(t=>Number(t.result_r)>0).length/decisive.length*100:0}
 function localPF(rows){let w=0,l=0;rows.forEach(t=>{const r=Number(t.result_r||0);if(r>0)w+=r;else if(r<0)l+=Math.abs(r)});return l?w/l:(w>0?Infinity:0)}
 function localStreak(rows,isWin){let c=0,b=0;bluebirdSortRows(rows).forEach(t=>{const r=Number(t.result_r||0),hit=isWin?r>0:r<0;c=hit?c+1:0;b=Math.max(b,c)});return b}
 function localCurrentStreak(rows){let c=0,kind='none';const a=bluebirdSortRows(rows);for(let i=a.length-1;i>=0;i--){const r=Number(a[i].result_r||0),k=r>0?'win':r<0?'loss':'be';if(i===a.length-1){kind=k;c=1;continue}if(k===kind)c++;else break}return {count:c,kind}}
@@ -3212,13 +3212,26 @@ function wireAIAsk(){
 
 document.addEventListener('DOMContentLoaded',()=>wireAIAsk());
 
+function analyticsChronologicalRows(rows){
+  return [...(rows||[])].filter(t=>Number.isFinite(Number(t?.result_r))).sort((a,b)=>{
+    const da=String(a?.trade_date||'').slice(0,10),db=String(b?.trade_date||'').slice(0,10);
+    if(da!==db)return da.localeCompare(db);
+    const ka=journalTradeSortKey(a,0),kb=journalTradeSortKey(b,0);
+    if(ka!==kb)return ka-kb;
+    return String(a?.id||'').localeCompare(String(b?.id||''));
+  });
+}
+function analyticsOutcomeRows(rows){return (rows||[]).filter(t=>Number.isFinite(Number(t?.result_r)));}
 function renderAnalytics(){
  const allRows=visibleTrades();const range=analyticsGetRange();const rows=filterAnalyticsRows(allRows,range);
- const wins=rows.filter(t=>Number(t.result_r)>0),losses=rows.filter(t=>Number(t.result_r)<0),R=rows.reduce((a,t)=>a+Number(t.result_r||0),0);
+ const evaluated=analyticsOutcomeRows(rows);
+ const wins=evaluated.filter(t=>Number(t.result_r)>0),losses=evaluated.filter(t=>Number(t.result_r)<0);
+ const decisive=wins.length+losses.length;
+ const R=evaluated.reduce((a,t)=>a+Number(t.result_r),0);
  const hasUsd=rows.some(t=>t.result_usd!==null&&t.result_usd!==undefined&&t.result_usd!=='');const usd=rows.reduce((a,t)=>a+Number(t.result_usd||0),0);
- const wr=rows.length?wins.length/rows.length*100:0,avg=rows.length?R/rows.length:0;
- const avgW=wins.length?wins.reduce((a,t)=>a+Number(t.result_r||0),0)/wins.length:0,avgL=losses.length?losses.reduce((a,t)=>a+Number(t.result_r||0),0)/losses.length:0;
- $('analytics').innerHTML=`<div class="metric"><span>TRADES</span><strong>${rows.length}</strong></div><div class="metric"><span>WIN RATE</span><strong>${rows.length?wr.toFixed(1)+'%':'—'}</strong></div><div class="metric"><span>TOTAL R</span><strong class="${R>=0?'pos':'neg'}">${R>=0?'+':''}${fmt(R)}R</strong></div><div class="metric"><span>TOTAL $</span><strong class="${usd>=0?'pos':'neg'}">${hasUsd?money(usd):'—'}</strong></div><div class="metric"><span>EXPECTANCY</span><strong>${rows.length?(avg>=0?'+':'')+fmt(avg)+'R':'—'}</strong></div><div class="metric"><span>AVG WIN</span><strong class="pos">${wins.length?fmt(avgW)+'R':'—'}</strong></div><div class="metric"><span>AVG LOSS</span><strong class="neg">${losses.length?fmt(avgL)+'R':'—'}</strong></div><div class="metric"><span>LONGEST L STREAK</span><strong>${longest(rows,false)}</strong></div><div class="metric"><span>LONGEST W STREAK</span><strong>${longest(rows,true)}</strong></div>`;
+ const wr=decisive?wins.length/decisive*100:0,avg=evaluated.length?R/evaluated.length:0;
+ const avgW=wins.length?wins.reduce((a,t)=>a+Number(t.result_r),0)/wins.length:0,avgL=losses.length?losses.reduce((a,t)=>a+Number(t.result_r),0)/losses.length:0;
+ $('analytics').innerHTML=`<div class="metric"><span>TRADES</span><strong>${rows.length}</strong></div><div class="metric"><span>WIN RATE</span><strong>${decisive?wr.toFixed(1)+'%':'—'}</strong></div><div class="metric"><span>TOTAL R</span><strong class="${R>=0?'pos':'neg'}">${R>=0?'+':''}${fmt(R)}R</strong></div><div class="metric"><span>TOTAL $</span><strong class="${usd>=0?'pos':'neg'}">${hasUsd?money(usd):'—'}</strong></div><div class="metric"><span>EXPECTANCY</span><strong>${evaluated.length?(avg>=0?'+':'')+fmt(avg)+'R':'—'}</strong></div><div class="metric"><span>AVG WIN</span><strong class="pos">${wins.length?fmt(avgW)+'R':'—'}</strong></div><div class="metric"><span>AVG LOSS</span><strong class="neg">${losses.length?fmt(avgL)+'R':'—'}</strong></div><div class="metric"><span>LONGEST L STREAK</span><strong>${longest(rows,false)}</strong></div><div class="metric"><span>LONGEST W STREAK</span><strong>${longest(rows,true)}</strong></div>`;
  if($('analyticsRangeLabel'))$('analyticsRangeLabel').textContent=`${range.label} · ${rows.length} of ${allRows.length} visible trades`;
  if($('analyticsChartResult')){$('analyticsChartResult').className='analytics-chart-result '+(R>=0?'pos':'neg');$('analyticsChartResult').textContent=(R>=0?'+':'')+fmt(R)+'R';}
  if($('analyticsChartMeta'))$('analyticsChartMeta').textContent=`Daily cumulative R · hover a point for the date and R`;
@@ -3270,10 +3283,18 @@ function renderAnalytics(){
  renderAIMockSnapshot(rows);
 }
 
-function longest(rows,win){let best=0,cur=0;for(const t of [...rows].sort((a,b)=>a.trade_date.localeCompare(b.trade_date)||a.created_at.localeCompare(b.created_at))){if((t.result_r>0)===win){cur++;best=Math.max(best,cur)}else cur=0}return best}
+function longest(rows,win){
+  let best=0,cur=0;
+  for(const t of analyticsChronologicalRows(rows)){
+    const r=Number(t.result_r);
+    const hit=win ? r>0 : r<0;
+    if(hit){cur++;if(cur>best)best=cur;} else cur=0;
+  }
+  return best;
+}
 function journalLockMessage(){
-  if(trialExpired())return "Your 7-day journal trial has ended. Subscribe to restore journal access and your stored history.";
-  return "Your subscription has ended. Journaling is locked until you resubscribe.";
+  if(trialExpired())return "Your journal access is available; refresh the page and try again.";
+  return "Your journal is free. Refresh the page and try again.";
 }
 function setJournalControls(){
   const locked=!canJournal();
